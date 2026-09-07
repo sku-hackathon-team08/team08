@@ -11,3 +11,5 @@ def anyio_backend() -> str:
 def clear_database_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delenv("database_url", raising=False)
+    monkeypatch.delenv("DATABASE_CONNECT_TIMEOUT_SECONDS", raising=False)
+    monkeypatch.delenv("database_connect_timeout_seconds", raising=False)

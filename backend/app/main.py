@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from app.api.router import api_router
 from app.core.config import Settings
+from app.db.session import open_database
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -13,7 +14,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.settings = settings if settings is not None else Settings()
-        yield
+        async with open_database(app.state.settings) as database:
+            app.state.database = database
+            try:
+                yield
+            finally:
+                del app.state.database
 
     application = FastAPI(title="Team 08 API", lifespan=lifespan)
     application.include_router(api_router)

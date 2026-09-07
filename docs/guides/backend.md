@@ -1,6 +1,6 @@
 # 백엔드 개발
 
-> 상태: 최소 앱·상태 확인 API·테스트·CI를 구성했습니다. 서비스 API·DB 구현은 후속 작업입니다.
+> 상태: 최소 앱·상태 확인 API·테스트·CI를 구성했습니다. DB 연결·세션과 시작/종료 처리를 구현했으며 서비스 API·업무 모델은 후속 작업입니다.
 
 ## 현재 의존성
 
@@ -9,6 +9,9 @@
 | 실행 | FastAPI | API 애플리케이션 프레임워크 |
 | 실행 | Pydantic | 요청·응답 데이터 모델과 입력 검증 |
 | 실행 | pydantic-settings | 환경변수·로컬 .env 로딩과 설정 검증 |
+| 실행 | SQLAlchemy asyncio | 비동기 엔진·세션과 향후 ORM |
+| 실행 | aiosqlite | SQLite 비동기 드라이버 |
+| 실행 | psycopg binary | PostgreSQL 비동기 드라이버 |
 | 실행 | Uvicorn | FastAPI 앱을 실행하는 서버 |
 | 개발 | pytest | 테스트 실행 |
 | 개발 | HTTPX | AsyncClient·ASGITransport로 앱을 호출하는 테스트 클라이언트 |
@@ -19,12 +22,12 @@
 실행 패키지는 `backend/pyproject.toml`의 `project.dependencies`, 개발 도구는 `dependency-groups.dev`로 구분합니다.
 배포할 웹 애플리케이션이므로 현재는 Python 배포 패키지를 만드는 빌드 설정을 추가하지 않습니다.
 FastAPI와 Uvicorn은 필요한 기본 패키지만 설치합니다. 추가 기능은 사용 시점에 의존성을 보완합니다.
-DB 접근 도구·LangGraph·인증 라이브러리는 기능을 구현할 때 선택합니다.
+DB 접근은 SQLAlchemy asyncio·aiosqlite·psycopg를 사용합니다. LangGraph·인증 라이브러리는 기능을 구현할 때 선택합니다.
 데이터 모델 설계는 [DB 설계 가이드](database.md)의 확정 선택·권장사항을 따르고 실제 구조는 [DB 명세](../db/index.md)에 기록합니다.
 
 ## 환경 설정과 DB 선택
 
-> 상태: 설정 로딩·URL 검증·앱 시작 시 적용을 구현했습니다. 실제 DB 연결·SQLite 파일 생성·연결 실패 처리는 [#35](https://github.com/sku-hackathon-team08/team08/issues/35)의 후속 작업입니다.
+> 상태: 설정 로딩·URL 검증과 실제 DB 연결·SQLite 파일 생성·시작 실패 및 종료 정리를 구현했습니다. 업무 테이블·마이그레이션은 후속 작업입니다.
 
 `app/core/config.py`의 `Settings`는 `pydantic-settings`를 사용합니다. `main.py`의 `create_app()`이 앱을 구성하고 lifespan 시작 시 설정을 읽어 `app.state.settings`에 보관합니다. 설정 오류가 있으면 시작을 중단합니다. import만으로 `.env`를 읽거나 DB를 열지 않습니다.
 
@@ -38,14 +41,29 @@ DB 접근 도구·LangGraph·인증 라이브러리는 기능을 구현할 때 �
 | 잘못된 URL | 지원하지 않는 스킴·형식은 설정 오류. SQLite 기본값으로 대체하지 않음 |
 
 `backend/.env`는 소스 파일 위치를 기준으로 찾습니다. 현재 실행 폴더의 `.env`를 자동 탐색하지 않습니다. 실행 환경변수에 빈 `DATABASE_URL`을 지정하면 `.env`의 PostgreSQL 값보다 우선해 SQLite를 선택합니다.
-PostgreSQL URL에는 포트·연결 옵션 쿼리를 사용할 수 있습니다. 비밀번호의 `@`·`#` 등 URL 예약 문자는 percent-encoding합니다. 드라이버 접미사(`+asyncpg` 등)는 아직 받지 않으며 실제 연결 도구는 #35에서 정합니다.
+PostgreSQL URL에는 포트·연결 옵션 쿼리를 사용할 수 있습니다. 비밀번호의 `@`·`#` 등 URL 예약 문자는 percent-encoding합니다. 드라이버 접미사(`+asyncpg` 등)는 아직 받지 않으며 DB 레이어가 내부에서 `sqlite+aiosqlite` 또는 `postgresql+psycopg`로 변환합니다.
 SQLite는 일반 파일 경로만 지원하며 메모리 DB·쿼리 옵션·fragment는 받지 않습니다. 설정 로딩은 디렉터리·파일 생성이나 연결 상태 확인을 수행하지 않습니다.
 
 테스트는 `Settings(_env_file=None, database_url=...)`로 `.env`와 환경변수의 영향을 분리하고 `create_app(settings)`에 주입할 수 있습니다. 설정을 전역 캐시하지 않으며 앱마다 검증한 설정을 보관합니다. 테스트에서도 lifespan을 실행해 시작 시 검증을 확인합니다.
-`Settings`는 변경 불가능한 객체로 사용하고 URL은 `SecretStr`로 보관해 일반 출력·JSON 직렬화에서 가립니다. 원문 추출은 향후 DB 연결 경계에 한정하고 로그에 남기지 않습니다. 검증 오류의 일반 출력은 입력을 숨기지만 `ValidationError.errors()` 같은 구조화 오류를 그대로 로깅하지 않습니다.
+`Settings`는 변경 불가능한 객체로 사용하고 URL은 `SecretStr`로 보관해 일반 출력·JSON 직렬화에서 가립니다. 원문 추출은 DB 연결 경계에 한정하고 로그에 남기지 않습니다. 검증 오류의 일반 출력은 입력을 숨기지만 `ValidationError.errors()` 같은 구조화 오류를 그대로 로깅하지 않습니다.
 `.env`의 다른 항목은 무시하는 설정이며, 이는 HTTP 요청의 미등록 필드 정책과 별개입니다.
 
 설치·환경변수 예시는 [백엔드 README](../../backend/README.md#환경-설정), 설정 API는 [Pydantic Settings 공식 문서](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)를 참고합니다.
+
+## DB 연결과 세션 수명
+
+`app/db/session.py`의 `open_database()`가 비동기 엔진·세션 팩토리를 제공하고 `main.py`가 lifespan에 연결합니다. SQLAlchemy asyncio는 SQLite와 PostgreSQL의 연결·세션 인터페이스를 공유하기 위해 선택했습니다. SQLite 드라이버는 aiosqlite, PostgreSQL은 비동기 연결과 일반적인 PostgreSQL 연결 옵션을 지원하는 psycopg 3의 binary 배포판을 사용합니다.
+
+- 시작 시 SQLite의 상위 폴더를 준비하고 연결하면서 파일을 생성합니다. 기존 파일은 재사용하며 업무 테이블을 자동 생성하거나 데이터를 초기화하지 않습니다.
+- PostgreSQL 설정이 있으면 해당 서버에 연결합니다. 실패해도 SQLite로 전환하지 않습니다.
+- `DATABASE_CONNECT_TIMEOUT_SECONDS`는 연결과 초기 확인의 제한 시간입니다. 기본 10초, 0 초과·최대 120초의 유한한 값을 받습니다. 시작 시 `SELECT 1`을 확인하고 실패하면 안전한 오류로 시작을 중단합니다.
+- SQLite는 새 연결마다 FK 제약을 활성화합니다. FK 인덱스나 삭제 정책을 자동 지정한다는 뜻은 아닙니다.
+- 앱 종료·시작 실패 시 엔진의 연결 풀을 정리합니다. `/health`는 기존 응답을 유지하며 매 요청마다 DB에 접속하는 준비 상태 검사가 아닙니다.
+- `api/dependencies.py`의 `get_session()`은 요청마다 세션을 제공하고 종료합니다. 같은 세션을 서로 다른 동시 작업에 공유하지 않습니다.
+- 의존성은 commit하지 않습니다. 닫힐 때 미완료 트랜잭션은 정리되므로 저장 성공을 원하면 향후 합의할 업무 경계에서 명시적으로 완료해야 합니다. commit 담당 계층의 보류를 이번 세션 수명 관리로 확정하지 않습니다.
+
+ORM 기반 모델은 실제 모델 도입 시 `models/base.py`에 둡니다. 범용 CRUD·업무 테이블·마이그레이션은 현재 추가하지 않습니다.
+공식 근거: [SQLAlchemy asyncio](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html), [SQLite FK](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support), [psycopg 연결](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#module-sqlalchemy.dialects.postgresql.psycopg).
 
 ## 기능 추가 순서
 
@@ -96,7 +114,7 @@ SQLite는 일반 파일 경로만 지원하며 메모리 DB·쿼리 옵션·frag
 | JSON 직렬화 | 아래 [별칭 적용 기준](#api-필드-별칭)을 따르고 내부 데이터 전달을 위해 불필요하게 JSON으로 변환하지 않음 |
 
 스키마에서 ORM 모델을 import하거나 DB 조회를 수행하지 않습니다. 모델과 스키마는 서비스에서 조합하며, 이는 기존 아키텍처의 의존 방향을 따릅니다.
-기본은 필드별 명시적 생성이며, ORM 속성 기반 자동 변환이 필요하면 ORM 선정 후 공개 필드·별칭·조회 범위를 검증한 뒤 적용합니다.
+기본은 필드별 명시적 생성이며, ORM 속성 기반 자동 변환이 필요하면 실제 ORM 모델의 공개 필드·별칭·조회 범위를 검증한 뒤 적용합니다.
 생성·검증 API 참고: [Pydantic 모델](https://docs.pydantic.dev/latest/concepts/models/).
 
 ### 검증 책임과 미정 정책
@@ -157,7 +175,7 @@ TypeScript 타입 선언만으로 수신 JSON이 검증되지는 않으므로 �
 FastAPI의 [동기·비동기 함수 실행 안내](https://fastapi.tiangolo.com/async/#very-technical-details)를 기준으로 합니다.
 테스트는 AnyIO의 pytest 플러그인과 HTTPX `AsyncClient`·`ASGITransport`를 사용합니다.
 `backend/tests/conftest.py`에서 실행 백엔드를 `asyncio`로 지정합니다. Starlette TestClient를 거치지 않고 실제 ASGI 앱을 호출합니다.
-현재 lifespan은 시작 시 환경 설정을 검증합니다. 테스트에서도 이를 실행하며, 추후 DB·외부 클라이언트를 도입하면 자원 생성·정리 검증을 추가합니다.
+현재 lifespan은 환경 설정·DB 연결을 검증하고 종료 시 연결 풀을 정리합니다. 테스트에서도 이를 실행하며, 외부 클라이언트를 도입하면 해당 자원 검증을 추가합니다.
 이 방식은 [FastAPI 비동기 테스트 안내](https://fastapi.tiangolo.com/advanced/async-tests/)를 따릅니다.
 
 ## 버전과 의존성 관리
@@ -220,7 +238,7 @@ Python 내부에서는 snake_case 필드명으로 모델을 생성하고, JSON �
 기본 브랜치에 워크플로우가 병합된 후 GitHub Actions 화면에서 수동 실행할 수도 있습니다.
 
 Python은 `.python-version`, 패키지는 `uv.lock`, uv는 워크플로우에 고정한 0.11.30을 사용합니다.
-Ubuntu에서 Python 설치 후 아래 검사를 순서대로 실행하며, 실패하면 후속 단계로 넘어가지 않습니다.
+Ubuntu에서 PostgreSQL 17 테스트 서비스를 준비하고 `TEST_DATABASE_URL`을 전달합니다. SQLite·PostgreSQL을 실제 연결하는 통합 검사를 같은 job에서 실행합니다. Python 설치 후 아래 검사를 순서대로 실행하며, 실패하면 후속 단계로 넘어가지 않습니다.
 
 | 단계 | `backend/`에서 실행할 명령 |
 |---|---|
@@ -236,6 +254,6 @@ CI는 읽기 권한으로 검사하며 자동 수정·커밋·배포는 하지 �
 `main` 보호 설정은 GitHub Actions가 보고한 `Backend checks` 통과를 필수로 요구합니다.
 체크 이름이나 실행 조건을 바꾸면 [브랜치 보호 설정](git-workflow.md#main-브랜치-보호)도 함께 확인합니다.
 필수 검사에 영향을 주는 `[skip ci]` 등의 커밋 메시지는 사용하지 않습니다. 워크플로우가 생략되면 결과가 대기 상태에 남아 병합이 막힐 수 있습니다.
-커버리지 기준·DB 통합 검사·배포 자동화는 해당 기능을 개발할 때 정합니다.
+커버리지 기준·업무 모델별 DB 검증·배포 자동화는 해당 기능을 개발할 때 정합니다.
 
 설치·설치 확인 명령은 [백엔드 README](../../backend/README.md), 코드 배치는 [아키텍처](../architecture.md)를 참고합니다.

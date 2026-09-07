@@ -24,6 +24,14 @@ class Settings(BaseSettings):
         default=SecretStr(DEFAULT_DATABASE_URL), validation_alias="DATABASE_URL"
     )
 
+    database_connect_timeout_seconds: float = Field(
+        default=10.0,
+        gt=0,
+        le=120,
+        allow_inf_nan=False,
+        validation_alias="DATABASE_CONNECT_TIMEOUT_SECONDS",
+    )
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: SecretStr) -> SecretStr:

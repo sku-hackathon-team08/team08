@@ -80,3 +80,11 @@ def test_validation_error_display_hides_database_password() -> None:
         )
     assert password not in str(exc.value)
     assert password not in repr(exc.value)
+
+
+@pytest.mark.parametrize("timeout", [0, -1, 121, float("inf"), float("nan")])
+def test_database_connection_timeout_requires_finite_positive_limit(
+    timeout: float,
+) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, database_connect_timeout_seconds=timeout)

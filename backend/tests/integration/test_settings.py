@@ -71,11 +71,13 @@ def test_absolute_sqlite_path_is_preserved_without_creating_file(
 
 
 @pytest.mark.anyio
-async def test_apps_use_separate_injected_settings_without_opening_database(
+async def test_apps_use_separate_injected_settings_and_databases(
     tmp_path: Path,
 ) -> None:
     first = Settings(_env_file=None, database_url=f"sqlite:///{tmp_path}/first.sqlite3")
-    second = Settings(_env_file=None, database_url="postgresql://localhost/second")
+    second = Settings(
+        _env_file=None, database_url=f"sqlite:///{tmp_path}/second.sqlite3"
+    )
     app_a = create_app(first)
     app_b = create_app(second)
     async with (
@@ -90,18 +92,20 @@ async def test_apps_use_separate_injected_settings_without_opening_database(
             response = await client.get("/health")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
-    assert not (tmp_path / "first.sqlite3").exists()
+    assert (tmp_path / "first.sqlite3").is_file()
+    assert (tmp_path / "second.sqlite3").is_file()
 
 
 @pytest.mark.anyio
 async def test_startup_reads_environment_and_rejects_invalid_url(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     app = create_app()
-    monkeypatch.setenv("DATABASE_URL", "postgresql://localhost/from_startup")
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/from_startup.sqlite3")
     async with app.router.lifespan_context(app):
         assert app.state.settings.database_url.get_secret_value().endswith(
-            "/from_startup"
+            "/from_startup.sqlite3"
         )
     monkeypatch.setenv(
         "DATABASE_URL", "mysql://user:example-password@localhost/database"

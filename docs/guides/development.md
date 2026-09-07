@@ -37,6 +37,6 @@
 
 ## 추후 결정
 
-- DB 접근 도구. 현재 Python·FastAPI 버전과 uv 검증 환경은 [백엔드 가이드](backend.md)와 [백엔드 README](../../backend/README.md) 참고
+- DB 마이그레이션과 업무 트랜잭션 경계. 현재 SQLAlchemy·비동기 드라이버·검증 환경은 [백엔드 가이드](backend.md)와 [백엔드 README](../../backend/README.md) 참고
 - 프론트 폴더 구조와 파일명·타입·오류 처리 세부 컨벤션
 - 프론트 포맷터와 프론트 CI 구현. 프론트 린트는 oxlint, 타입 검사는 `tsc -b --noEmit`을 사용하고 백엔드 포맷·린트는 Ruff, 타입 검사는 Pyrefly 사용

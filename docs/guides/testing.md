@@ -68,6 +68,8 @@ backend/tests/
 │   └── test_config.py        # DB URL 선택·검증
 └── integration/
     ├── test_health.py        # ASGI 앱의 요청·응답 검증
+    ├── conftest.py           # SQLite·별도 PostgreSQL 설정 fixture
+    ├── test_database.py      # 실제 연결·FK·파일 유지·세션 정리
     └── test_settings.py      # 설정 소스·경로·앱 시작 검증
 ```
 
@@ -78,7 +80,7 @@ pytest의 `importlib` 모드를 설정해 두 폴더에 같은 파일명이 있�
 테스트 파일끼리 import하지 않고, 재사용 준비 코드는 fixture로 제공합니다.
 
 현재 `/health` 테스트는 설정을 주입하고 lifespan·라우팅·응답 스키마·JSON 변환을 함께 확인하는 통합 테스트입니다.
-실제 ASGI 앱을 프로세스 안에서 호출하며 별도 서버·네트워크·DB를 사용하지 않습니다. 브라우저부터 배포 서버까지 확인하는 E2E 테스트는 아닙니다.
+실제 ASGI 앱을 프로세스 안에서 호출하며 외부 HTTP 서버는 사용하지 않고 격리한 SQLite와 실제 앱 시작 과정을 실행합니다. 브라우저부터 배포 서버까지 확인하는 E2E 테스트는 아닙니다.
 외부 API만 mock으로 대체한 앱 테스트도 통합 폴더에 둘 수 있지만, 실제로 확인한 연결과 대체한 경계를 PR에 구분해 적습니다.
 
 ### 작성 권고
@@ -95,7 +97,7 @@ pytest의 `importlib` 모드를 설정해 두 폴더에 같은 파일명이 있�
 Fixture는 테스트의 데이터·자원을 준비하고 정리하는 pytest 함수입니다.
 
 - 특정 파일에서만 쓰는 fixture는 그 파일에 둡니다. 여러 파일이 공유하면 가장 가까운 `conftest.py`에 두며, 루트에는 두 종류가 함께 쓰는 것만 둡니다.
-- 루트의 공통 fixture는 테스트마다 `DATABASE_URL` 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
+- 루트의 공통 fixture는 테스트마다 `DATABASE_URL`·`DATABASE_CONNECT_TIMEOUT_SECONDS` 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
 - 현재 루트의 `anyio_backend`는 `asyncio`를 선택합니다. 비동기 테스트에는 `@pytest.mark.anyio`를 사용하고, 순수 동기 로직은 일반 `def`로 테스트합니다.
 - 변경 가능한 상태는 테스트마다 새로 준비하는 기본 `function` 범위를 우선합니다. 넓은 범위의 fixture는 상태가 섞이지 않는 경우에만 사용합니다.
 - 클라이언트·파일·향후 DB 세션은 context manager나 `yield` fixture로 정리합니다. 환경변수는 `monkeypatch`, 임시 파일은 `tmp_path`를 활용합니다.
@@ -103,7 +105,7 @@ Fixture는 테스트의 데이터·자원을 준비하고 정리하는 pytest �
 - DB 도입 시 별도 테스트 DB를 준비하고 테스트별 데이터 격리·정리 방식을 함께 구현합니다. 개발용 SQLite 파일이나 운영 DB를 재사용하지 않습니다.
 - 외부 서비스의 실제 호출은 기본 테스트에 넣지 않습니다. 필요해지면 별도 실행 조건·자격 증명·비용과 검증 범위를 정합니다.
 
-DB 도구·fixture는 아직 구현하지 않았습니다. PostgreSQL을 채택하면 그 환경에서 필요한 통합 검증을 추가하며 SQLite 테스트 결과만으로 PostgreSQL 호환성을 보장하지 않습니다.
+DB 통합 fixture는 임시 SQLite와 `TEST_DATABASE_URL`의 별도 PostgreSQL `team08_test` DB를 사용합니다. PostgreSQL 테이블은 연결별 TEMP 테이블로 격리하고 SQLite는 테스트마다 임시 경로를 사용합니다. 로컬에서 테스트 PostgreSQL이 없으면 해당 사례만 skip하고 CI는 서비스를 준비해 모두 실행합니다. 연결 실패·제한 시간은 로컬 TCP 시험 서버로 재현하며 실제 PostgreSQL 성공 검증과 구분합니다. SQLite 결과만으로 PostgreSQL 호환성을 보장하지 않습니다.
 현재 비동기 앱 호출과 향후 lifespan 처리는 [백엔드 개발 가이드](backend.md#동기비동기-사용-기준), 전체·종류별 실행 명령은 [백엔드 README](../../backend/README.md#코드-검사와-테스트)를 참고합니다.
 위 작성 권고를 검사하는 별도 린터·커버리지 하한·테스트 종류별 CI job은 추가하지 않습니다.
 

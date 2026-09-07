@@ -19,6 +19,22 @@ jobs:
     name: Backend checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: team08_test
+          POSTGRES_PASSWORD: team08_test
+          POSTGRES_DB: team08_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U team08_test -d team08_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://team08_test:team08_test@127.0.0.1:5432/team08_test
     defaults:
       run:
         working-directory: backend
