@@ -16,7 +16,11 @@ docs/
 ├── README.md          # 문서 지도
 ├── sot.md             # 기준 문서의 위치·책임·유지 방법
 ├── sdd.md             # 명세 기반 개발 흐름 검토안
-├── prd.md             # 제품 요구사항 틀
+├── prd/               # 주제별 제품 요구사항
+│   ├── README.md      # PRD 목차
+│   ├── context.md     # 문제·사용자·목표
+│   ├── scope.md       # MVP 범위·우선순위
+│   └── success-criteria.md # 성공 기준·데모 흐름
 ├── architecture.md    # 시스템 구성과 코드 역할을 기록할 틀
 ├── features/
 │   └── README.md      # 기능 명세 목록
@@ -29,7 +33,7 @@ docs/
 
 | 작업 | 읽거나 갱신할 문서 |
 |---|---|
-| 서비스·기능 범위 정하기 | [PRD](prd.md) → [기능 명세](features/README.md) |
+| 서비스·기능 범위 정하기 | [PRD](prd/README.md) → [기능 명세](features/README.md) |
 | 프론트·백엔드 구현 | 해당 기능 명세 → [기술 명세](specs/README.md) → [아키텍처](architecture.md) |
 | 스택·공통 설계 결정 | [결정 기록](decisions.md) → 아키텍처·관련 기술 명세 |
 | 문서·에이전트 안내 변경 | SOT → 문서 지도 → 루트 에이전트 안내 |
