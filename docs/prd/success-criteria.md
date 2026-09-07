@@ -13,6 +13,6 @@
 ## 미결정 사항
 
 제품 목표와 MVP 범위가 정해진 뒤 성공 조건과 데모 흐름을 구체화합니다.
-기능별 상세 인수 조건은 [기능 명세](../features/README.md)에서 관리합니다.
+기능별 상세 인수 조건은 [기능 명세](../features/index.md)에서 관리합니다.
 
-관련 문서: [PRD 목차](README.md), [문제·사용자·목표](context.md), [MVP 범위](scope.md)
+관련 문서: [PRD 목차](index.md), [문제·사용자·목표](context.md), [MVP 범위](scope.md)

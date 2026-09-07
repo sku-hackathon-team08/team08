@@ -18,4 +18,4 @@
 
 서비스 주제와 대상 사용자를 정한 뒤 위 항목을 구체화합니다.
 
-관련 문서: [PRD 목차](README.md), [MVP 범위](scope.md), [성공 기준](success-criteria.md)
+관련 문서: [PRD 목차](index.md), [MVP 범위](scope.md), [성공 기준](success-criteria.md)

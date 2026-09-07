@@ -16,4 +16,4 @@
 - 주요 모듈과 코드 위치
 - 실행·배포 구성
 
-선택의 이유는 [결정 기록](decisions.md), 상세 API·데이터 계약은 [기술 명세](specs/README.md)에 작성합니다.
+선택의 이유는 [결정 기록](decisions.md), 상세 API·데이터 계약은 [기술 명세](specs/index.md)에 작성합니다.

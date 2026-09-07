@@ -7,7 +7,7 @@
 ## 프로젝트 소개
 
 서비스가 정해지면 이곳에 해결하려는 문제, 대상 사용자, 핵심 기능과 데모 링크를 정리합니다.
-상세 요구사항과 설계는 [docs 문서 지도](docs/README.md)에서 관리합니다.
+상세 요구사항과 설계는 [docs 문서 지도](docs/index.md)에서 관리합니다.
 
 ## 저장소 구성
 
@@ -15,7 +15,7 @@
 |---|---|
 | [frontend/](frontend/) | 프론트엔드 코드 |
 | [backend/](backend/) | 백엔드 코드 |
-| [docs/](docs/README.md) | SDD·SOT·요구사항·기능 및 기술 명세 |
+| [docs/](docs/index.md) | SDD·SOT·요구사항·기능 및 기술 명세 |
 | [AGENTS.md](AGENTS.md) | 에이전트가 docs를 읽도록 안내 |
 | [CLAUDE.md](CLAUDE.md) | Claude용 문서 진입점 |
 

@@ -1,6 +1,6 @@
 # 에이전트 문서 안내
 
-작업을 시작할 때 [docs/README.md](docs/README.md)를 먼저 읽고 작업에 해당하는 기준 문서를 확인한다.
+작업을 시작할 때 [docs/index.md](docs/index.md)를 먼저 읽고 작업에 해당하는 기준 문서를 확인한다.
 
 - 문서별 책임과 미정 사항 처리: [SOT](docs/sot.md)
 - 명세 확인·구현·검증 흐름: [SDD](docs/sdd.md)
