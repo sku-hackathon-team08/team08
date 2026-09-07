@@ -12,6 +12,10 @@ dependencies = [
 [tool.uv]
 package = false
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
 [tool.ruff]
 target-version = "py313"
 
@@ -25,6 +29,7 @@ project-includes = ["**/*.py", "**/*.pyi"]
 
 [dependency-groups]
 dev = [
+    "anyio>=4.15.1",
     "httpx>=0.28.1",
     "pyrefly>=1.2.0",
     "pytest>=9.1.1",

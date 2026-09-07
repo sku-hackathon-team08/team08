@@ -21,7 +21,8 @@
 
 ## 백엔드 레이어 구성
 
-아래는 스캐폴딩의 배치 기준입니다. 현재 해당 앱 파일이 구현된 상태는 아니며, 필요한 책임이 생길 때 생성합니다.
+아래는 레이어의 배치 기준입니다. 현재 `app/main.py`에 앱과 상태 확인 라우터·응답 모델이 있고,
+서비스 기능이 생기면 해당 라우터·스키마를 역할별 파일로 분리합니다. 나머지 레이어는 필요한 책임이 생길 때 생성합니다.
 `<기능>`은 설명용 자리표시자이며 서비스 기능을 미리 정의하지 않습니다.
 
 ```text
@@ -68,7 +69,7 @@ uv로 백엔드의 가상환경과 의존성을 관리합니다. Python은 3.13 
 현재 정확한 Python 버전은 [`backend/.python-version`](../backend/.python-version), 의존성은
 [`pyproject.toml`](../backend/pyproject.toml)과 [`uv.lock`](../backend/uv.lock)에서 관리합니다.
 로컬 설치·확인 명령은 [백엔드 README](../backend/README.md)에 기록했습니다.
-후속 CI·배포에서도 검증한 Python 버전과 잠금 파일을 사용합니다.
+CI는 같은 Python 버전과 잠금 파일을 사용합니다. 배포도 같은 기준을 적용할 예정입니다.
 
 선택 근거는 FastAPI·LangGraph의 Python 3.13 지원 표기와 Python 3.13의 유지보수 기간입니다.
 [FastAPI 배포 정보](https://pypi.org/project/fastapi/), [LangGraph 배포 정보](https://pypi.org/project/langgraph/),
@@ -81,7 +82,7 @@ DB 접근은 아래 비동기 기본 방식을 따르며, ORM·DB 드라이버·
 
 ## 동기·비동기 실행 방식
 
-> 상태: 팀 합의로 확정. 앱·DB 구현과 동시 요청 성능 검증은 후속 작업입니다.
+> 상태: 팀 합의로 확정. 상태 확인 라우터에 적용했으며, DB 구현과 동시 요청 성능 검증은 후속 작업입니다.
 
 백엔드는 **비동기 입출력을 기본**으로 설계합니다. 외부 AI API 등 응답을 기다리는 동안 다른 요청을 처리할 수 있도록,
 라우터와 입출력을 수행하는 서비스는 `async def`로 작성하고 비동기 클라이언트를 `await`합니다.
@@ -105,4 +106,4 @@ SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우�
 - 실제 기능별 파일·DB 접근 도구·모델 구성
 - 실행·배포 구성
 
-선택의 이유는 [결정 기록](decisions.md), 상세 API·데이터 계약은 [기술 명세](specs/index.md)에 작성합니다.
+선택의 이유는 [결정 기록](decisions.md), API 계약은 [API 문서](api/index.md), 데이터 등 계약은 [기술 명세](specs/index.md)에 작성합니다.
