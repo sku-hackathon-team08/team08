@@ -33,6 +33,7 @@
 | D-027 | 2026-09-07 | 라우팅은 react-router-dom v7의 createBrowserRouter, 서버 상태는 @tanstack/react-query v5 사용 | 팀 합의. react-router는 프레임워크 모드를 쓰지 않고 데이터 라우터만 사용. QueryClientProvider 배선만 확인했고 실제 조회·오류 처리는 기능 구현에서 정함 |
 | D-028 | 2026-09-07 | 스타일링은 Tailwind CSS v4와 @tailwindcss/vite 플러그인 사용 | 팀 합의. v4 공식 방식으로 tailwind.config.js·postcss.config.js 없이 vite.config.ts 플러그인과 CSS `@import "tailwindcss"`로 연결. 디자인 토큰은 후속 작업 |
 | D-029 | 2026-09-07 | 프론트 린트는 oxlint, 타입 검사는 `tsc -b --noEmit` 사용. 별도 배포 구성은 두지 않음 | create-vite 템플릿 기본 구성을 유지. 루트 tsconfig는 솔루션 구성이라 `-b` 없이는 검사 대상이 없음. 포맷터와 프론트 CI는 후속 결정 |
+| D-030 | 2026-09-07 | [스키마 작성 패턴](guides/backend.md#스키마-작성-패턴)을 권고사항으로 정리 | 팀 요청. 목적별 요청·응답 분리, 공통 설정, 명시적 생성과 서비스의 응답 변환, 검증 책임 정의. 추가 입력 필드·타입 변환 정책과 PATCH·오류 경로는 후속 계약에서 정하며 공통 모델은 미구현 |
 
 서비스 주제는 아직 미정입니다. 프론트 기술 스택은 D-026~D-029에서 확정했으며 폴더 구조·컨벤션·CI는 후속 작업입니다. [SDD](sdd.md)의 구체적인 작업 흐름은 검토안입니다.
 새로운 선택은 날짜·결정·이유와 함께 기록하고 관련 기준 문서를 갱신합니다.
