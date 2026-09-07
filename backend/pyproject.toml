@@ -1,0 +1,32 @@
+[project]
+name = "team08-backend"
+version = "0.1.0"
+description = "서경대 해커톤 Team 08 백엔드"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "pydantic>=2.13.5",
+    "uvicorn>=0.52.4",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pyrefly]
+python-version = "3.13"
+preset = "default"
+project-includes = ["**/*.py", "**/*.pyi"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pyrefly>=1.2.0",
+    "pytest>=9.1.1",
+    "ruff>=0.16.6",
+]
