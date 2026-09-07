@@ -14,7 +14,7 @@ SOT(Source of Truth)는 주제별로 기준이 되는 문서를 뜻합니다.
 | 기술 계약 | [기술 명세](specs/index.md) | 데이터 모델·관계·외부 연동 등 기술 약속 |
 | 시스템 | [아키텍처](architecture.md) | 시스템 경계·파트별 책임·코드 위치 |
 | 개발 흐름 | [SDD](sdd.md) | 명세 확인·구현·검증을 연결하는 잠정 작업 흐름 |
-| 개발 컨벤션 | [개발 가이드](guides/development.md) | 코드 구성·네이밍·환경·의존성 권장사항 |
+| 개발 가이드 | [가이드 목차](guides/index.md) | 개발 컨벤션·주석·백엔드 구현·환경·검사 가이드의 진입점 |
 | 작업 추적 | [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues) | 작업 목록·담당자·진행 상태·완료 조건 |
 | Git 협업 | [Git 가이드](guides/git-workflow.md) | 이슈·브랜치·커밋·PR·리뷰·스쿼시 머지 |
 | 테스트 | [테스트 가이드](guides/testing.md) | 검증 범위·TDD 적용·결과 기록 |

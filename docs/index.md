@@ -21,12 +21,12 @@ docs/
 │   ├── context.md     # 문제·사용자·목표
 │   ├── scope.md       # MVP 범위·우선순위
 │   └── success-criteria.md # 성공 기준·데모 흐름
-├── architecture.md    # 시스템 구성과 코드 역할을 기록할 틀
+├── architecture.md    # 시스템 구성·레이어 역할·의존 방향
 ├── features/
 │   └── index.md       # 기능 명세 목록
 ├── api/
 │   ├── index.md       # API 계약 목록·관리 원칙
-│   ├── errors.md      # 공통 오류 계약·구현 완료 기준
+│   ├── errors.md      # 공통 오류 형식·코드·구현 완료 기준
 │   ├── naming.md      # JSON·쿼리 필드 네이밍 계약
 │   ├── integration-contracts.md # 프론트·백엔드 계약 검토
 │   └── health.md      # 앱 상태 확인 계약
@@ -36,7 +36,7 @@ docs/
 │   ├── index.md       # 가이드 목차
 │   ├── development.md # 개발 컨벤션
 │   ├── comments.md    # 주석·docstring 권고사항
-│   ├── backend.md     # 백엔드 의존성·개발 환경
+│   ├── backend.md     # 백엔드 개발·API 변환·비동기·검사·CI
 │   ├── git-workflow.md # 브랜치·커밋·PR
 │   └── testing.md     # 테스트·TDD
 └── decisions.md       # 결정 기록
@@ -61,6 +61,6 @@ docs/
 ## 현재 상태
 
 백엔드는 Python 3.13·FastAPI·uv, 로컬 DB는 SQLite로 정했습니다. 배포용 PostgreSQL은 후보이며 [아키텍처](architecture.md)에 상태를 기록합니다.
-앱 상태 확인 API와 백엔드 CI는 구현했습니다. 공통 오류 응답의 기본 형식과 API 필드 네이밍은 합의했으며 핸들러·공통 스키마·별칭 설정은 미구현입니다. 서비스·프론트 스택·기능 API·데이터 모델은 미정입니다. 빈 문서의 항목은 작성 틀이며 확정된 요구사항이 아닙니다.
+앱 상태 확인 API와 백엔드 CI는 구현했습니다. 공통 오류 응답의 기본 형식·코드 5개와 API 필드 네이밍은 합의했으며 핸들러·공통 스키마·별칭 설정은 미구현입니다. 서비스·프론트 스택·기능 API·데이터 모델은 미정입니다. 빈 문서의 항목은 작성 틀이며 확정된 요구사항이 아닙니다.
 SDD의 세부 절차도 검토안이며, 문서 구조를 만드는 것만으로 명세 승인이나 구현 완료를 의미하지 않습니다.
 필요한 문서가 생기면 해당 목록에 연결합니다. 세부 유지 방법은 [SOT](sot.md)를 따릅니다.
