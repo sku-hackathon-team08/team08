@@ -8,7 +8,7 @@
 | [Git 협업](git-workflow.md) | 이슈·라벨·브랜치·커밋·이슈/PR 템플릿·리뷰·스쿼시 머지·main 보호 |
 | [주석·docstring](comments.md) | 한국어 설명·작성 범위·Google 스타일 권고 |
 | [백엔드 개발](backend.md) | 의존성·기능 추가 순서·API 별칭·오류 처리 구현·동기/비동기·버전·검사 도구·CI |
-| [DB 설계](database.md) | UUIDv4·상태값의 확정 선택, 무결성 기본 방향, NULL·기본값·인덱스 권고와 미정 항목 |
+| [DB 설계](database.md) | UUIDv4·상태값의 확정 선택, 무결성 기본 방향, 네이밍·NULL·기본값·인덱스 권고와 미정 항목 |
 | [테스트·TDD](testing.md) | 백엔드 unit·integration 구조·작성 권고, TDD·검증 결과 기록 |
 
 ## 필수 규칙과 권장사항
