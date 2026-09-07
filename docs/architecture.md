@@ -58,22 +58,23 @@ backend/app/
 
 | 항목 | 선택 | 상태 |
 |---|---|---|
-| Python | 3.13 | 확정, 패치 버전은 스캐폴딩에서 선택 |
+| Python | 3.13 | 확정, 현재 설치·검증 버전은 `backend/.python-version` 참고 |
 | 웹 프레임워크 | FastAPI | 확정 |
 | 가상환경·의존성 관리 | uv | 확정 |
 | 로컬 개발 DB | SQLite | 확정 |
 | 배포 DB | PostgreSQL 검토 | 후보, 미확정 |
 
 uv로 백엔드의 가상환경과 의존성을 관리합니다. Python은 3.13 계열을 사용합니다.
-스캐폴딩 시 사용 가능한 최신 3.13 패치 버전에서 선택한 의존성의 설치·동작을 확인하고,
-검증한 정확한 버전을 로컬·CI·배포에 동일하게 맞춥니다.
-실제 버전 지정 파일·의존성 설정과 설치·실행 명령은 스캐폴딩에서 추가한 뒤 [백엔드 README](../backend/README.md)에 기록합니다.
+현재 정확한 Python 버전은 [`backend/.python-version`](../backend/.python-version), 의존성은
+[`pyproject.toml`](../backend/pyproject.toml)과 [`uv.lock`](../backend/uv.lock)에서 관리합니다.
+로컬 설치·확인 명령은 [백엔드 README](../backend/README.md)에 기록했습니다.
+후속 CI·배포에서도 검증한 Python 버전과 잠금 파일을 사용합니다.
 
 선택 근거는 FastAPI·LangGraph의 Python 3.13 지원 표기와 Python 3.13의 유지보수 기간입니다.
 [FastAPI 배포 정보](https://pypi.org/project/fastapi/), [LangGraph 배포 정보](https://pypi.org/project/langgraph/),
 [Python 지원 현황](https://devguide.python.org/versions/)을 참고했습니다.
 LangGraph는 AI 기능을 도입할 때 검토할 후보이며 아직 의존성에 추가하지 않았습니다.
-전체 의존성 조합의 설치·실행 검증은 후속 스캐폴딩에서 수행합니다.
+현재 최소 의존성의 설치·호환성을 검증했으며, AI·DB 패키지 조합은 해당 기능 도입 시 검증합니다.
 
 PostgreSQL을 배포 DB로 채택할 경우 연결 설정·드라이버·스키마 관리 방식과 해당 DB에서의 통합 검증을 함께 정합니다.
 현재 ORM·DB 드라이버·동기 또는 비동기 접근·마이그레이션 도구는 미정입니다.
