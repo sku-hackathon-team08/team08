@@ -65,7 +65,18 @@ uv run --locked pyrefly check
 uv run --locked pytest
 ```
 
-특정 테스트만 확인하려면 `uv run --locked pytest tests/test_health.py`를 실행합니다.
+테스트 범위를 골라 실행할 수도 있습니다. 아래 명령도 `backend/`에서 실행합니다.
+
+```sh
+uv run --locked pytest tests/unit
+uv run --locked pytest tests/integration
+uv run --locked pytest tests/integration/test_health.py
+```
+
+현재 유닛 테스트는 없으므로 `tests/unit`만 실행하면 `no tests ran`과 종료 코드 5가 나옵니다.
+실제 로직의 테스트를 추가하기 전에는 전체 또는 통합 테스트 명령으로 검증합니다.
+CI는 `pytest` 한 번으로 두 폴더를 모두 수집하며, 테스트가 없는 결과를 통과로 바꾸지 않습니다.
+분류 기준·폴더 구조·작성 권고는 [백엔드 테스트 가이드](../docs/guides/testing.md#백엔드-테스트)를 참고합니다.
 실행 조건과 실패 시 확인할 내용은 [백엔드 CI 안내](../docs/guides/backend.md#ci)를 참고합니다.
 
 패키지별 역할과 추가·갱신 방법은 [백엔드 개발 가이드](../docs/guides/backend.md)를 참고합니다.

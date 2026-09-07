@@ -8,7 +8,7 @@
 | [Git 협업](git-workflow.md) | 이슈·브랜치·커밋·PR 템플릿·리뷰·스쿼시 머지 |
 | [주석·docstring](comments.md) | 한국어 설명·작성 범위·Google 스타일 권고 |
 | [백엔드 개발](backend.md) | 실행·개발 의존성, 버전 관리, 검사 도구 |
-| [테스트·TDD](testing.md) | 테스트 범위·TDD 적용·실행 시점·결과 기록 |
+| [테스트·TDD](testing.md) | 백엔드 unit·integration 구조·작성 권고, TDD·검증 결과 기록 |
 
 ## 필수 규칙과 권장사항
 
