@@ -41,6 +41,7 @@ docs/
 | 서비스·기능 범위 정하기 | [PRD](prd/index.md) → [기능 명세](features/index.md) |
 | 프론트·백엔드 구현 | 해당 기능 명세 → [기술 명세](specs/index.md) → [아키텍처](architecture.md) |
 | 스택·공통 설계 결정 | [결정 기록](decisions.md) → 아키텍처·관련 기술 명세 |
+| 작업 관리·PR 작성 | [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues) → [Git 가이드](guides/git-workflow.md) → [PR 템플릿](../.github/pull_request_template.md) |
 | 문서·에이전트 안내 변경 | SOT → 문서 지도 → 루트 에이전트 안내 |
 
 ## 개발 가이드
