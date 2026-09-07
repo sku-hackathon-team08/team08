@@ -16,3 +16,12 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Local SQLite databases, journals and write-ahead logs
+/backend/data/
+/backend/**/*.db
+/backend/**/*.db-*
+/backend/**/*.sqlite
+/backend/**/*.sqlite-*
+/backend/**/*.sqlite3
+/backend/**/*.sqlite3-*
