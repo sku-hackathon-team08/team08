@@ -13,6 +13,9 @@ SOT(Source of Truth)는 주제별로 기준이 되는 문서를 뜻합니다.
 | 기술 계약 | [기술 명세](specs/index.md) | API·데이터 모델·공통 오류 등 구현 간 약속 |
 | 시스템 | [아키텍처](architecture.md) | 시스템 경계·파트별 책임·코드 위치 |
 | 개발 흐름 | [SDD](sdd.md) | 명세 확인·구현·검증을 연결하는 잠정 작업 흐름 |
+| 개발 컨벤션 | [개발 가이드](guides/development.md) | 코드 구성·네이밍·환경·의존성 권장사항 |
+| Git 협업 | [Git 가이드](guides/git-workflow.md) | 브랜치·커밋·PR·리뷰·병합 제안 |
+| 테스트 | [테스트 가이드](guides/testing.md) | 검증 범위·TDD 적용·결과 기록 |
 | 결정 이력 | [결정 기록](decisions.md) | 선택·이유·날짜·영향받는 문서 |
 
 루트 README는 프로젝트 소개와 실행 진입점입니다. `AGENTS.md`·`CLAUDE.md`는 docs를 읽는 경로만 안내합니다.

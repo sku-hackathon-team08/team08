@@ -26,6 +26,11 @@ docs/
 │   └── index.md       # 기능 명세 목록
 ├── specs/
 │   └── index.md       # API·데이터 등 기술 명세 목록
+├── guides/
+│   ├── index.md       # 가이드 목차
+│   ├── development.md # 개발 컨벤션
+│   ├── git-workflow.md # 브랜치·커밋·PR
+│   └── testing.md     # 테스트·TDD
 └── decisions.md       # 결정 기록
 ```
 
@@ -37,6 +42,12 @@ docs/
 | 프론트·백엔드 구현 | 해당 기능 명세 → [기술 명세](specs/index.md) → [아키텍처](architecture.md) |
 | 스택·공통 설계 결정 | [결정 기록](decisions.md) → 아키텍처·관련 기술 명세 |
 | 문서·에이전트 안내 변경 | SOT → 문서 지도 → 루트 에이전트 안내 |
+
+## 개발 가이드
+
+[가이드 목차](guides/index.md)에서 필수 규칙 제안과 권장사항의 구분을 확인합니다.
+구현은 [개발 컨벤션](guides/development.md), 커밋·PR은 [Git 협업](guides/git-workflow.md),
+검증과 TDD는 [테스트 가이드](guides/testing.md)를 참고합니다.
 
 ## 현재 상태
 
