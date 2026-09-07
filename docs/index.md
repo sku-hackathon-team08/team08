@@ -39,7 +39,7 @@ docs/
 │   ├── development.md # 개발 컨벤션
 │   ├── comments.md    # 주석·docstring 권고사항
 │   ├── backend.md     # 백엔드 개발·API 변환·비동기·검사·CI
-│   ├── database.md    # DB 설계의 확정 선택·권고·미정 항목
+│   ├── database.md    # DB 설계·네이밍의 확정 선택·권고·미정 항목
 │   ├── git-workflow.md # 브랜치·커밋·PR
 │   └── testing.md     # 테스트·TDD
 └── decisions.md       # 결정 기록
