@@ -3,7 +3,7 @@
 서경대학교 해커톤을 위한 Team 08의 프로젝트 저장소입니다.
 
 현재 서비스 주제·이름·기능 범위와 프론트 기술 스택은 미정입니다.
-백엔드는 FastAPI·uv, 로컬 DB는 SQLite로 정했습니다. 배포 DB로 PostgreSQL을 검토하고 있으며,
+백엔드는 Python 3.13·FastAPI·uv, 로컬 DB는 SQLite로 정했습니다. 배포 DB로 PostgreSQL을 검토하고 있으며,
 선택별 상태는 [아키텍처](docs/architecture.md)에서 확인할 수 있습니다.
 
 ## 프로젝트 소개
