@@ -3,5 +3,5 @@ import pytest
 
 @pytest.fixture
 def anyio_backend() -> str:
-    # 서버와 같은 asyncio 환경에서 검증하도록 테스트 실행 백엔드를 고정한다.
+    # 서버와 동일한 asyncio 환경에서 검증하기 위한 실행 백엔드 고정.
     return "asyncio"
