@@ -4,6 +4,8 @@ Python 3.13과 FastAPI를 사용하며 uv로 가상환경·의존성을 관리�
 레이어 기반 모놀리식의 코드 배치와 DB 선택 상태는 [아키텍처](../docs/architecture.md)에서 확인합니다.
 
 FastAPI 앱과 `/health`, 기본 테스트·CI를 구성했습니다. 서비스 API·DB 연결은 후속 작업입니다.
+`app/main.py`는 앱 조립, `app/api/`는 라우터, `app/schemas/`는 데이터 계약을 담당합니다.
+나머지 레이어는 패키지 경계만 준비했으며, [허용 의존 방향](../docs/architecture.md#의존-방향)에 따라 기능을 추가합니다.
 
 ## 환경 설치
 
