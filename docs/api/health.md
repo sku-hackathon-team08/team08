@@ -21,4 +21,4 @@ DB·AI API·외부 서비스의 준비 상태나 전체 기능의 정상 동작�
 이 API에 정의된 업무 오류는 없습니다. 앱이 실행되지 않거나 연결할 수 없으면 정상 응답을 받을 수 없습니다.
 
 검증 기준은 인증 없이 호출했을 때 상태 코드·콘텐츠 유형·본문이 위 계약과 일치하는 것입니다.
-실행 방법은 [백엔드 README](../../backend/README.md), 테스트는 [test_health.py](../../backend/tests/test_health.py)에 있습니다.
+실행 방법은 [백엔드 README](../../backend/README.md), 테스트는 [test_health.py](../../backend/tests/integration/test_health.py)에 있습니다.
