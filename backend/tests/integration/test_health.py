@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -6,8 +8,10 @@ from app.main import create_app
 
 
 @pytest.mark.anyio
-async def test_health_returns_ok_without_authentication() -> None:
-    app = create_app(Settings(_env_file=None, database_url=""))
+async def test_health_returns_ok_without_authentication(tmp_path: Path) -> None:
+    app = create_app(
+        Settings(_env_file=None, database_url=f"sqlite:///{tmp_path}/health.sqlite3")
+    )
     async with (
         app.router.lifespan_context(app),
         AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,

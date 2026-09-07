@@ -22,7 +22,7 @@
 ## 백엔드 레이어 구성
 
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
-`core/config.py`에 환경 설정을 구현했습니다. `services/`, `repositories/`, `models/`, `db/`는 패키지 경계만 준비한 상태입니다.
+`core/config.py`에 환경 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -30,6 +30,7 @@ backend/app/
 ├── __init__.py
 ├── main.py                  # FastAPI 앱 생성·최종 조립
 ├── api/
+│   ├── dependencies.py      # 요청별 세션 제공·종료
 │   ├── router.py            # 기능 라우터 등록
 │   └── routes/
 │       └── health.py        # GET /health
@@ -38,7 +39,8 @@ backend/app/
 ├── services/                # 기능 규칙·업무 흐름
 ├── repositories/            # 필요할 때 DB 조회·저장 분리
 ├── models/                  # 영속 데이터 모델·ORM 공통 기반
-├── db/                      # DB 연결·세션 수명
+├── db/
+│   └── session.py           # 비동기 연결·시작 확인·세션 팩토리·종료
 └── core/
     └── config.py            # 환경 설정·DB URL 검증과 기본값 선택
 ```
@@ -75,7 +77,7 @@ flowchart LR
 | `main.py` | 앱 생성, 라우터·오류 핸들러·시작/종료 조립 | 조립에 필요한 레이어. 다른 레이어는 main을 import하지 않음 |
 | `api/routes/` | URL·HTTP 메서드, 입력·인증 의존성, 응답·상태 코드 | `services`, `schemas`, `core`. DB 조회를 직접 수행하지 않음 |
 | `api/router.py` | 기능 라우터를 모아 등록 | `api/routes`. 개별 라우터는 이 파일을 역참조하지 않음 |
-| `api/dependencies.py` (추후 필요 시) | FastAPI 의존성으로 서비스·세션 등을 연결 | 조립에 필요한 `services`, `repositories`, `db`, `core`. 업무 규칙·직접 쿼리는 두지 않음 |
+| `api/dependencies.py` | FastAPI 의존성으로 서비스·세션 등을 연결 | 조립에 필요한 `services`, `repositories`, `db`, `core`. 업무 규칙·직접 쿼리는 두지 않음 |
 | `services/` | 기능 규칙·업무 흐름, 모델을 응답 데이터로 변환 | `repositories`, `schemas`, `core`. 간단한 기능은 `db`, `models` 직접 사용 가능 |
 | `repositories/` | DB 조회·저장 | `db`, `models`, `core`. HTTP 응답 스키마를 만들지 않음 |
 | `db/` | 연결·세션 수명·DB 초기화 | `models`, `core` |
@@ -91,7 +93,7 @@ flowchart LR
 
 - 하위 레이어에서 상위 레이어를 import하지 않습니다. 같은 레이어의 기능 파일 사이에도 상호 import를 만들지 않습니다.
 - 모델·스키마는 서로 import하지 않습니다. ORM 모델을 응답 스키마로 바꾸는 코드는 서비스에서 조합합니다.
-- 향후 ORM 공통 Base는 `models/base.py`에 둡니다. `models → db → models` 형태의 순환을 만들지 않도록 모델이 연결·세션을 import하지 않습니다. 아직 ORM·Base 구현은 없습니다.
+- 향후 ORM 공통 Base는 `models/base.py`에 둡니다. `models → db → models` 형태의 순환을 만들지 않도록 모델이 연결·세션을 import하지 않습니다. SQLAlchemy를 선택했으며 실제 모델·Base는 아직 없습니다.
 - 서비스 오류는 일반 Python 예외 또는 HTTP에 독립적인 `core` 예외로 표현하고, API 경계에서 HTTP 응답으로 변환합니다. `HTTPException`·`Depends`·`Request`는 서비스·리포지토리·모델에 넣지 않습니다.
 - `core`에 기능 로직을 모으거나 `__init__.py`에서 하위 모듈을 일괄 재노출해 경계를 우회하지 않습니다. 실제 정의가 있는 모듈을 직접 import합니다.
 - `TYPE_CHECKING`이나 함수 내부 import로 의존 방향 위반을 숨기지 않습니다. 공통 데이터 계약의 위치 또는 기능 책임을 조정합니다.
@@ -123,7 +125,7 @@ Tailwind는 v4 방식으로 `vite.config.ts` 플러그인과 CSS `@import`로 �
 
 ## 백엔드 환경과 DB
 
-[환경 설정 가이드](guides/backend.md#환경-설정과-db-선택)에 따라 DB URL 선택을 구현했습니다. PostgreSQL URL을 지정하지 않으면 로컬 SQLite URL을 선택합니다. 앱 시작 시 설정 형식을 검증하며 실제 DB 연결·파일 생성은 아직 구현하지 않았습니다. PostgreSQL을 선택할 수 있는 설정과 배포 DB의 최종 선정은 구분합니다.
+[환경 설정 가이드](guides/backend.md#환경-설정과-db-선택)에 따라 DB URL 선택을 구현했습니다. PostgreSQL URL을 지정하지 않으면 로컬 SQLite URL을 선택합니다. 앱 시작 시 설정 형식과 실제 DB 연결을 검증하며, SQLite 파일이 없으면 폴더·파일을 생성합니다. 기존 데이터는 유지하고 업무 테이블을 자동 생성하지 않습니다. PostgreSQL을 선택할 수 있는 설정과 배포 DB의 최종 선정은 구분합니다.
 
 | 항목 | 선택 | 상태 |
 |---|---|---|
@@ -143,15 +145,14 @@ CI는 같은 Python 버전과 잠금 파일을 사용합니다. 배포도 같은
 [FastAPI 배포 정보](https://pypi.org/project/fastapi/), [LangGraph 배포 정보](https://pypi.org/project/langgraph/),
 [Python 지원 현황](https://devguide.python.org/versions/)을 참고했습니다.
 LangGraph는 AI 기능을 도입할 때 검토할 후보이며 아직 의존성에 추가하지 않았습니다.
-현재 최소 의존성의 설치·호환성을 검증했으며, AI·DB 패키지 조합은 해당 기능 도입 시 검증합니다.
+현재 최소 의존성의 설치·호환성을 검증했으며, SQLAlchemy·aiosqlite·psycopg 조합은 SQLite·PostgreSQL 통합 테스트로 검증합니다. AI 패키지는 기능 도입 시 검증합니다.
 
-PostgreSQL을 배포 DB로 채택할 경우 연결 설정·드라이버·스키마 관리 방식과 해당 DB에서의 통합 검증을 함께 정합니다.
-DB 접근은 아래 비동기 기본 방식을 따르며, ORM·DB 드라이버·마이그레이션 도구는 DB 구현 때 정합니다.
+DB 접근 도구는 SQLAlchemy asyncio, 드라이버는 SQLite의 aiosqlite와 PostgreSQL의 psycopg로 정했습니다. 연결·세션·두 DB의 통합 검증을 구성했으며 마이그레이션 도구·배포 설정은 후속 결정입니다.
 공통 PK·상태값·무결성 기준과 미정 항목은 [DB 설계 가이드](guides/database.md)에서 확인합니다.
 
 ## 동기·비동기 실행 방식
 
-> 상태: 팀 합의로 확정. 상태 확인 라우터에 적용했으며, DB 구현과 동시 요청 성능 검증은 후속 작업입니다.
+> 상태: 팀 합의로 확정. 상태 확인 라우터와 DB 연결에 적용했으며 업무 모델·동시 요청 성능 검증은 후속 작업입니다.
 
 백엔드는 **비동기 입출력을 기본**으로 설계합니다. 외부 AI API 등 응답을 기다리는 동안 다른 요청을 처리할 수 있도록,
 라우터와 입출력을 수행하는 서비스는 `async def`로 작성하고 비동기 클라이언트를 `await`합니다.
@@ -165,14 +166,14 @@ AI 사용은 아직 후보이며, 이 선택만으로 LangGraph 도입이나 처
 | 무거운 CPU 연산·로컬 모델 추론 | 별도 프로세스·작업 실행 구조 검토; `async def`만으로 해결하지 않음 |
 
 SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우선 검토합니다.
-이것이 두 DB의 동시성·쓰기 처리 특성이 같다는 뜻은 아닙니다. 드라이버·연결 수명·트랜잭션과 실제 DB 검증은 후속 DB 작업에서 정합니다.
+이것이 두 DB의 동시성·쓰기 처리 특성이 같다는 뜻은 아닙니다. 연결·세션 수명과 실제 DB 검증은 구성했으며 업무 트랜잭션 경계는 보류 상태입니다.
 구현과 리뷰의 세부 기준은 [백엔드 실행 가이드](guides/backend.md#동기비동기-사용-기준)에 둡니다.
 
 ## 추후 정리할 내용
 
 - 프론트·백엔드의 책임과 통신 방식
 - 배포 DB 확정·DB 접근과 스키마 관리·외부 서비스·파일 저장 방식
-- 실제 기능별 파일·DB 접근 도구·모델 구성
+- 실제 기능별 파일·업무 모델 구성
 - 실행·배포 구성
 
 선택의 이유는 [결정 기록](decisions.md), 요청·응답 계약은 [API 명세](api/index.md), 저장 구조·제약은 [DB 명세](db/index.md), 외부 제공자와의 통신은 [외부 연동 명세](integrations/index.md)에 작성합니다.

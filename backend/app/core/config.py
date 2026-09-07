@@ -24,6 +24,30 @@ class Settings(BaseSettings):
         default=SecretStr(DEFAULT_DATABASE_URL), validation_alias="DATABASE_URL"
     )
 
+    database_connect_timeout_seconds: float = Field(
+        default=10.0,
+        gt=0,
+        le=120,
+        allow_inf_nan=False,
+        validation_alias="DATABASE_CONNECT_TIMEOUT_SECONDS",
+    )
+
+    database_pool_size: int = Field(
+        default=5, gt=0, validation_alias="DATABASE_POOL_SIZE"
+    )
+    database_max_overflow: int = Field(
+        default=5, ge=0, validation_alias="DATABASE_MAX_OVERFLOW"
+    )
+    database_pool_timeout_seconds: float = Field(
+        default=10.0,
+        gt=0,
+        allow_inf_nan=False,
+        validation_alias="DATABASE_POOL_TIMEOUT_SECONDS",
+    )
+    database_pool_pre_ping: bool = Field(
+        default=True, validation_alias="DATABASE_POOL_PRE_PING"
+    )
+
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, value: SecretStr) -> SecretStr:
