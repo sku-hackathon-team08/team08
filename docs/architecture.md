@@ -1,13 +1,13 @@
 # 아키텍처
 
-> 상태: 백엔드 레이어 기반 모놀리식·프레임워크·환경 관리·로컬 DB·비동기 기본 방식 확정. 프론트 스택과 배포 DB는 미정입니다.
+> 상태: 상태: 백엔드 레이어 기반 모놀리식·프레임워크·환경 관리·로컬 DB·비동기 기본 방식 확정. 프론트 스택은 확정했으며 프론트 폴더 구조와 배포 DB는 미정입니다.
 > 기술 선택을 기록한 문서이며 앱·DB 연결의 구현 완료를 뜻하지 않습니다.
 
 ## 코드 구성
 
 | 폴더 | 역할 | 기술 스택 |
 |---|---|---|
-| [frontend/](../frontend/) | 프론트엔드 코드 | 미정 |
+| [frontend/](../frontend/) | 프론트엔드 코드 | Vite · React 19 · TypeScript · Tailwind CSS |
 | [backend/](../backend/) | 백엔드 코드 | Python 3.13 · FastAPI |
 
 ## 저장소와 애플리케이션 경계
@@ -17,7 +17,7 @@
 각 레이어 안에서 기능별 파일 또는 하위 패키지로 구분합니다. 전체 백엔드는 하나의 FastAPI 애플리케이션으로 실행·배포합니다.
 
 예상 개발 규모가 크지 않아 코드의 역할과 위치를 쉽게 찾을 수 있는 구성을 선택했습니다.
-프론트 정적 파일을 백엔드에서 제공할지, 프론트를 별도로 배포할지는 아직 정하지 않았습니다.
+프론트 정적 파일을 백엔드에서 제공할지, 프론트는 Vite 개발 서버로 실행하며 별도 배포 구성은 두지 않습니다. 프론트 정적 파일을 백엔드에서 제공할지는 아직 정하지 않았습니다. 백엔드 연결 주소와 CORS는 프론트·백엔드 계약 검토에서 관리합니다.
 
 ## 백엔드 레이어 구성
 
@@ -97,6 +97,28 @@ flowchart LR
 
 레이어 규칙은 코드 리뷰 기준입니다. 현재 CI의 Ruff·Pyrefly는 이 표 전체를 자동 강제하지 않습니다.
 새 기능의 구현 순서는 [백엔드 개발 가이드](guides/backend.md#기능-추가-순서)를 참고합니다.
+
+## 프론트 환경
+
+| 항목 | 선택 | 상태 |
+|---|---|---|
+| 빌드 도구 | Vite | 확정 |
+| 프레임워크 | React 19 | 확정 |
+| 언어 | TypeScript | 확정 |
+| 스타일링 | Tailwind CSS v4 | 확정 |
+| 라우팅 | react-router-dom v7 | 확정 |
+| 서버 상태 | @tanstack/react-query v5 | 확정 |
+| 패키지 관리자 | npm | 확정 |
+| 폴더 구조 | 미정 | 후속 작업 |
+
+npm으로 프론트 의존성을 관리하며 정확한 버전은
+[`package.json`](../frontend/package.json)과 [`package-lock.json`](../frontend/package-lock.json)에서 관리합니다.
+설치·실행·검사 명령은 [프론트 README](../frontend/README.md)에 기록했습니다.
+선택 근거는 [결정 기록](decisions.md)의 D-021~D-024에 있습니다.
+
+react-router는 `createBrowserRouter` 기반 데이터 라우터만 사용하고 프레임워크 모드는 쓰지 않습니다.
+Tailwind는 v4 방식으로 `vite.config.ts` 플러그인과 CSS `@import`로 연결하며 `tailwind.config.js`를 두지 않습니다.
+현재 라우터·QueryClientProvider·Tailwind 배선만 확인했으며 실제 화면과 API 연결은 후속 작업입니다.
 
 ## 백엔드 환경과 DB
 
