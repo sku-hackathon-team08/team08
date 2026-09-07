@@ -3,7 +3,7 @@
 프론트엔드 코드가 위치할 폴더입니다.
 Vite · React 19 · TypeScript · Tailwind CSS v4로 구성하며, 라우팅은 react-router-dom,
 서버 상태는 @tanstack/react-query를 사용합니다.
-선택 근거는 [결정 기록](../docs/decisions.md)의 D-021~D-024, 스택 현황은 [아키텍처](../docs/architecture.md#프론트-환경)에 있습니다.
+선택 근거는 [결정 기록](../docs/decisions.md)의 D-026~D-029, 스택 현황은 [아키텍처](../docs/architecture.md#프론트-환경)에 있습니다.
 
 ## 실행 환경
 

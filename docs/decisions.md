@@ -24,12 +24,18 @@
 | D-018 | 2026-09-07 | 백엔드 테스트를 unit·integration 폴더로 분리하고 작성·격리 기준을 권고로 정리 | 팀 요청. 실제 연결 범위로 분류하고 기존 health 테스트는 통합으로 이동. 유닛 테스트는 실제 로직 도입 시 추가하며 CI는 전체 테스트 실행 유지 |
 | D-019 | 2026-09-07 | main에 PR·Backend checks 통과를 요구하고 강제 push·삭제를 차단. 관리자도 적용 | 팀 요청. 필수 검사가 문서 PR에서 대기하지 않도록 CI 경로 필터 제거. 승인 인원은 0명으로 시작하고 추후 합의 |
 | D-020 | 2026-09-07 | 공통 오류 응답은 HTTP 상태와 일치하는 status·문자열 detail·안정적인 code·배열 errors로 정의 | 팀 합의. errors가 없으면 빈 배열, 프론트 공통 처리와 공개 오류 형식을 일관되게 유지. 자체 JSON 계약이며 RFC 9457 준수를 표방하지 않음. 문서 우선, 핸들러·스키마·OpenAPI·테스트는 후속 구현 |
-| D-021 | 2026-09-07 | 프론트는 Vite·React 19·TypeScript로 구성하고 패키지 관리자는 npm 사용 | 팀 합의. Vite 8·TypeScript 6·React 19.2.8, Node 24.14.1·npm 11.11.0에서 설치·빌드·타입 검사 검증. 폴더 구조와 파일명 컨벤션은 후속 작업 |
-| D-022 | 2026-09-07 | 라우팅은 react-router-dom v7의 createBrowserRouter, 서버 상태는 @tanstack/react-query v5 사용 | 팀 합의. react-router는 프레임워크 모드를 쓰지 않고 데이터 라우터만 사용. QueryClientProvider 배선만 확인했고 실제 조회·오류 처리는 기능 구현에서 정함 |
-| D-023 | 2026-09-07 | 스타일링은 Tailwind CSS v4와 @tailwindcss/vite 플러그인 사용 | 팀 합의. v4 공식 방식으로 tailwind.config.js·postcss.config.js 없이 vite.config.ts 플러그인과 CSS `@import "tailwindcss"`로 연결. 디자인 토큰은 후속 작업 |
-| D-024 | 2026-09-07 | 프론트 린트는 oxlint, 타입 검사는 `tsc -b --noEmit` 사용. 별도 배포 구성은 두지 않음 | create-vite 템플릿 기본 구성을 유지. 루트 tsconfig는 솔루션 구성이라 `-b` 없이는 검사 대상이 없음. 포맷터와 프론트 CI는 후속 결정 |
+| D-021 | 2026-09-07 | JSON·쿼리 필드명은 camelCase, Python 내부 변수·함수·모델 필드명은 snake_case로 확정 | 팀 요청. [네이밍 계약](api/naming.md)을 기준으로 Pydantic 별칭을 활용하며 공통 변환 구현·테스트는 후속 작업 |
+| D-022 | 2026-09-07 | [공통 오류 코드 5개](api/errors.md#공통-오류-코드) 확정. 필드 오류 경로와 변환 핸들러는 첫 기능 개발 시 결정·구현 | 팀 합의. 기능에 독립적인 기본 오류부터 문서화하고 실제 입력 폼에 필요한 필드 오류 구조는 추후 합의. 런타임 구현은 후속 작업 |
+| D-023 | 2026-09-07 | 기술 명세를 [DB](db/index.md)와 [외부 연동](integrations/index.md)으로 분리하고 API·기능 명세의 책임 명시 | 팀 합의. 사용자 동작, 공개 API, 저장 구조, 외부 제공자 연동을 주제별로 찾도록 구성. 실제 DB·연동 명세는 기능 도입 시 작성 |
+| D-024 | 2026-09-07 | [DB 설계 가이드](guides/database.md)에 일반 엔티티 PK의 백엔드 UUIDv4 생성과 상태값의 앱 Enum 검증·DB 문자열 저장 확정, 무결성 기본 방향 기록 | 팀 합의 정리 반영. NULL·기본값·인덱스는 권고, 수치·범위 CHECK는 선택 적용. 네이밍·날짜·금액·마이그레이션 등은 미정으로 유지하며 실제 DB 구현은 후속 작업 |
+| D-025 | 2026-09-07 | [DB 네이밍](guides/database.md#네이밍-권고사항)을 권고사항으로 정리 | 팀 요청. 테이블·컬럼·역할별 FK·연결 테이블·제약·인덱스의 예시 제공. 도메인에 맞게 조정 가능하며 필수 규칙·CI로 강제하지 않음 |
+| D-026 | 2026-09-07 | 프론트는 Vite·React 19·TypeScript로 구성하고 패키지 관리자는 npm 사용 | 팀 합의. Vite 8·TypeScript 6·React 19.2.8, Node 24.14.1·npm 11.11.0에서 설치·빌드·타입 검사 검증. 폴더 구조와 파일명 컨벤션은 후속 작업 |
+| D-027 | 2026-09-07 | 라우팅은 react-router-dom v7의 createBrowserRouter, 서버 상태는 @tanstack/react-query v5 사용 | 팀 합의. react-router는 프레임워크 모드를 쓰지 않고 데이터 라우터만 사용. QueryClientProvider 배선만 확인했고 실제 조회·오류 처리는 기능 구현에서 정함 |
+| D-028 | 2026-09-07 | 스타일링은 Tailwind CSS v4와 @tailwindcss/vite 플러그인 사용 | 팀 합의. v4 공식 방식으로 tailwind.config.js·postcss.config.js 없이 vite.config.ts 플러그인과 CSS `@import "tailwindcss"`로 연결. 디자인 토큰은 후속 작업 |
+| D-029 | 2026-09-07 | 프론트 린트는 oxlint, 타입 검사는 `tsc -b --noEmit` 사용. 별도 배포 구성은 두지 않음 | create-vite 템플릿 기본 구성을 유지. 루트 tsconfig는 솔루션 구성이라 `-b` 없이는 검사 대상이 없음. 포맷터와 프론트 CI는 후속 결정 |
 
-서비스 주제는 아직 미정입니다. 프론트 기술 스택은 D-021~D-024에서 확정했으며 폴더 구조·컨벤션·CI는 후속 작업입니다.
+서비스 주제는 아직 미정입니다. 프론트 기술 스택은 D-026~D-029에서 확정했으며 폴더 구조·컨벤션·CI는 후속 작업입니다. [SDD](sdd.md)의 구체적인 작업 흐름은 검토안입니다.
+새로운 선택은 날짜·결정·이유와 함께 기록하고 관련 기준 문서를 갱신합니다.
 
 ## 검토 중
 

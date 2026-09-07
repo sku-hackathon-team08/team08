@@ -114,7 +114,7 @@ flowchart LR
 npm으로 프론트 의존성을 관리하며 정확한 버전은
 [`package.json`](../frontend/package.json)과 [`package-lock.json`](../frontend/package-lock.json)에서 관리합니다.
 설치·실행·검사 명령은 [프론트 README](../frontend/README.md)에 기록했습니다.
-선택 근거는 [결정 기록](decisions.md)의 D-021~D-024에 있습니다.
+선택 근거는 [결정 기록](decisions.md)의 D-026~D-029에 있습니다.
 
 react-router는 `createBrowserRouter` 기반 데이터 라우터만 사용하고 프레임워크 모드는 쓰지 않습니다.
 Tailwind는 v4 방식으로 `vite.config.ts` 플러그인과 CSS `@import`로 연결하며 `tailwind.config.js`를 두지 않습니다.
@@ -144,6 +144,7 @@ LangGraph는 AI 기능을 도입할 때 검토할 후보이며 아직 의존성�
 
 PostgreSQL을 배포 DB로 채택할 경우 연결 설정·드라이버·스키마 관리 방식과 해당 DB에서의 통합 검증을 함께 정합니다.
 DB 접근은 아래 비동기 기본 방식을 따르며, ORM·DB 드라이버·마이그레이션 도구는 DB 구현 때 정합니다.
+공통 PK·상태값·무결성 기준과 미정 항목은 [DB 설계 가이드](guides/database.md)에서 확인합니다.
 
 ## 동기·비동기 실행 방식
 
@@ -171,4 +172,4 @@ SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우�
 - 실제 기능별 파일·DB 접근 도구·모델 구성
 - 실행·배포 구성
 
-선택의 이유는 [결정 기록](decisions.md), API 계약은 [API 문서](api/index.md), 데이터 등 계약은 [기술 명세](specs/index.md)에 작성합니다.
+선택의 이유는 [결정 기록](decisions.md), 요청·응답 계약은 [API 명세](api/index.md), 저장 구조·제약은 [DB 명세](db/index.md), 외부 제공자와의 통신은 [외부 연동 명세](integrations/index.md)에 작성합니다.
