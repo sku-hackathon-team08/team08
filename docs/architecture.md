@@ -22,7 +22,7 @@
 ## 백엔드 레이어 구성
 
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
-`core/config.py`에 환경 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
+`core/config.py`에 환경 설정, `core/logging.py`에 앱 로그 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -42,7 +42,8 @@ backend/app/
 ├── db/
 │   └── session.py           # 비동기 연결·시작 확인·세션 팩토리·종료
 └── core/
-    └── config.py            # 환경 설정·DB URL 검증과 기본값 선택
+    ├── config.py            # 환경 설정·DB URL 검증과 기본값 선택
+    └── logging.py           # 앱 콘솔 로그·레벨 설정
 ```
 
 각 디렉터리에는 `__init__.py`가 있습니다. 기능별 파일은 실제 구현 시 같은 기능 이름으로 각 레이어에 추가합니다.

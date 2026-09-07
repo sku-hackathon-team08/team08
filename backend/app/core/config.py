@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
 from pydantic import Field, PostgresDsn, SecretStr, ValidationError, field_validator
@@ -23,6 +24,11 @@ class Settings(BaseSettings):
     database_url: SecretStr = Field(
         default=SecretStr(DEFAULT_DATABASE_URL), validation_alias="DATABASE_URL"
     )
+
+    log_level: Annotated[
+        Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        Field(validation_alias="LOG_LEVEL"),
+    ] = "INFO"
 
     database_connect_timeout_seconds: float = Field(
         default=10.0,

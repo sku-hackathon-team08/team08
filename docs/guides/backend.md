@@ -82,6 +82,39 @@ SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/con
 공식 동작은 [SQLAlchemy 연결 풀](https://docs.sqlalchemy.org/en/20/core/pooling.html)을 참고합니다.
 
 
+## 기본 로깅
+
+> 상태: Python 표준 logging으로 DB 준비·정리 완료 로그와 환경별 레벨 설정을 구현했습니다. HTTP 오류 핸들러·외부 로그 수집은 후속 작업입니다.
+
+`core/logging.py`가 `app` 로거에 콘솔(stderr) 핸들러 하나를 구성합니다. lifespan에서 설정 검증 후 DB를 열기 전에 초기화하며, import·`create_app()` 호출만으로는 로깅 설정을 바꾸지 않습니다. 반복 초기화 시 같은 핸들러를 재사용하고 레벨을 갱신합니다. 로거는 프로세스 공통이므로 같은 프로세스에서 여러 앱을 실행하면 마지막 초기화의 레벨을 공유합니다.
+
+`LOG_LEVEL`은 기본 `INFO`이며 대문자 `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`을 받습니다. 설정 우선순위는 다른 환경 설정과 같습니다. 앱 로그는 UTC 시각·레벨·모듈·메시지를 출력합니다.
+
+```text
+2026-09-08T00:00:00Z INFO app.db.session: DB 연결 확인 완료 (sqlite)
+2026-09-08T00:01:00Z INFO app.db.session: DB 연결 풀 정리 완료
+```
+
+| 레벨 | 기록 기준 |
+|---|---|
+| DEBUG | 개발 중 필요한 상세 진단. 현재 별도 상세 이벤트 없음 |
+| INFO | `SELECT 1` 성공 후 DB 준비 완료, `dispose()` 성공 후 풀 정리 완료 |
+| WARNING | 계속 실행할 수 있지만 확인이 필요한 상황. 현재 별도 이벤트 없음 |
+| ERROR | 앱 시작·종료 실패. Uvicorn이 lifespan 예외와 스택을 기록 |
+| CRITICAL | 프로세스를 유지할 수 없는 심각한 오류. 현재 별도 이벤트 없음 |
+
+앱 시작·종료와 HTTP 접근 로그는 Uvicorn 기본 로그를 사용합니다. 앱에서는 같은 메시지를 추가하지 않으며, `app` 로그의 root 전파를 막아 중복 출력을 방지합니다. root·Uvicorn·외부 라이브러리의 핸들러와 레벨은 변경하지 않습니다. `LOG_LEVEL`은 앱 로그에만 적용되며 Uvicorn은 `--log-level`로 별도 조정합니다.
+
+### 오류 기록과 노출 범위
+
+- 시작 실패는 기존 `DatabaseStartupError`, 풀 정리 실패는 `DatabaseShutdownError`로 변환해 Uvicorn에 전달합니다. 드라이버 원본 메시지 대신 오류 종류와 안전한 안내를 남기고, 앱에서 같은 예외를 먼저 로깅한 뒤 다시 던지지 않습니다. 오류 스택과 Uvicorn의 종료 안내는 서로 다른 정보입니다.
+- DB URL·접속 비밀번호·토큰·SQL 파라미터·요청 본문을 새 앱 로그에 넣지 않습니다. 모든 문자열을 자동으로 가리는 필터를 구현한 것은 아니므로, 이후 로그에서도 원본 입력·설정 객체·예외 메시지를 무조건 기록하지 않습니다.
+- Uvicorn 접근 로그에는 요청 경로·쿼리가 포함될 수 있으므로 URL에 비밀값을 전달하지 않습니다. 접근 로그 마스킹·정책 변경은 이번 범위에 포함하지 않습니다.
+- 앞으로 HTTP 오류 핸들러가 예외를 처리한다면 한 경계에서 한 번 기록하고, 클라이언트 응답은 [오류 계약](../api/errors.md)을 따릅니다. 현재는 공통 HTTP 오류 핸들러나 응답 형식을 변경하지 않습니다.
+- 풀 정리 완료는 `dispose()`가 성공했다는 의미이며, 사용 중인 연결의 강제 회수나 강제 종료 시 정리 보장을 뜻하지 않습니다. 요청 취소·실제 종료 신호 테스트는 후속 보완입니다.
+
+파일 저장·외부 수집·분산 추적·요청별 추가 로그는 필요할 때 도입합니다. 동작 참고: [Python logging](https://docs.python.org/3.13/library/logging.html), [Uvicorn 설정](https://www.uvicorn.org/settings/).
+
 ## 기능 추가 순서
 
 폴더 책임과 허용 import 방향은 [아키텍처](../architecture.md#의존-방향)를 기준으로 합니다.
