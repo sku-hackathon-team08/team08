@@ -27,7 +27,7 @@ docs/
 ├── api/
 │   ├── index.md       # API 계약 목록·관리 원칙
 │   ├── errors.md      # 공통 오류 형식·코드·구현 완료 기준
-│   ├── naming.md      # JSON·쿼리 필드 네이밍 계약
+│   ├── naming.md      # JSON·쿼리 필드 네이밍·외부 입력 지원 범위
 │   ├── integration-contracts.md # 프론트·백엔드 계약 검토
 │   └── health.md      # 앱 상태 확인 계약
 ├── db/
