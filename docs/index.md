@@ -30,8 +30,10 @@ docs/
 │   ├── naming.md      # JSON·쿼리 필드 네이밍 계약
 │   ├── integration-contracts.md # 프론트·백엔드 계약 검토
 │   └── health.md      # 앱 상태 확인 계약
-├── specs/
-│   └── index.md       # 데이터·연동 등 기술 명세 목록
+├── db/
+│   └── index.md       # DB 모델·ERD·저장 제약 명세 목록
+├── integrations/
+│   └── index.md       # 외부 제공자 연동 명세 목록
 ├── guides/
 │   ├── index.md       # 가이드 목차
 │   ├── development.md # 개발 컨벤션
@@ -47,7 +49,7 @@ docs/
 | 작업 | 읽거나 갱신할 문서 |
 |---|---|
 | 서비스·기능 범위 정하기 | [PRD](prd/index.md) → [기능 명세](features/index.md) |
-| 프론트·백엔드 구현 | 해당 기능 명세 → [API 계약](api/index.md)·[기술 명세](specs/index.md) → [아키텍처](architecture.md) |
+| 프론트·백엔드 구현 | [기능 명세](features/index.md) → 필요한 [API](api/index.md)·[DB](db/index.md)·[외부 연동](integrations/index.md) 명세 → [아키텍처](architecture.md) |
 | 스택·공통 설계 결정 | [결정 기록](decisions.md) → 아키텍처·관련 기술 명세 |
 | 작업 관리·PR 작성 | [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues) → [Git 가이드](guides/git-workflow.md) → [이슈 템플릿](../.github/ISSUE_TEMPLATE/task.md) · [PR 템플릿](../.github/pull_request_template.md) |
 | 문서·에이전트 안내 변경 | SOT → 문서 지도 → 루트 에이전트 안내 |

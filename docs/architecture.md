@@ -149,4 +149,4 @@ SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우�
 - 실제 기능별 파일·DB 접근 도구·모델 구성
 - 실행·배포 구성
 
-선택의 이유는 [결정 기록](decisions.md), API 계약은 [API 문서](api/index.md), 데이터 등 계약은 [기술 명세](specs/index.md)에 작성합니다.
+선택의 이유는 [결정 기록](decisions.md), 요청·응답 계약은 [API 명세](api/index.md), 저장 구조·제약은 [DB 명세](db/index.md), 외부 제공자와의 통신은 [외부 연동 명세](integrations/index.md)에 작성합니다.

@@ -27,7 +27,7 @@ SDD(Spec-Driven Development)는 요구사항·계약에 적힌 기대 동작을 
 
 ## 기록 위치
 
-- 제품·기능·API·데이터의 기준: [SOT가 연결하는 문서](sot.md)
+- 제품·기능·API·DB·외부 연동의 기준: [SOT가 연결하는 문서](sot.md)
 - 중요한 기술 선택과 이유: [결정 기록](decisions.md)
 - 작업 목록·담당자·진행·막힘·완료 조건: GitHub 이슈. 상태는 [Git 가이드의 라벨 기준](guides/git-workflow.md#단순-라벨-구성)으로 관리
 - 구현·검증 결과: 이슈에 연결된 PR
