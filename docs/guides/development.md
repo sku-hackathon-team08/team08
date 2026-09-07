@@ -30,7 +30,7 @@
 
 ## 계약 변경과 검증
 
-화면 동작·예외·인수 조건은 [기능 명세](../features/index.md), API 계약은 [API 문서](../api/index.md), 데이터 계약은 [기술 명세](../specs/index.md)에 둡니다.
+화면 동작·업무 규칙·인수 조건은 [기능 명세](../features/index.md), 요청·응답 계약은 [API 명세](../api/index.md), 저장 구조·제약은 [DB 명세](../db/index.md), 외부 제공자와의 통신은 [외부 연동 명세](../integrations/index.md)에 둡니다.
 변경 시 해당 명세 → 구현 → 호출부 → 테스트를 대조하고, 호환성이 바뀌면 PR에 영향을 적습니다.
 검사 범위와 결과 기록은 [테스트 가이드](testing.md), PR 작성은 [Git 가이드](git-workflow.md)를 참고합니다.
 
