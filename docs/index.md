@@ -32,6 +32,7 @@ docs/
 ├── guides/
 │   ├── index.md       # 가이드 목차
 │   ├── development.md # 개발 컨벤션
+│   ├── comments.md    # 주석·docstring 권고사항
 │   ├── backend.md     # 백엔드 의존성·개발 환경
 │   ├── git-workflow.md # 브랜치·커밋·PR
 │   └── testing.md     # 테스트·TDD

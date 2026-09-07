@@ -1,1 +1,1 @@
-"""Persistence models; ORM base definitions will also live in this layer."""
+"""영속 데이터 모델·향후 ORM 공통 기반."""

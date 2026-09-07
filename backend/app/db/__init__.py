@@ -1,1 +1,1 @@
-"""Database connection and session lifecycle infrastructure."""
+"""DB 연결과 세션 수명 관리."""

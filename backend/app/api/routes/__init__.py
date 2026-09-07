@@ -1,1 +1,1 @@
-"""Feature-specific HTTP endpoints."""
+"""기능별 HTTP 엔드포인트."""

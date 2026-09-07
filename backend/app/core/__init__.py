@@ -1,1 +1,1 @@
-"""Shared configuration and errors; no imports from other app layers."""
+"""공통 설정·오류. 다른 app 레이어 참조 금지."""

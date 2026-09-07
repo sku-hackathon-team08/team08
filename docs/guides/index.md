@@ -1,11 +1,12 @@
 # 개발 가이드
 
-> 상태: 세부 컨벤션은 검토안입니다. GitHub Issues를 통한 작업 관리와 Squash merge는 확정되어 있습니다.
+> 상태: 주석·docstring은 합의된 권고사항이며 나머지 세부 컨벤션은 각 문서의 상태를 따릅니다. GitHub Issues를 통한 작업 관리와 Squash merge는 확정되어 있습니다.
 
 | 문서 | 다루는 내용 |
 |---|---|
 | [개발 컨벤션](development.md) | 코드 구성·네이밍·의존성·환경변수·계약 변경 |
 | [Git 협업](git-workflow.md) | 이슈·브랜치·커밋·PR 템플릿·리뷰·스쿼시 머지 |
+| [주석·docstring](comments.md) | 한국어 설명·작성 범위·Google 스타일 권고 |
 | [백엔드 개발](backend.md) | 실행·개발 의존성, 버전 관리, 검사 도구 |
 | [테스트·TDD](testing.md) | 테스트 범위·TDD 적용·실행 시점·결과 기록 |
 

@@ -1,1 +1,1 @@
-"""Database queries and persistence operations, added when needed."""
+"""필요할 때 분리하는 DB 조회·저장 처리."""
