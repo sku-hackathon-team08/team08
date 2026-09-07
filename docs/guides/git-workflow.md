@@ -14,6 +14,11 @@
 작업 목록·담당자·진행 상태는 [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues)에서 관리합니다.
 요구사항·설계·계약의 본문은 `docs/`의 기준 문서에 두고, 이슈에서는 해당 문서를 연결합니다.
 
+새 이슈는 [작업 등록 템플릿](../../.github/ISSUE_TEMPLATE/task.md) 하나로 시작합니다.
+기능·버그·문서·설정 모두 같은 양식을 사용하고, 종류 라벨과 담당자는 작성 화면에서 직접 선택합니다.
+템플릿은 무엇을 할지 → 완료 조건 → 관련 자료 → 선택 참고사항 순서로 짧게 작성합니다.
+자동으로 종류 라벨이나 담당자를 지정하지 않습니다.
+
 이슈 하나는 완료 조건을 설명할 수 있는 작업 단위를 권장합니다. 큰 작업은 하위 작업으로 나누어 연결합니다.
 작성할 정보는 다음과 같습니다.
 
@@ -176,10 +181,12 @@ TDD 중 실패하는 테스트 등 중간 상태를 로컬 작업 커밋으로 �
 저장소는 **Squash merge만 허용**하며 Merge commit·Rebase merge는 비활성화되어 있습니다.
 스쿼시 커밋의 기본 제목은 PR 제목이므로 병합 전에 제목과 최종 메시지가 변경 전체를 설명하는지 확인합니다.
 
-템플릿은 GitHub가 읽는 [`.github/pull_request_template.md`](../../.github/pull_request_template.md)에 둡니다.
+PR 템플릿은 GitHub가 읽는 [`.github/pull_request_template.md`](../../.github/pull_request_template.md)에 둡니다.
 본문에는 변경 목적·관련 이슈와 명세·실제 검증 결과·남은 작업을 적습니다. 화면 자료는 선택 사항입니다.
 작성 기준은 이 가이드에서 관리하고, 템플릿은 입력 항목과 짧은 도움말만 제공합니다.
-템플릿은 `main`에 병합된 뒤 새 PR 작성에 적용되며, 기존 PR 본문을 자동으로 갱신하지 않습니다.
+이슈·PR 템플릿은 `main`에 병합된 뒤 새 이슈·PR 작성에 적용됩니다. 기존 본문은 자동으로 갱신하지 않습니다.
+두 양식은 쉬운 질문과 짧은 항목으로 작성하고, 이슈의 완료 조건은 체크리스트로 표현합니다.
+스크린샷·영상은 선택 사항이며, 보이는 양식에 긴 작업 규칙이나 이미 완료된 체크 표시를 넣지 않습니다.
 [공식 템플릿 안내](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository)를 참고합니다.
 
 ### 화면 변경 자료
