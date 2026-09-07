@@ -8,6 +8,7 @@
 |---|---|---|
 | 실행 | FastAPI | API 애플리케이션 프레임워크 |
 | 실행 | Pydantic | 요청·응답 데이터 모델과 입력 검증 |
+| 실행 | pydantic-settings | 환경변수·로컬 .env 로딩과 설정 검증 |
 | 실행 | Uvicorn | FastAPI 앱을 실행하는 서버 |
 | 개발 | pytest | 테스트 실행 |
 | 개발 | HTTPX | AsyncClient·ASGITransport로 앱을 호출하는 테스트 클라이언트 |
@@ -20,6 +21,31 @@
 FastAPI와 Uvicorn은 필요한 기본 패키지만 설치합니다. 추가 기능은 사용 시점에 의존성을 보완합니다.
 DB 접근 도구·LangGraph·인증 라이브러리는 기능을 구현할 때 선택합니다.
 데이터 모델 설계는 [DB 설계 가이드](database.md)의 확정 선택·권장사항을 따르고 실제 구조는 [DB 명세](../db/index.md)에 기록합니다.
+
+## 환경 설정과 DB 선택
+
+> 상태: 설정 로딩·URL 검증·앱 시작 시 적용을 구현했습니다. 실제 DB 연결·SQLite 파일 생성·연결 실패 처리는 [#35](https://github.com/sku-hackathon-team08/team08/issues/35)의 후속 작업입니다.
+
+`app/core/config.py`의 `Settings`는 `pydantic-settings`를 사용합니다. `main.py`의 `create_app()`이 앱을 구성하고 lifespan 시작 시 설정을 읽어 `app.state.settings`에 보관합니다. 설정 오류가 있으면 시작을 중단합니다. import만으로 `.env`를 읽거나 DB를 열지 않습니다.
+
+| 항목 | 적용 기준 |
+|---|---|
+| 설정값 | `DATABASE_URL` 하나로 DB 대상을 선택 |
+| 우선순위 | Python에서 명시한 설정값 → 실행 환경변수 → `backend/.env` → 기본값 |
+| 미설정·빈 값 | 앞뒤 공백 제거 후 빈 값이면 `backend/data/team08.sqlite3`의 절대 SQLite URL 선택 |
+| PostgreSQL | `postgresql://` 또는 `postgres://`. 호스트·DB 이름을 요구하며 `postgres://`는 `postgresql://`로 통일 |
+| SQLite | `sqlite:///data/team08.sqlite3`처럼 파일 URL 사용. 상대 경로는 항상 `backend/` 기준으로 절대 경로화 |
+| 잘못된 URL | 지원하지 않는 스킴·형식은 설정 오류. SQLite 기본값으로 대체하지 않음 |
+
+`backend/.env`는 소스 파일 위치를 기준으로 찾습니다. 현재 실행 폴더의 `.env`를 자동 탐색하지 않습니다. 실행 환경변수에 빈 `DATABASE_URL`을 지정하면 `.env`의 PostgreSQL 값보다 우선해 SQLite를 선택합니다.
+PostgreSQL URL에는 포트·연결 옵션 쿼리를 사용할 수 있습니다. 비밀번호의 `@`·`#` 등 URL 예약 문자는 percent-encoding합니다. 드라이버 접미사(`+asyncpg` 등)는 아직 받지 않으며 실제 연결 도구는 #35에서 정합니다.
+SQLite는 일반 파일 경로만 지원하며 메모리 DB·쿼리 옵션·fragment는 받지 않습니다. 설정 로딩은 디렉터리·파일 생성이나 연결 상태 확인을 수행하지 않습니다.
+
+테스트는 `Settings(_env_file=None, database_url=...)`로 `.env`와 환경변수의 영향을 분리하고 `create_app(settings)`에 주입할 수 있습니다. 설정을 전역 캐시하지 않으며 앱마다 검증한 설정을 보관합니다. 테스트에서도 lifespan을 실행해 시작 시 검증을 확인합니다.
+`Settings`는 변경 불가능한 객체로 사용하고 URL은 `SecretStr`로 보관해 일반 출력·JSON 직렬화에서 가립니다. 원문 추출은 향후 DB 연결 경계에 한정하고 로그에 남기지 않습니다. 검증 오류의 일반 출력은 입력을 숨기지만 `ValidationError.errors()` 같은 구조화 오류를 그대로 로깅하지 않습니다.
+`.env`의 다른 항목은 무시하는 설정이며, 이는 HTTP 요청의 미등록 필드 정책과 별개입니다.
+
+설치·환경변수 예시는 [백엔드 README](../../backend/README.md#환경-설정), 설정 API는 [Pydantic Settings 공식 문서](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)를 참고합니다.
 
 ## 기능 추가 순서
 
@@ -131,7 +157,7 @@ TypeScript 타입 선언만으로 수신 JSON이 검증되지는 않으므로 �
 FastAPI의 [동기·비동기 함수 실행 안내](https://fastapi.tiangolo.com/async/#very-technical-details)를 기준으로 합니다.
 테스트는 AnyIO의 pytest 플러그인과 HTTPX `AsyncClient`·`ASGITransport`를 사용합니다.
 `backend/tests/conftest.py`에서 실행 백엔드를 `asyncio`로 지정합니다. Starlette TestClient를 거치지 않고 실제 ASGI 앱을 호출합니다.
-현재 앱에는 시작·종료 자원 처리가 없습니다. 추후 lifespan으로 자원을 관리하면 테스트에서도 그 시작·종료 과정을 실행하도록 보완합니다.
+현재 lifespan은 시작 시 환경 설정을 검증합니다. 테스트에서도 이를 실행하며, 추후 DB·외부 클라이언트를 도입하면 자원 생성·정리 검증을 추가합니다.
 이 방식은 [FastAPI 비동기 테스트 안내](https://fastapi.tiangolo.com/advanced/async-tests/)를 따릅니다.
 
 ## 버전과 의존성 관리

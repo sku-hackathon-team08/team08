@@ -22,7 +22,7 @@
 ## 백엔드 레이어 구성
 
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
-`core/`, `services/`, `repositories/`, `models/`, `db/`는 패키지 경계만 준비한 상태입니다.
+`core/config.py`에 환경 설정을 구현했습니다. `services/`, `repositories/`, `models/`, `db/`는 패키지 경계만 준비한 상태입니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -39,7 +39,8 @@ backend/app/
 ├── repositories/            # 필요할 때 DB 조회·저장 분리
 ├── models/                  # 영속 데이터 모델·ORM 공통 기반
 ├── db/                      # DB 연결·세션 수명
-└── core/                    # 공통 설정·HTTP에 독립적인 공통 오류
+└── core/
+    └── config.py            # 환경 설정·DB URL 검증과 기본값 선택
 ```
 
 각 디렉터리에는 `__init__.py`가 있습니다. 기능별 파일은 실제 구현 시 같은 기능 이름으로 각 레이어에 추가합니다.
@@ -121,6 +122,8 @@ Tailwind는 v4 방식으로 `vite.config.ts` 플러그인과 CSS `@import`로 �
 현재 라우터·QueryClientProvider·Tailwind 배선만 확인했으며 실제 화면과 API 연결은 후속 작업입니다.
 
 ## 백엔드 환경과 DB
+
+[환경 설정 가이드](guides/backend.md#환경-설정과-db-선택)에 따라 DB URL 선택을 구현했습니다. PostgreSQL URL을 지정하지 않으면 로컬 SQLite URL을 선택합니다. 앱 시작 시 설정 형식을 검증하며 실제 DB 연결·파일 생성은 아직 구현하지 않았습니다. PostgreSQL을 선택할 수 있는 설정과 배포 DB의 최종 선정은 구분합니다.
 
 | 항목 | 선택 | 상태 |
 |---|---|---|
