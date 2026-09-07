@@ -14,12 +14,19 @@ SOT(Source of Truth)는 주제별로 기준이 되는 문서를 뜻합니다.
 | 시스템 | [아키텍처](architecture.md) | 시스템 경계·파트별 책임·코드 위치 |
 | 개발 흐름 | [SDD](sdd.md) | 명세 확인·구현·검증을 연결하는 잠정 작업 흐름 |
 | 개발 컨벤션 | [개발 가이드](guides/development.md) | 코드 구성·네이밍·환경·의존성 권장사항 |
-| Git 협업 | [Git 가이드](guides/git-workflow.md) | 브랜치·커밋·PR·리뷰·병합 제안 |
+| 작업 추적 | [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues) | 작업 목록·담당자·진행 상태·완료 조건 |
+| Git 협업 | [Git 가이드](guides/git-workflow.md) | 이슈·브랜치·커밋·PR·리뷰·스쿼시 머지 |
 | 테스트 | [테스트 가이드](guides/testing.md) | 검증 범위·TDD 적용·결과 기록 |
 | 결정 이력 | [결정 기록](decisions.md) | 선택·이유·날짜·영향받는 문서 |
 
 루트 README는 프로젝트 소개와 실행 진입점입니다. `AGENTS.md`·`CLAUDE.md`는 docs를 읽는 경로만 안내합니다.
 파트별 README는 설치·실행·검증 명령을 안내하며 상세 요구사항·계약은 docs를 링크합니다.
+
+요구사항·설계·계약은 계속 `docs/`가 소유합니다. 이슈의 완료 조건은 관련 명세의 인수 조건을 연결하고
+해당 작업에서 수행할 검증·산출물을 적습니다. 상세 계약의 복사본은 만들지 않습니다.
+이슈·PR 종료만으로 명세를 확정하거나 배포 검증이 완료된 것으로 보지 않습니다.
+이슈 템플릿은 `.github/ISSUE_TEMPLATE/task.md`, PR 템플릿은 `.github/pull_request_template.md`에 둡니다.
+작성 기준은 Git 가이드에서 관리하고, 템플릿은 사람이 읽기 쉬운 수정 범위·완료 기준·변경 전후·검증 결과 중심으로 간단히 유지합니다.
 
 ## 문서 상태
 
