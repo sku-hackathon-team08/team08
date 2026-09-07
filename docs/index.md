@@ -39,6 +39,7 @@ docs/
 │   ├── development.md # 개발 컨벤션
 │   ├── comments.md    # 주석·docstring 권고사항
 │   ├── backend.md     # 백엔드 개발·API 변환·비동기·검사·CI
+│   ├── database.md    # DB 설계의 확정 선택·권고·미정 항목
 │   ├── git-workflow.md # 브랜치·커밋·PR
 │   └── testing.md     # 테스트·TDD
 └── decisions.md       # 결정 기록
@@ -50,6 +51,7 @@ docs/
 |---|---|
 | 서비스·기능 범위 정하기 | [PRD](prd/index.md) → [기능 명세](features/index.md) |
 | 프론트·백엔드 구현 | [기능 명세](features/index.md) → 필요한 [API](api/index.md)·[DB](db/index.md)·[외부 연동](integrations/index.md) 명세 → [아키텍처](architecture.md) |
+| DB 모델·관계 설계 | [DB 설계 가이드](guides/database.md) → [DB 명세](db/index.md) |
 | 스택·공통 설계 결정 | [결정 기록](decisions.md) → 아키텍처·관련 기술 명세 |
 | 작업 관리·PR 작성 | [GitHub Issues](https://github.com/sku-hackathon-team08/team08/issues) → [Git 가이드](guides/git-workflow.md) → [이슈 템플릿](../.github/ISSUE_TEMPLATE/task.md) · [PR 템플릿](../.github/pull_request_template.md) |
 | 문서·에이전트 안내 변경 | SOT → 문서 지도 → 루트 에이전트 안내 |
