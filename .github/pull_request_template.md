@@ -2,6 +2,7 @@
 PR 제목: Conventional Commits 형식. 예: docs: 협업 가이드 정리
 스쿼시 커밋 기본 제목은 PR 제목입니다.
 작성 안내: https://github.com/sku-hackathon-team08/team08/blob/main/docs/guides/git-workflow.md
+관련 이슈의 상태 라벨은 리뷰 중으로 갱신합니다. PR 자체에는 필요할 때 작업 종류 라벨만 사용합니다.
 각 항목은 변경에 맞게 작성하고 해당하지 않는 선택 항목은 삭제할 수 있습니다.
 -->
 
