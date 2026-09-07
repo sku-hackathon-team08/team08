@@ -1,1 +1,1 @@
-"""Business rules and workflows, independent of HTTP handling."""
+"""HTTP 처리에 독립적인 기능 규칙과 업무 흐름."""

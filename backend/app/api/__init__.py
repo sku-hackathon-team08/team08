@@ -1,1 +1,1 @@
-"""HTTP routes and dependency wiring."""
+"""HTTP 요청·응답 처리와 의존성 연결."""
