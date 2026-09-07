@@ -65,6 +65,23 @@ SQLite는 일반 파일 경로만 지원하며 메모리 DB·쿼리 옵션·frag
 ORM 기반 모델은 실제 모델 도입 시 `models/base.py`에 둡니다. 범용 CRUD·업무 테이블·마이그레이션은 현재 추가하지 않습니다.
 공식 근거: [SQLAlchemy asyncio](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html), [SQLite FK](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support), [psycopg 연결](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#module-sqlalchemy.dialects.postgresql.psycopg).
 
+### 연결 풀 초기값
+
+SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/config.py`에서 읽어 `db/session.py`의 엔진 생성에 적용합니다. 부하 측정으로 검증한 최적값은 아니며 해커톤 초기 연결 상한을 작게 잡은 값입니다.
+
+| 환경변수 | 기본값 | 의미 |
+|---|---|---|
+| `DATABASE_POOL_SIZE` | `5` | 풀에 유지할 연결 수. 1 이상 |
+| `DATABASE_MAX_OVERFLOW` | `5` | 필요할 때 추가할 연결 수. 0 이상, 무제한 설정은 받지 않음 |
+| `DATABASE_POOL_TIMEOUT_SECONDS` | `10` | 모든 연결이 사용 중일 때 반환을 기다리는 시간. 양의 유한한 값 |
+| `DATABASE_POOL_PRE_PING` | `true` | 기존 연결을 빌릴 때 유효성을 확인하고 끊긴 연결 교체 |
+
+연결은 필요할 때 생성하며 시작부터 10개를 열지 않습니다. 상한은 **엔진 하나당 5 + 5 = 10개**입니다. 워커·인스턴스를 늘리면 각각 풀이 생기므로 전체 연결 상한과 다른 DB 사용자의 연결 수를 함께 계산합니다. SQLite 연결 수를 늘려도 동시에 여러 쓰기를 처리할 수 있다는 뜻은 아닙니다.
+풀 대기 시간은 빈 연결을 기다리는 시간이며 새 연결·ping·쿼리의 전체 제한 시간이 아닙니다. `DATABASE_CONNECT_TIMEOUT_SECONDS`는 기존처럼 앱 시작 시 연결 확인을 제한합니다. `pre_ping`도 이미 실행 중인 트랜잭션의 연결 장애를 복구하거나 작업을 자동 재시도하지 않습니다.
+`pool_recycle`은 서버의 연결 만료 정책이 아직 정해지지 않아 기본 비활성 상태를 유지합니다. 실제 배포 환경에서 필요할 때 정합니다.
+공식 동작은 [SQLAlchemy 연결 풀](https://docs.sqlalchemy.org/en/20/core/pooling.html)을 참고합니다.
+
+
 ## 기능 추가 순서
 
 폴더 책임과 허용 import 방향은 [아키텍처](../architecture.md#의존-방향)를 기준으로 합니다.

@@ -88,3 +88,26 @@ def test_database_connection_timeout_requires_finite_positive_limit(
 ) -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, database_connect_timeout_seconds=timeout)
+
+
+@pytest.mark.parametrize(
+    "size,overflow,timeout",
+    [
+        (0, 5, 10),
+        (-1, 5, 10),
+        (5, -1, 10),
+        (5, 5, 0),
+        (5, 5, float("inf")),
+        (5, 5, float("nan")),
+    ],
+)
+def test_pool_settings_reject_unbounded_or_invalid_limits(
+    size: int, overflow: int, timeout: float
+) -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            database_pool_size=size,
+            database_max_overflow=overflow,
+            database_pool_timeout_seconds=timeout,
+        )

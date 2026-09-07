@@ -7,6 +7,7 @@ from fastapi import Depends
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event, text
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_session
@@ -178,3 +179,26 @@ async def test_postgres_connection_timeout_is_bounded(tmp_path: Path) -> None:
             await writer.wait_closed()
         await server.wait_closed()
     assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.anyio
+async def test_pool_limits_connections_and_reuses_them_after_timeout(
+    database_settings: Settings,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        database_url=database_settings.database_url,
+        database_pool_size=1,
+        database_max_overflow=1,
+        database_pool_timeout_seconds=0.05,
+    )
+    async with open_database(settings) as database:
+        async with database.engine.connect() as first:
+            async with database.engine.connect() as overflow:
+                assert await first.scalar(text("SELECT 1")) == 1
+                assert await overflow.scalar(text("SELECT 1")) == 1
+                with pytest.raises(PoolTimeoutError):
+                    async with database.engine.connect():
+                        pytest.fail("Pool must enforce its two-connection limit")
+            async with database.engine.connect() as released:
+                assert await released.scalar(text("SELECT 1")) == 1

@@ -97,7 +97,7 @@ pytest의 `importlib` 모드를 설정해 두 폴더에 같은 파일명이 있�
 Fixture는 테스트의 데이터·자원을 준비하고 정리하는 pytest 함수입니다.
 
 - 특정 파일에서만 쓰는 fixture는 그 파일에 둡니다. 여러 파일이 공유하면 가장 가까운 `conftest.py`에 두며, 루트에는 두 종류가 함께 쓰는 것만 둡니다.
-- 루트의 공통 fixture는 테스트마다 `DATABASE_URL`·`DATABASE_CONNECT_TIMEOUT_SECONDS` 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
+- 루트의 공통 fixture는 테스트마다 DB URL·연결 제한 시간·연결 풀 관련 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
 - 현재 루트의 `anyio_backend`는 `asyncio`를 선택합니다. 비동기 테스트에는 `@pytest.mark.anyio`를 사용하고, 순수 동기 로직은 일반 `def`로 테스트합니다.
 - 변경 가능한 상태는 테스트마다 새로 준비하는 기본 `function` 범위를 우선합니다. 넓은 범위의 fixture는 상태가 섞이지 않는 경우에만 사용합니다.
 - 클라이언트·파일·향후 DB 세션은 context manager나 `yield` fixture로 정리합니다. 환경변수는 `monkeypatch`, 임시 파일은 `tmp_path`를 활용합니다.

@@ -56,6 +56,8 @@ cp .env.example .env
 앱 시작 시 DB에 실제 연결해 확인합니다. SQLite 폴더·파일이 없으면 생성하고 기존 파일과 데이터는 유지합니다. PostgreSQL을 지정했는데 연결할 수 없으면 시작에 실패하며 SQLite로 바꾸지 않습니다. `DATABASE_CONNECT_TIMEOUT_SECONDS`는 기본 10초(0 초과·최대 120초)입니다. 업무 테이블 자동 생성과 마이그레이션은 아직 없습니다.
 실제 비밀값은 `.env.example`에 쓰지 않습니다. `.env`·로컬 SQLite 파일은 Git에서 제외합니다. 지원 URL 형식과 테스트 설정 교체 방법은 [환경 설정 가이드](../docs/guides/backend.md#환경-설정과-db-선택)에 있습니다.
 
+기본 연결 풀은 유지 5개·추가 5개로 **엔진 하나당 최대 10개**이며 필요할 때 생성합니다. 풀 대기는 10초, 연결 대여 시 상태 확인은 켜져 있습니다. `.env.example`의 `DATABASE_POOL_SIZE`, `DATABASE_MAX_OVERFLOW`, `DATABASE_POOL_TIMEOUT_SECONDS`, `DATABASE_POOL_PRE_PING`으로 조정합니다. 워커를 늘리면 각각 풀이 생깁니다. 상세 기준은 [연결 풀 초기값](../docs/guides/backend.md#연결-풀-초기값)에 있습니다.
+
 ## 서버 실행
 
 `backend/`에서 실행합니다.

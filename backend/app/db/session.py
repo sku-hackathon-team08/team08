@@ -50,7 +50,14 @@ async def open_database(settings: Settings) -> AsyncIterator[Database]:
                 url = url.set(drivername="sqlite+aiosqlite")
             else:
                 url = url.set(drivername="postgresql+psycopg")
-            engine = create_async_engine(url, hide_parameters=True)
+            engine = create_async_engine(
+                url,
+                hide_parameters=True,
+                pool_size=settings.database_pool_size,
+                max_overflow=settings.database_max_overflow,
+                pool_timeout=settings.database_pool_timeout_seconds,
+                pool_pre_ping=settings.database_pool_pre_ping,
+            )
             if url.drivername == "sqlite+aiosqlite":
                 event.listen(engine.sync_engine, "connect", enable_sqlite_foreign_keys)
             async with asyncio.timeout(settings.database_connect_timeout_seconds):

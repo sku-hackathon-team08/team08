@@ -113,3 +113,17 @@ async def test_startup_reads_environment_and_rejects_invalid_url(
     with pytest.raises(ValidationError):
         async with app.router.lifespan_context(app):
             pytest.fail("Invalid configuration must prevent startup")
+
+
+def test_pool_settings_can_be_overridden_by_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_POOL_SIZE", "2")
+    monkeypatch.setenv("DATABASE_MAX_OVERFLOW", "0")
+    monkeypatch.setenv("DATABASE_POOL_TIMEOUT_SECONDS", "0.2")
+    monkeypatch.setenv("DATABASE_POOL_PRE_PING", "false")
+    settings = Settings(_env_file=None)
+    assert settings.database_pool_size == 2
+    assert settings.database_max_overflow == 0
+    assert settings.database_pool_timeout_seconds == 0.2
+    assert settings.database_pool_pre_ping is False

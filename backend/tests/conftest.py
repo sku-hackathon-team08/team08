@@ -13,3 +13,11 @@ def clear_database_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("database_url", raising=False)
     monkeypatch.delenv("DATABASE_CONNECT_TIMEOUT_SECONDS", raising=False)
     monkeypatch.delenv("database_connect_timeout_seconds", raising=False)
+    for name in (
+        "DATABASE_POOL_SIZE",
+        "DATABASE_MAX_OVERFLOW",
+        "DATABASE_POOL_TIMEOUT_SECONDS",
+        "DATABASE_POOL_PRE_PING",
+    ):
+        monkeypatch.delenv(name, raising=False)
+        monkeypatch.delenv(name.lower(), raising=False)
