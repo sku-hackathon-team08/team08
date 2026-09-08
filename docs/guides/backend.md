@@ -1,6 +1,6 @@
 # 백엔드 개발
 
-> 상태: 최소 앱·상태 확인 API·테스트·CI를 구성했습니다. DB 연결·세션과 시작/종료 처리를 구현했으며 서비스 API·업무 모델은 후속 작업입니다.
+> 상태: 최소 앱·상태 확인 API·테스트·CI를 구성했습니다. DB 연결·세션과 시작/종료 처리, API 공통 스키마·입력 경계를 구현했으며 서비스 API·업무 모델은 후속 작업입니다.
 
 ## 현재 의존성
 
@@ -130,7 +130,7 @@ SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/con
 
 ## 스키마 작성 패턴
 
-> 적용: 작성 패턴은 권고사항입니다. 이미 확정한 [API 네이밍](../api/naming.md)과 [레이어 의존 방향](../architecture.md#의존-방향)은 해당 기준을 따릅니다. 공통 기반 모델 구현은 후속 작업입니다.
+> 적용: 작성 패턴은 권고사항입니다. 이미 확정한 [API 네이밍](../api/naming.md)과 [레이어 의존 방향](../architecture.md#의존-방향)은 해당 기준을 따릅니다. 공통 기반 모델 `ApiModel`을 구현했습니다.
 
 ### 위치와 이름
 
@@ -149,7 +149,7 @@ SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/con
 ### 모델 분리와 공통 설정
 
 - 요청과 응답 모델을 분리하는 방식을 권장합니다. 서버가 생성하는 ID나 서버가 판단하는 권한 등은 생성 요청의 필드에 자동으로 포함하지 않습니다.
-- API용 공통 기반 모델은 `schemas/base.py`에 별칭 등 합의한 설정을 모으는 형태를 권장합니다. `id`·생성 시각·업무 필드를 모든 모델에 강제로 넣지 않습니다. 클래스 이름은 구현 시 정합니다.
+- API용 공통 기반 모델은 `schemas/base.py`의 `ApiModel`입니다. 별칭·직렬화 설정과 내부 생성 메서드를 제공하며 `id`·생성 시각·업무 필드, 전역 `extra`·`strict`·ORM 설정은 넣지 않습니다.
 - 같은 의미·검증 조건의 필드 묶음이 반복될 때만 공통 모델이나 중첩 모델을 고려합니다. 응답 모델이 생성 요청을 그대로 상속하는 등 서로 다른 목적을 중복 제거만을 위해 결합하지 않습니다.
 - PATCH의 생략·null 의미는 해당 API를 설계할 때 정합니다. 생성 모델의 필드를 일괄 선택값으로 바꾸는 자동 생성 패턴은 기본으로 도입하지 않습니다.
 
@@ -157,7 +157,7 @@ SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/con
 
 | 상황 | 권장 패턴 |
 |---|---|
-| Python 코드에서 모델 생성 | `snake_case` 키워드 인자로 필요한 값을 명시 |
+| Python 코드에서 모델 생성 | `Model.from_internal(display_name=...)`처럼 `snake_case` 키워드 인자로 필요한 값을 명시 |
 | 사전 등 외부 데이터를 모델로 변환 | 입력 경계에서 `model_validate()` 등 검증 경로 사용. `model_construct()`로 입력 검증을 우회하지 않음 |
 | DB 조회 결과를 응답으로 변환 | 서비스에서 공개 필드를 선택해 응답 모델을 생성. ORM 객체 전체를 사전으로 풀어 전달하지 않음 |
 | 라우터 응답 | 응답 모델을 선언하고 서비스가 만든 결과를 반환. 업무 로직이 없는 health는 기존처럼 라우터에서 응답 생성 |
@@ -178,15 +178,42 @@ SQLite 파일 DB와 PostgreSQL 모두 아래 시작값을 사용하며 `core/con
 
 ## API 필드 별칭
 
-> 상태: [필드 네이밍 계약](../api/naming.md)의 구현 가이드. 공통 별칭 설정은 후속 구현입니다.
+> 상태: [필드 네이밍 계약](../api/naming.md)의 구현 가이드. `ApiModel`과 JSON·쿼리 입력 경계 검증을 구현했습니다.
 
-- 요청·응답 모델에 Pydantic의 `alias_generator=to_camel`을 적용하고, 응답 직렬화에서 별칭이 사용되는지 확인합니다.
-- [외부 입력 지원 범위](../api/naming.md#외부-입력의-지원-범위)에 맞게 HTTP 입력 검증과 Python 내부의 모델 생성 경로를 구분합니다. 내부 생성을 위해 필드명 입력을 허용한 설정을 HTTP 요청 모델에 그대로 적용해 지원 범위를 넓히지 않습니다. 구체적인 모델 구성·검증 설정은 공통 스키마 구현 시 정합니다.
-- 모델을 직접 사전으로 변환할 때는 `model_dump(by_alias=True)` 또는 대응하는 직렬화 설정을 사용합니다. 별칭 생성만으로 모든 반환 경로의 출력 이름이 바뀐다고 가정하지 않습니다.
-- 쿼리는 별칭을 적용한 Pydantic 쿼리 모델이나 개별 `Query(alias="pageSize")`로 연결합니다. 일반 함수 인자명은 Pydantic 모델의 설정으로 자동 변환되지 않습니다.
-- 중첩 모델에도 별칭 설정을 적용합니다. 임의의 `dict` 키를 재귀적으로 변환하는 유틸은 사용하지 않습니다.
-- 실제 JSON·쿼리 입력, 응답 JSON, OpenAPI, 필드 오류의 이름을 통합 테스트로 확인합니다. 타입 검사 통과와 실제 변환 검증은 구분합니다.
-- 별칭과 다른 내부 이름을 외부에서 단독·동시에 보낸 경우에도 해당 값이 필드에 반영되지 않는지 확인합니다. 중첩·선택 필드와 Python 내부 생성도 검증하고, 미등록 키의 거절·무시는 별도 입력 정책에 맞춰 확인합니다.
+요청·응답·쿼리 모델과 그 중첩 모델은 [`ApiModel`](../../backend/app/schemas/base.py)을 상속해 공통 설정을 사용합니다.
+
+| 설정 | 적용 목적 |
+|---|---|
+| `alias_generator=to_camel` | 선언된 Python 필드의 외부 이름 생성 |
+| `validate_by_alias=True`, `validate_by_name=False` | 기본 검증에서 외부 별칭만 필드 입력으로 사용 |
+| `serialize_by_alias=True` | `model_dump()`·`model_dump_json()`의 기본 출력에 외부 이름 사용 |
+| `loc_by_alias=True` | HTTP 입력의 필드 오류 위치에 외부 이름 사용 |
+
+HTTP JSON은 FastAPI의 요청 본문 모델로, 쿼리는 `Annotated[QueryModel, Query()]`로 연결해 기본 검증 경로를 사용합니다. 개별 쿼리 인자를 사용하면 `Query(alias="pageSize")`처럼 별칭을 지정합니다. 일반 함수 인자명은 모델 설정으로 자동 변환되지 않습니다. 응답은 `response_model`을 선언하고 FastAPI의 기본 별칭 직렬화를 사용합니다.
+
+Python 내부 생성은 `from_internal()`을 사용합니다. 이 메서드는 Pydantic의 `model_validate(values, by_alias=False, by_name=True, extra="forbid")`를 호출해 내부 필드명으로 검증합니다. 일반 생성자나 기본 `model_validate()`는 HTTP와 같은 별칭 입력 경로이므로, 별칭과 다른 `snake_case` 키워드로 내부 모델을 만들 때 사용하지 않습니다. HTTP 요청 데이터를 `from_internal()`로 전달하거나 HTTP 모델의 `validate_by_name`을 켜면 입력 지원 범위가 달라집니다.
+
+아래 모델·필드는 사용법 설명용이며 제품 API가 아닙니다.
+
+```python
+from app.schemas.base import ApiModel
+
+
+class ExamplePayload(ApiModel):
+    display_name: str
+
+
+payload = ExamplePayload.from_internal(display_name="생일팀")
+payload.model_dump()  # {"displayName": "생일팀"}
+payload.model_dump(by_alias=False)  # {"display_name": "생일팀"}
+ExamplePayload.model_validate({"displayName": "생일팀"})  # 외부 데이터 검증
+```
+
+내부 생성에서만 적용한 `extra="forbid"`는 선택 필드·중첩 입력의 키 오타가 조용히 무시되는 것을 막습니다. HTTP의 미등록 필드 처리 정책은 공통 모델에서 정하지 않으며, 해당 API 계약에 따라 개별 모델에 설정합니다. 타입 변환과 ORM 속성 검증도 전역 정책으로 추가하지 않습니다.
+
+중첩 객체는 공통 모델을 상속한 별도 모델로 선언합니다. 임의 `dict`의 데이터 키·문자열 값을 재귀 변환하는 유틸은 사용하지 않습니다. 내부 전달용 사전이 필요하면 `model_dump(by_alias=False)`를 명시합니다.
+
+[`test_schemas.py`](../../backend/tests/unit/test_schemas.py)는 내부 생성·검증·직렬화를, [`test_api_naming.py`](../../backend/tests/integration/test_api_naming.py)는 실제 JSON·쿼리, 선택·중첩 필드, 두 이름의 동시 입력, 응답·OpenAPI·오류 필드명을 검증합니다. HTTP 테스트용 라우트는 제품 앱에 등록하지 않습니다. `/health`는 `ApiModel`을 적용하면서 기존 계약을 유지합니다.
 
 설정 참고: [Pydantic 별칭](https://docs.pydantic.dev/latest/concepts/alias/), [FastAPI 쿼리 모델](https://fastapi.tiangolo.com/tutorial/query-param-models/).
 
@@ -272,10 +299,8 @@ Pyrefly를 사용합니다. `tool.pyrefly`에 `preset = "default"`와 Python 3.1
 Pyrefly 버전은 `uv.lock`으로 고정하고, 에디터에서도 같은 버전과 프로젝트 설정을 사용합니다.
 
 Pydantic v2 지원은 내장되어 있어 별도 플러그인이 필요하지 않습니다.
-Python 내부에서는 snake_case 필드명으로 모델을 생성하고, JSON 입출력에서 camelCase 별칭을 사용하는 방식을 검증했습니다.
-실제 API의 필드 규칙은 [네이밍 계약](../api/naming.md)으로 확정했습니다. 공통 변환 구현·검증은 위 [별칭 구현 가이드](#api-필드-별칭)를 따릅니다.
-`alias_generator`가 생성한 camelCase 이름을 Python 생성자 인자로 직접 사용하는 패턴은 별도로 확인해야 합니다.
-정적 타입 검사와 실제 요청·응답 변환 검증은 구분하며 API 테스트를 함께 작성합니다.
+내부 모델 생성은 위 [별칭 구현 가이드](#api-필드-별칭)의 `from_internal()`을 사용합니다. 반환 타입은 호출한 모델로 유지되지만 `**values: object` 인자의 필드별 이름·타입은 Pyrefly가 정적으로 검사하지 못합니다. 실행 시 Pydantic이 필수 필드·타입·키 오타를 검증하므로 내부 생성 테스트를 함께 작성합니다.
+일반 생성자의 정적 검사 결과만으로 런타임 별칭 입력 지원을 판단하지 않습니다. 실제 API 필드 규칙은 [네이밍 계약](../api/naming.md)으로 확인하고 JSON·쿼리·응답 변환은 API 테스트로 검증합니다.
 
 옵션은 [Pyrefly 설정 안내](https://pyrefly.org/en/docs/configuration/),
 별칭 등의 지원 범위는 [Pydantic 지원 안내](https://pyrefly.org/en/docs/pydantic/)를 참고합니다.

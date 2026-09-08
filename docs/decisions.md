@@ -38,6 +38,7 @@
 | D-032 | 2026-09-08 | [환경 설정](guides/backend.md#환경-설정과-db-선택)은 pydantic-settings로 관리하고 PostgreSQL 설정이 없으면 파일 기반 SQLite URL 선택 | #34 구현. DATABASE_URL·backend/.env·고정 기준 경로·앱 시작 검증과 테스트 주입을 구성. 실제 DB 연결은 #35, 배포 DB 선정·commit 계층은 후속 결정 |
 | D-033 | 2026-09-08 | [DB 연결·세션](guides/backend.md#db-연결과-세션-수명)에 SQLAlchemy asyncio·aiosqlite·psycopg 사용 | #35 구현. SQLite 파일 생성·기존 데이터 유지, PostgreSQL 선택 시 실제 연결, 제한 시간·FK·수명 정리와 두 DB의 CI 검증 구성. 연결 풀은 5개+추가 5개, 대기 10초·pre_ping 활성화를 조정 가능한 초기값으로 명시. 업무 모델·마이그레이션·commit 계층은 후속 결정 |
 | D-034 | 2026-09-08 | [기본 로깅](guides/backend.md#기본-로깅)은 표준 logging·INFO·콘솔 출력으로 시작 | #36 구현. DB 준비·정리 완료만 앱에서 기록하고 시작·종료 실패는 안전한 예외를 Uvicorn이 기록. 중복 핸들러·root 전파 방지, 외부 수집·추가 요청 로그는 후속 작업 |
+| D-035 | 2026-09-08 | [API 공통 스키마](guides/backend.md#api-필드-별칭)는 `ApiModel`로 제공하고 HTTP 기본 검증과 내부 `from_internal()` 생성을 분리 | #37 구현. D-021·D-031의 입력 지원 범위를 Pydantic 검증 옵션으로 구분. 내부 생성에서만 미등록 키를 거절해 오타를 검출하며 HTTP 미등록 필드 정책은 미정 유지. `**values`의 정적 필드별 인자 검사 한계는 런타임 검증·테스트로 보완 |
 
 서비스 주제는 아직 미정입니다. 프론트 기술 스택은 D-026~D-029에서 확정했으며 폴더 구조·컨벤션·CI는 후속 작업입니다. [SDD](sdd.md)의 구체적인 작업 흐름은 검토안입니다.
 새로운 선택은 날짜·결정·이유와 함께 기록하고 관련 기준 문서를 갱신합니다.

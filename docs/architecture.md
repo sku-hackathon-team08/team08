@@ -23,6 +23,7 @@
 
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
 `core/config.py`에 환경 설정, `core/logging.py`에 앱 로그 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
+`schemas/base.py`의 `ApiModel`은 공통 별칭·직렬화와 내부 모델 생성을 담당하며 `HealthResponse`에 적용했습니다. HTTP 입력은 FastAPI의 기본 모델 검증에 연결합니다. 사용 방법은 [API 필드 별칭 가이드](guides/backend.md#api-필드-별칭)에 있습니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -35,6 +36,7 @@ backend/app/
 │   └── routes/
 │       └── health.py        # GET /health
 ├── schemas/
+│   ├── base.py              # ApiModel·API 별칭·내부 생성
 │   └── health.py            # HealthResponse
 ├── services/                # 기능 규칙·업무 흐름
 ├── repositories/            # 필요할 때 DB 조회·저장 분리
@@ -48,12 +50,12 @@ backend/app/
 
 각 디렉터리에는 `__init__.py`가 있습니다. 기능별 파일은 실제 구현 시 같은 기능 이름으로 각 레이어에 추가합니다.
 현재 `/health`에는 업무 규칙이나 DB 접근이 없어 라우터와 스키마만 사용합니다.
-단순 전달만 하는 서비스·리포지토리, 범용 베이스 클래스·인터페이스는 만들지 않습니다.
+단순 전달만 하는 서비스·리포지토리, 실제 공통 책임이 없는 범용 베이스 클래스·인터페이스는 만들지 않습니다.
 
 ### 의존 방향
 
 아래 화살표는 **왼쪽 코드가 오른쪽 코드를 import하거나 사용하는 방향**이며, 응답 데이터가 돌아오는 방향과 다릅니다.
-구현된 `/health` 경로는 `main → api/router → api/routes/health → schemas/health`입니다.
+구현된 `/health` 경로는 `main → api/router → api/routes/health → schemas/health → schemas/base`입니다.
 아래 그림은 이후 기능까지 적용할 기본 규칙이며 모든 레이어가 구현됐다는 뜻은 아닙니다.
 
 ```mermaid
