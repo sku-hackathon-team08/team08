@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -17,9 +18,15 @@ from sqlalchemy.pool import ConnectionPoolEntry
 
 from app.core.config import Settings
 
+logger = logging.getLogger(__name__)
+
 
 class DatabaseStartupError(RuntimeError):
     """연결 문자열을 노출하지 않는 DB 시작 실패."""
+
+
+class DatabaseShutdownError(RuntimeError):
+    """드라이버의 원본 메시지를 노출하지 않는 DB 정리 실패."""
 
 
 @dataclass(frozen=True)
@@ -72,7 +79,15 @@ async def open_database(settings: Settings) -> AsyncIterator[Database]:
                 f"DB 연결을 시작하지 못했습니다 ({type(error).__name__}). "
                 "DATABASE_URL, DB 실행 상태와 파일·접속 권한을 확인하세요."
             ) from None
-        yield Database(engine, async_sessionmaker(engine, expire_on_commit=False))
+        database = Database(engine, async_sessionmaker(engine, expire_on_commit=False))
+        logger.info("DB 연결 확인 완료 (%s)", url.get_backend_name())
+        yield database
     finally:
         if engine is not None:
-            await engine.dispose()
+            try:
+                await engine.dispose()
+            except Exception as error:
+                raise DatabaseShutdownError(
+                    f"DB 연결 풀 정리에 실패했습니다 ({type(error).__name__})."
+                ) from None
+            logger.info("DB 연결 풀 정리 완료")

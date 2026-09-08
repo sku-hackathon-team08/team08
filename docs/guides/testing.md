@@ -65,12 +65,14 @@ TDD의 중간 작업 커밋과 병합 단위는 [원자적 커밋 가이드](git
 backend/tests/
 ├── conftest.py               # 두 종류에 공통인 fixture
 ├── unit/
-│   └── test_config.py        # DB URL 선택·검증
+│   ├── test_config.py        # DB URL 선택·검증
+│   └── test_logging.py       # 로그 필터·중복 출력 방지
 └── integration/
     ├── test_health.py        # ASGI 앱의 요청·응답 검증
     ├── conftest.py           # SQLite·별도 PostgreSQL 설정 fixture
     ├── test_database.py      # 실제 연결·FK·파일 유지·세션 정리
-    └── test_settings.py      # 설정 소스·경로·앱 시작 검증
+    ├── test_settings.py      # 설정 소스·경로·앱 시작 검증
+    └── test_logging.py       # 수명주기 로그·안전한 오류 출력
 ```
 
 `unit/`은 외부 연결 없는 설정값 검증을, `integration/`은 임시 `.env`·환경변수와 앱 시작을 연결한 검증을 포함합니다. 개발용 `.env`·DB 파일을 테스트 자원으로 재사용하지 않습니다.
@@ -97,7 +99,7 @@ pytest의 `importlib` 모드를 설정해 두 폴더에 같은 파일명이 있�
 Fixture는 테스트의 데이터·자원을 준비하고 정리하는 pytest 함수입니다.
 
 - 특정 파일에서만 쓰는 fixture는 그 파일에 둡니다. 여러 파일이 공유하면 가장 가까운 `conftest.py`에 두며, 루트에는 두 종류가 함께 쓰는 것만 둡니다.
-- 루트의 공통 fixture는 테스트마다 DB URL·연결 제한 시간·연결 풀 관련 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
+- 루트의 공통 fixture는 테스트마다 DB URL·연결 제한 시간·연결 풀·로그 레벨 관련 환경변수를 제거하고 종료 후 복원합니다. 필요한 값은 각 테스트에서 주입합니다.
 - 현재 루트의 `anyio_backend`는 `asyncio`를 선택합니다. 비동기 테스트에는 `@pytest.mark.anyio`를 사용하고, 순수 동기 로직은 일반 `def`로 테스트합니다.
 - 변경 가능한 상태는 테스트마다 새로 준비하는 기본 `function` 범위를 우선합니다. 넓은 범위의 fixture는 상태가 섞이지 않는 경우에만 사용합니다.
 - 클라이언트·파일·향후 DB 세션은 context manager나 `yield` fixture로 정리합니다. 환경변수는 `monkeypatch`, 임시 파일은 `tmp_path`를 활용합니다.
@@ -115,3 +117,5 @@ DB 통합 fixture는 임시 SQLite와 `TEST_DATABASE_URL`의 별도 PostgreSQL `
 - 프론트 CI와 그 필수 검사 여부. 백엔드는 모든 PR에서 실행하며 `Backend checks` 통과를 병합 조건으로 적용. 자세한 조건은 [백엔드 CI](backend.md#ci) 참고
 - E2E 대상과 통합 테스트 환경
 - 커버리지 기준의 필요 여부. 숫자를 정하기 전에 핵심 동작의 검증 범위를 정합니다.
+
+로깅 테스트는 앱 로거 상태를 복원해 테스트 간 레벨·핸들러가 섞이지 않도록 합니다. Uvicorn의 시작 실패 출력은 별도 프로세스에서 실제 lifespan으로 확인하며 HTTP 서버·종료 신호 검증은 아닙니다. 정리 실패는 실제 연결을 먼저 닫고 드라이버 실패를 주입해 안전한 예외와 잘못된 완료 로그 방지를 확인합니다.
