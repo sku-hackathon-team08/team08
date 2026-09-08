@@ -6,6 +6,7 @@ Python 3.13과 FastAPI를 사용하며 uv로 가상환경·의존성을 관리�
 FastAPI 앱과 `/health`, 기본 테스트·CI를 구성했습니다. 환경 설정·SQLite/PostgreSQL 연결·세션 수명도 구현했으며 서비스 API·업무 테이블은 후속 작업입니다.
 `app/main.py`는 앱 조립, `app/api/`는 라우터, `app/schemas/`는 데이터 계약을 담당합니다.
 `app/schemas/base.py`의 `ApiModel`은 API 별칭·직렬화와 내부 생성 메서드를 제공합니다. 요청·응답·쿼리 모델의 작성 방법과 입력 경계는 [API 필드 별칭 가이드](../docs/guides/backend.md#api-필드-별칭), 외부 필드 계약은 [API 네이밍](../docs/api/naming.md)을 참고합니다.
+`app/schemas/errors.py`와 `app/api/errors.py`는 일반 HTTP 오류 스키마·핸들러를 제공하며 `main.py`에서 등록합니다. 현재 400·404·405·500을 적용하고 422는 FastAPI 기본 응답을 유지합니다. 적용 범위·남은 작업은 [공통 오류 계약](../docs/api/errors.md), 구현 책임은 [오류 처리 가이드](../docs/guides/backend.md#오류-처리-구현과-연동)에 있습니다.
 `app/core/config.py`는 환경 설정을 검증하며 `app/core/logging.py`는 앱 로그를 설정합니다. `app/db/session.py`는 DB 연결·세션을, `app/api/dependencies.py`는 요청별 세션 제공을 담당합니다. 서비스·업무 모델은 패키지 경계만 준비했으며, [허용 의존 방향](../docs/architecture.md#의존-방향)에 따라 기능을 추가합니다.
 
 ## 환경 설치
@@ -108,10 +109,12 @@ uv run --locked pytest tests/unit
 uv run --locked pytest tests/integration
 uv run --locked pytest tests/integration/test_health.py
 uv run --locked pytest tests/unit/test_schemas.py tests/integration/test_api_naming.py
+uv run --locked pytest tests/unit/test_errors.py tests/integration/test_errors.py tests/integration/test_error_logging.py
 ```
 
 유닛 테스트는 DB URL 기본값·형식·비밀값의 일반 출력 가림을, 통합 테스트는 환경 설정 우선순위·앱 시작·health 응답을 확인합니다. DB 통합 테스트는 임시 SQLite와 별도 PostgreSQL에서 연결·세션 종료·미완료 저장 정리를 확인하고 SQLite의 파일 유지·FK 동작도 검사합니다.
 스키마 유닛 테스트는 내부 생성·검증·직렬화를, 네이밍 통합 테스트는 테스트 전용 앱에서 JSON·쿼리 입력 경계와 응답·OpenAPI의 필드명을 확인합니다.
+오류 테스트는 일반 오류 모델과 ASGI 응답·헤더·HEAD·422 경계·OpenAPI를 확인합니다. 서버 오류 로그 테스트는 실제 Uvicorn에 HTTP 요청을 보내 원인 기록과 안전한 응답을 확인합니다.
 CI는 `pytest` 한 번으로 두 폴더를 모두 수집하며, 테스트가 없는 결과를 통과로 바꾸지 않습니다.
 분류 기준·폴더 구조·작성 권고는 [백엔드 테스트 가이드](../docs/guides/testing.md#백엔드-테스트)를 참고합니다.
 실행 조건과 실패 시 확인할 내용은 [백엔드 CI 안내](../docs/guides/backend.md#ci)를 참고합니다.
@@ -127,4 +130,4 @@ CI는 `pytest` 한 번으로 두 폴더를 모두 수집하며, 테스트가 없
 LOG_LEVEL=DEBUG uv run uvicorn app.main:app --reload
 ```
 
-DB 연결 확인·풀 정리 완료는 앱에서, 앱 시작·종료·접근·lifespan 실패는 Uvicorn에서 기록합니다. `LOG_LEVEL`은 앱 로그에만 적용됩니다. Uvicorn 레벨은 `--log-level info`처럼 별도 지정합니다. 상세 기준은 [기본 로깅](../docs/guides/backend.md#기본-로깅)을 참고합니다.
+DB 연결 확인·풀 정리 완료와 명시적 HTTP 500의 안전한 진단은 앱에서, 앱 시작·종료·접근·lifespan 실패와 예상하지 못한 요청 오류의 원인·스택은 Uvicorn에서 기록합니다. `LOG_LEVEL`은 앱 로그에만 적용됩니다. Uvicorn 레벨은 `--log-level info`처럼 별도 지정합니다. 상세 기준과 서버 로그 노출 범위는 [기본 로깅](../docs/guides/backend.md#기본-로깅)을 참고합니다.

@@ -66,11 +66,14 @@ backend/tests/
 ├── conftest.py               # 두 종류에 공통인 fixture
 ├── unit/
 │   ├── test_config.py        # DB URL 선택·검증
+│   ├── test_errors.py        # 일반 오류 스키마·빈 errors 배열
 │   ├── test_logging.py       # 로그 필터·중복 출력 방지
 │   └── test_schemas.py       # 공통 별칭·내부 생성·직렬화
 └── integration/
     ├── test_health.py        # ASGI 앱의 요청·응답 검증
     ├── test_api_naming.py    # JSON·쿼리 입력 경계·응답·OpenAPI
+    ├── test_errors.py        # HTTP 오류·헤더·HEAD·422 경계·OpenAPI
+    ├── test_error_logging.py # Uvicorn 서버 오류 기록·안전한 응답
     ├── conftest.py           # SQLite·별도 PostgreSQL 설정 fixture
     ├── test_database.py      # 실제 연결·FK·파일 유지·세션 정리
     ├── test_settings.py      # 설정 소스·경로·앱 시작 검증
@@ -86,6 +89,8 @@ pytest의 `importlib` 모드를 설정해 두 폴더에 같은 파일명이 있�
 현재 `/health` 테스트는 설정을 주입하고 lifespan·라우팅·응답 스키마·JSON 변환을 함께 확인하는 통합 테스트입니다.
 실제 ASGI 앱을 프로세스 안에서 호출하며 외부 HTTP 서버는 사용하지 않고 격리한 SQLite와 실제 앱 시작 과정을 실행합니다. 브라우저부터 배포 서버까지 확인하는 E2E 테스트는 아닙니다.
 공통 스키마의 독립된 검증·직렬화·내부 생성은 `test_schemas.py`에서, [네이밍 계약](../api/naming.md)의 HTTP 입력 지원 범위와 응답·OpenAPI는 `test_api_naming.py`의 테스트 전용 앱에서 확인합니다. 선택 필드는 상태 코드뿐 아니라 실제 값과 생략 여부를 확인하고, 미등록 필드 정책은 테스트 모델에 명시해 전역 계약으로 확정하지 않습니다. 이 테스트용 모델·라우트는 제품 앱에 등록하지 않습니다.
+[공통 오류 계약](../api/errors.md)의 일반 오류 모델은 `unit/test_errors.py`에서, 실제 ASGI 응답은 `integration/test_errors.py`에서 확인합니다. HTTP 상태·콘텐츠 유형·필수 필드·빈 배열, 원래 오류 헤더, HEAD 본문 생략, 안전한 500, FastAPI 기본 422 유지와 서버 응답 검증 실패의 구분을 검증합니다. 오류를 발생시키는 테스트 전용 라우트는 제품 앱에 등록하지 않습니다. 예상하지 못한 예외의 응답을 검사할 때는 `ASGITransport(raise_app_exceptions=False)`를 사용해 프레임워크가 다시 전파한 예외와 이미 생성한 HTTP 응답을 구분합니다.
+서버 오류 로깅은 `integration/test_error_logging.py`에서 실제 Uvicorn과 HTTP 요청을 연결해 원인 로그가 한 번 기록되는지와 클라이언트 응답에서 내부 내용이 제외되는지를 확인합니다. 이 검증은 서버 로그 자체의 자동 마스킹을 보장하지 않습니다.
 외부 API만 mock으로 대체한 앱 테스트도 통합 폴더에 둘 수 있지만, 실제로 확인한 연결과 대체한 경계를 PR에 구분해 적습니다.
 
 ### 작성 권고
