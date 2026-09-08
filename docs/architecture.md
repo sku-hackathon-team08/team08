@@ -24,6 +24,7 @@
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
 `core/config.py`에 환경 설정, `core/logging.py`에 앱 로그 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
 `schemas/base.py`의 `ApiModel`은 공통 별칭·직렬화와 내부 모델 생성을 담당하며 `HealthResponse`에 적용했습니다. HTTP 입력은 FastAPI의 기본 모델 검증에 연결합니다. 사용 방법은 [API 필드 별칭 가이드](guides/backend.md#api-필드-별칭)에 있습니다.
+`schemas/errors.py`와 `api/errors.py`는 일반 HTTP 오류 스키마와 변환을 담당하고 `main.py`에서 핸들러·OpenAPI를 연결합니다. 현재 적용 범위와 남은 422 변환은 [공통 오류 계약](api/errors.md), 기록 책임은 [오류 처리 가이드](guides/backend.md#오류-처리-구현과-연동)에 있습니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -32,11 +33,13 @@ backend/app/
 ├── main.py                  # FastAPI 앱 생성·최종 조립
 ├── api/
 │   ├── dependencies.py      # 요청별 세션 제공·종료
+│   ├── errors.py            # 일반 HTTP 오류·예상하지 못한 예외 변환
 │   ├── router.py            # 기능 라우터 등록
 │   └── routes/
 │       └── health.py        # GET /health
 ├── schemas/
 │   ├── base.py              # ApiModel·API 별칭·내부 생성
+│   ├── errors.py            # ErrorResponse·일반 오류 응답
 │   └── health.py            # HealthResponse
 ├── services/                # 기능 규칙·업무 흐름
 ├── repositories/            # 필요할 때 DB 조회·저장 분리
@@ -56,6 +59,7 @@ backend/app/
 
 아래 화살표는 **왼쪽 코드가 오른쪽 코드를 import하거나 사용하는 방향**이며, 응답 데이터가 돌아오는 방향과 다릅니다.
 구현된 `/health` 경로는 `main → api/router → api/routes/health → schemas/health → schemas/base`입니다.
+공통 오류 처리의 의존 방향은 `main → api/errors → schemas/errors → schemas/base`이며 HTTP 변환을 `core`에 두지 않습니다.
 아래 그림은 이후 기능까지 적용할 기본 규칙이며 모든 레이어가 구현됐다는 뜻은 아닙니다.
 
 ```mermaid
@@ -81,6 +85,7 @@ flowchart LR
 | `api/routes/` | URL·HTTP 메서드, 입력·인증 의존성, 응답·상태 코드 | `services`, `schemas`, `core`. DB 조회를 직접 수행하지 않음 |
 | `api/router.py` | 기능 라우터를 모아 등록 | `api/routes`. 개별 라우터는 이 파일을 역참조하지 않음 |
 | `api/dependencies.py` | FastAPI 의존성으로 서비스·세션 등을 연결 | 조립에 필요한 `services`, `repositories`, `db`, `core`. 업무 규칙·직접 쿼리는 두지 않음 |
+| `api/errors.py` | HTTP 예외·예상하지 못한 예외를 공개 오류 응답으로 변환 | `schemas`, `core`. 앱 조립은 main에 위임 |
 | `services/` | 기능 규칙·업무 흐름, 모델을 응답 데이터로 변환 | `repositories`, `schemas`, `core`. 간단한 기능은 `db`, `models` 직접 사용 가능 |
 | `repositories/` | DB 조회·저장 | `db`, `models`, `core`. HTTP 응답 스키마를 만들지 않음 |
 | `db/` | 연결·세션 수명·DB 초기화 | `models`, `core` |
