@@ -1,0 +1,10 @@
+# 축제 API 상세 문서
+
+상태·전체 흐름은 [축제 API 명세](../festival.md)를 기준으로 합니다.
+
+- [공통 모델·요청 규칙](common.md)
+- [행사·세션·지도](event-entry.md)
+- [분석·신고 접수](intake.md)
+- [조회·담당·취소·지원](reports.md)
+- [활동 리포트·PDF·경로](outputs.md)
+- [검증·결정 목록](review.md)
