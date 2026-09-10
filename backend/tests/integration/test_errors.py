@@ -225,7 +225,7 @@ async def test_server_failures_return_safe_500_instead_of_request_422(
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("document", [{}, {"displayName": []}])
-async def test_request_validation_keeps_fastapi_422_until_field_contract_is_defined(
+async def test_request_validation_uses_public_field_contract(
     errors: ErrorHarness, document: dict[str, object]
 ) -> None:
     response = await errors.client.post("/errors/input", json=document)
@@ -233,9 +233,10 @@ async def test_request_validation_keeps_fastapi_422_until_field_contract_is_defi
     assert response.status_code == 422
     assert response.headers["content-type"] == "application/json"
     body = response.json()
-    assert set(body) == {"detail"}
-    assert isinstance(body["detail"], list)
-    assert body["detail"][0]["loc"] == ["body", "displayName"]
+    assert body["code"] == "VALIDATION_ERROR"
+    assert isinstance(body["detail"], str)
+    assert body["errors"][0]["location"] == "body"
+    assert body["errors"][0]["path"] == ["displayName"]
 
 
 @pytest.mark.anyio
@@ -245,8 +246,8 @@ async def test_invalid_json_remains_422(errors: ErrorHarness) -> None:
     )
 
     assert response.status_code == 422
-    assert set(response.json()) == {"detail"}
-    assert response.json()["detail"][0]["type"] == "json_invalid"
+    assert response.json()["errors"][0]["code"] == "INVALID_JSON"
+    assert response.json()["errors"][0]["path"] == []
 
 
 @pytest.mark.anyio
@@ -373,7 +374,12 @@ async def test_openapi_error_model_matches_runtime_and_keeps_422_separate(
         "schema"
     ]["$ref"]
     assert validation_ref != error_ref
-    assert set(schemas[validation_ref.rsplit("/", 1)[-1]]["properties"]) == {"detail"}
+    assert set(schemas[validation_ref.rsplit("/", 1)[-1]]["properties"]) == {
+        "status",
+        "code",
+        "detail",
+        "errors",
+    }
     assert not {"400", "404", "405", "422"}.intersection(health_responses)
     assert all(
         str(status) in document["info"]["description"]

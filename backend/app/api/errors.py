@@ -73,3 +73,13 @@ async def unexpected_error_handler(request: Request, exc: Exception) -> Response
     # 여기서 먼저 로깅하면 중복되며 응답 검증 오류의 입력도 노출될 수 있음.
     code, detail = _ERRORS[500]
     return _error_response(request, 500, code, detail)
+
+
+async def service_error_handler(request: Request, exc: Exception) -> Response:
+    from app.services.errors import ServiceError
+
+    assert isinstance(exc, ServiceError)
+    headers = {"WWW-Authenticate": "Bearer"} if exc.status == 401 else {}
+    return _without_head_body(
+        request, JSONResponse(exc.body(), status_code=exc.status, headers=headers)
+    )

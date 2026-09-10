@@ -169,8 +169,8 @@ async def test_body_snake_name_does_not_supply_missing_or_invalid_camel_field(
     response = await naming.client.post("/naming/body", json=document)
 
     assert response.status_code == 422
-    # 필드명만 검증한다. 422 포맷·중첩/배열 경로 표현은 아직 미정이다.
-    assert response.json()["detail"][0]["loc"][-1] == "displayName"
+    # 공개 필드 경로가 camelCase 이름을 유지한다.
+    assert response.json()["errors"][0]["path"][-1] == "displayName"
     assert naming.bodies == []
 
 
@@ -262,7 +262,7 @@ async def test_query_snake_name_does_not_supply_missing_or_invalid_camel_field(
     response = await naming.client.get("/naming/query", params=params)
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"][-1] == "pageSize"
+    assert response.json()["errors"][0]["path"][-1] == "pageSize"
     assert naming.queries == []
 
 
@@ -310,7 +310,7 @@ async def test_body_unrecognized_key_handling_follows_request_model_policy(
     assert ignored.status_code == 200
     assert ignored.json()["displayName"] == "accepted"
     assert forbidden.status_code == 422
-    assert any(item["type"] == "extra_forbidden" for item in forbidden.json()["detail"])
+    assert any(item["code"] == "UNKNOWN_FIELD" for item in forbidden.json()["errors"])
 
 
 @pytest.mark.anyio
@@ -325,7 +325,7 @@ async def test_query_unrecognized_key_handling_follows_request_model_policy(
     assert ignored.status_code == 200
     assert ignored.json()["pageSize"] == 5
     assert forbidden.status_code == 422
-    assert any(item["type"] == "extra_forbidden" for item in forbidden.json()["detail"])
+    assert any(item["code"] == "UNKNOWN_FIELD" for item in forbidden.json()["errors"])
 
 
 @pytest.mark.anyio

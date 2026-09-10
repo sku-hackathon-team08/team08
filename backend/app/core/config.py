@@ -2,11 +2,18 @@ from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
+from dotenv import dotenv_values
 from pydantic import Field, PostgresDsn, SecretStr, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATABASE_URL = f"sqlite:///{(BACKEND_ROOT / 'data/team08.sqlite3').as_posix()}"
+
+
+def workspace_openai_key() -> SecretStr | None:
+    # 사용자가 저장소 루트에 발급해 둔 키만 fallback으로 읽는다.
+    value = dotenv_values(BACKEND_ROOT.parent / ".env").get("OPENAI_API_KEY")
+    return SecretStr(value) if value else None
 
 
 class Settings(BaseSettings):
@@ -23,6 +30,21 @@ class Settings(BaseSettings):
 
     database_url: SecretStr = Field(
         default=SecretStr(DEFAULT_DATABASE_URL), validation_alias="DATABASE_URL"
+    )
+
+    cors_origins: list[str] = Field(
+        default=["http://localhost:5173", "http://127.0.0.1:5173"],
+        validation_alias="CORS_ORIGINS",
+    )
+
+    openai_api_key: SecretStr | None = Field(
+        default_factory=workspace_openai_key, validation_alias="OPENAI_API_KEY"
+    )
+    openai_analysis_model: str = Field(
+        default="gpt-4.1-mini", validation_alias="OPENAI_ANALYSIS_MODEL"
+    )
+    openai_transcription_model: str = Field(
+        default="gpt-transcribe", validation_alias="OPENAI_TRANSCRIPTION_MODEL"
     )
 
     log_level: Annotated[

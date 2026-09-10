@@ -1,15 +1,27 @@
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 
-from app.api.errors import http_error_handler, unexpected_error_handler
+from app.api.cors import ConfiguredCORS
+from app.api.errors import (
+    http_error_handler,
+    service_error_handler,
+    unexpected_error_handler,
+)
 from app.api.router import api_router
+from app.api.validation import request_validation_handler
 from app.core.config import Settings
 from app.core.logging import configure_logging
+from app.db.recovery import recover_interrupted_analyses
 from app.db.session import open_database
 from app.schemas.errors import ErrorResponse
+from app.schemas.validation import ValidationErrorResponse
+from app.services.errors import ServiceError
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -21,6 +33,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         configure_logging(app.state.settings.log_level)
         async with open_database(app.state.settings) as database:
             app.state.database = database
+            await recover_interrupted_analyses(database)
             try:
                 yield
             finally:
@@ -33,14 +46,45 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "앱의 400·404·405·500 오류는 ErrorResponse 형식을 사용합니다. "
             "미등록 경로의 404와 미지원 메서드의 405도 포함합니다. "
             "아래 작업별 응답에는 공통 500과 해당 작업에서 정의한 오류만 표시합니다. "
-            "422 입력 검증 오류와 그 외 미정 상태의 HTTP 오류는 FastAPI 기본 응답이며 "
-            "공통 오류 계약이 아직 적용되지 않았습니다."
+            "422 입력 검증 오류는 ValidationErrorResponse를 사용합니다."
         ),
         responses={500: {"model": ErrorResponse, "description": "서버 내부 오류"}},
     )
+    application.add_exception_handler(
+        RequestValidationError, request_validation_handler
+    )
     application.add_exception_handler(HTTPException, http_error_handler)
     application.add_exception_handler(Exception, unexpected_error_handler)
+    application.add_exception_handler(ServiceError, service_error_handler)
+    application.add_middleware(ConfiguredCORS)
     application.include_router(api_router)
+    application.state.cursor_secret = secrets.token_bytes(32)
+    original_openapi = application.openapi
+
+    def openapi() -> dict[str, Any]:
+        document = original_openapi()
+        schema = ValidationErrorResponse.model_json_schema(
+            ref_template="#/components/schemas/{model}"
+        )
+        definitions = schema.pop("$defs", {})
+        components = document.setdefault("components", {}).setdefault("schemas", {})
+        components.update(definitions)
+        components["ValidationErrorResponse"] = schema
+        for path in document["paths"].values():
+            for operation in path.values():
+                if not isinstance(operation, dict):
+                    continue
+                response = operation.get("responses", {}).get("422", {})
+                value = (
+                    response.get("content", {})
+                    .get("application/json", {})
+                    .get("schema", {})
+                )
+                if value.get("$ref") == "#/components/schemas/HTTPValidationError":
+                    value["$ref"] = "#/components/schemas/ValidationErrorResponse"
+        return document
+
+    application.openapi = openapi
     return application
 
 

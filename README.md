@@ -3,7 +3,7 @@
 서경대학교 해커톤을 위한 Team 08의 프로젝트 저장소입니다.
 
 서비스는 **현장의 지금**입니다. 축제 스태프의 음성·텍스트 신고를 3D 지도와 연결해 관리자의 담당 배정·지원·완료를 돕습니다.
-[PRD v1.2](docs/prd/index.md)에 기획 결정을 반영했으며, 기능 API·ERD는 후속 작성 대상입니다.
+[PRD v1.2](docs/prd/index.md)에 기획 결정을 반영했으며, 현재 기능 계약은 [해커톤 API](docs/api/hackathon.md), 저장 구조는 [DB 계약](docs/db/storage.md)에 있습니다.
 백엔드는 Python 3.13·FastAPI·uv, 로컬 DB는 SQLite로 정했습니다. 배포 DB로 PostgreSQL을 검토하고 있으며,
 선택별 상태는 [아키텍처](docs/architecture.md)에서 확인할 수 있습니다.
 
@@ -27,7 +27,7 @@
 ## 개발 시작
 
 백엔드 최소 앱과 상태 확인 API, 테스트·CI를 구성했습니다.
-설치·서버 실행·검사 방법은 백엔드 README에서 확인합니다. SQLite·PostgreSQL 연결과 시작/종료 처리를 구성했습니다. 서비스 기능·업무 테이블은 아직 없습니다.
+설치·서버 실행·검사 방법은 백엔드 README에서 확인합니다. 세션·분석·신고·담당·지원·통계·PDF와 SQLite/PostgreSQL 업무 저장을 구현했습니다. 준비된 행사 코드 DEMO26을 사용하며 실제 화면·기기 연결은 별도 작업입니다.
 
 - [프론트엔드 안내](frontend/README.md)
 - [백엔드 안내](backend/README.md)

@@ -3,10 +3,10 @@
 Python 3.13과 FastAPI를 사용하며 uv로 가상환경·의존성을 관리합니다.
 레이어 기반 모놀리식의 코드 배치와 DB 선택 상태는 [아키텍처](../docs/architecture.md)에서 확인합니다.
 
-FastAPI 앱과 `/health`, 기본 테스트·CI를 구성했습니다. 환경 설정·SQLite/PostgreSQL 연결·세션 수명도 구현했으며 서비스 API·업무 테이블은 후속 작업입니다.
+FastAPI 서비스 API·업무 테이블·Alembic 마이그레이션과 SQLite/PostgreSQL 통합 테스트를 구현했습니다. 현재 범위와 실행 방법은 아래 해커톤 실행 안내 및 API 계약을 따릅니다.
 `app/main.py`는 앱 조립, `app/api/`는 라우터, `app/schemas/`는 데이터 계약을 담당합니다.
 `app/schemas/base.py`의 `ApiModel`은 API 별칭·직렬화와 내부 생성 메서드를 제공합니다. 요청·응답·쿼리 모델의 작성 방법과 입력 경계는 [API 필드 별칭 가이드](../docs/guides/backend.md#api-필드-별칭), 외부 필드 계약은 [API 네이밍](../docs/api/naming.md)을 참고합니다.
-`app/schemas/errors.py`와 `app/api/errors.py`는 일반 HTTP 오류 스키마·핸들러를 제공하며 `main.py`에서 등록합니다. 현재 400·404·405·500을 적용하고 422는 FastAPI 기본 응답을 유지합니다. 적용 범위·남은 작업은 [공통 오류 계약](../docs/api/errors.md), 구현 책임은 [오류 처리 가이드](../docs/guides/backend.md#오류-처리-구현과-연동)에 있습니다.
+`app/schemas/errors.py`와 `app/api/errors.py`는 일반 HTTP 오류 스키마·핸들러를 제공하며 `main.py`에서 등록합니다. 현재 400·404·405·500을 적용하고 422 요청 검증은 schemas/validation.py·api/validation.py의 공통 필드 오류 응답으로 변환합니다. 적용 범위·남은 작업은 [공통 오류 계약](../docs/api/errors.md), 구현 책임은 [오류 처리 가이드](../docs/guides/backend.md#오류-처리-구현과-연동)에 있습니다.
 `app/core/config.py`는 환경 설정을 검증하며 `app/core/logging.py`는 앱 로그를 설정합니다. `app/db/session.py`는 DB 연결·세션을, `app/api/dependencies.py`는 요청별 세션 제공을 담당합니다. 서비스·업무 모델은 패키지 경계만 준비했으며, [허용 의존 방향](../docs/architecture.md#의존-방향)에 따라 기능을 추가합니다.
 
 ## 환경 설치
@@ -140,3 +140,39 @@ DB 연결 확인·풀 정리 완료와 명시적 HTTP 500의 안전한 진단은
 프론트 담당자에게 8001 포트의 지도 API와 행사 ID를 전달합니다. 프론트 구현은 이 PR에 포함하지 않습니다.
 [데모 API 계약](../docs/api/demo-map.md)과 [작업 기준](../docs/integrations/vworld-demo.md)을 참고하세요.
 읽기 전용 공개 seed이며 제품 인증·업무 DB 저장 구현과 구분합니다.
+
+
+## 해커톤 백엔드 실행
+
+현재 범위와 요청/응답은 [해커톤 API](../docs/api/hackathon.md), DB는 [업무 저장](../docs/db/storage.md), AI는 [OpenAI 연동](../docs/integrations/openai.md)을 따릅니다. 행사 신청·발급/GPS/구역 판정/접근 경로는 이번 범위에서 제외했습니다.
+
+backend 폴더에서 실행합니다.
+
+```bash
+uv sync --locked
+uv run alembic upgrade head
+uv run python -m app.db.seed_demo
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+```
+
+코드는 `DEMO26`이며 ADMIN/STAFF가 공통으로 사용합니다. 관리자 별도 자격 확인 없이 진입 화면에서 역할을 선택하는 해커톤 정책입니다. 세션 토큰은 클라이언트에서 저장해 다음 요청에 Bearer로 전달하고 로그아웃은 DELETE /api/v1/sessions/me입니다. 새 진입은 동명이인이어도 새 사용자입니다.
+
+OPENAI_API_KEY는 실행 환경·backend/.env에서 읽고 저장소 루트 .env의 키도 fallback으로 지원합니다. 키를 복사하거나 출력할 필요가 없습니다. 기본 분석 모델은 gpt-4.1-mini, STT는 gpt-transcribe이며 OPENAI_ANALYSIS_MODEL·OPENAI_TRANSCRIPTION_MODEL로 바꿀 수 있습니다.
+
+CORS_ORIGINS는 JSON 문자열 배열입니다. 기본값은 http://localhost:5173 및 http://127.0.0.1:5173이며 배포 주소는 별도로 설정합니다. 허용 헤더는 Authorization·Content-Type·Idempotency-Key, 노출 헤더는 Location·Content-Disposition입니다.
+
+앱 시작은 테이블을 만들지 않으므로 마이그레이션을 먼저 실행합니다. seed 명령을 다시 실행해도 기존 데이터를 초기화하지 않습니다. 단일 워커/인스턴스로 실행하며 재시작 때 중단된 분석은 실패로 처리합니다. `--reload`로 재시작되는 개발 환경에서도 실행 중 분석이 중단될 수 있습니다.
+
+PDF는 번들 NanumGothic 폰트로 생성하며 별도 시스템 폰트 설치가 필요 없습니다. 폰트와 SIL OFL 라이선스는 assets/fonts에 있습니다. 원본: https://github.com/google/fonts/tree/main/ofl/nanumgothic
+
+### 추가 검증
+
+```bash
+uv run alembic check
+uv run ruff check .
+uv run ruff format --check .
+uv run pyrefly check
+uv run pytest
+```
+
+TEST_DATABASE_URL을 전용 PostgreSQL team08_test DB로 설정하면 PostgreSQL 연결/격리된 업무 스키마 테스트를 함께 실행합니다. 설정하지 않으면 해당 테스트는 skip하며 SQLite만 검증합니다. 실제 기기·브라우저 UI·배포 검증과 제공자 대체 테스트는 구분합니다.
