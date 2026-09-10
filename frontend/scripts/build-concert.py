@@ -224,7 +224,7 @@ data=dict(eventId=uid('event'),name=layout['name'],status=layout['status'],dataV
 features=[dict(type='Feature',id=z['id'],properties={k:v for k,v in z.items() if k!='geometry'},geometry=z['geometry']) for z in zones]
 features += [dict(type='Feature',id=g['id'],properties=dict(name=g['name'],kind='GATE',zoneId=g['zoneId']),geometry=dict(type='Point',coordinates=[g['position']['lng'],g['position']['lat']])) for g in gates]
 (OUT/'concert-zones.geojson').write_text(json.dumps(dict(type='FeatureCollection',name=layout['name'],status=layout['status'],features=features),ensure_ascii=False,indent=2)+'\n')
-s=io.StringIO();w=csv.writer(s);w.writerow(['kind','id','name','vertex','longitude','latitude'])
+s=io.StringIO();w=csv.writer(s,lineterminator="\n");w.writerow(['kind','id','name','vertex','longitude','latitude'])
 for z in zones:
     for i,xy in enumerate(z['geometry']['coordinates'][0]):w.writerow(['ZONE',z['id'],z['name'],i,*xy])
 for g in gates:w.writerow(['GATE',g['id'],g['name'],0,g['position']['lng'],g['position']['lat']])
