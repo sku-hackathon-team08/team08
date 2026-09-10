@@ -108,5 +108,11 @@
     "method": "VISUAL_AERIAL_ALIGNMENT",
     "headingReference": "clockwise from true north",
     "note": "Field long axis visually estimated from north-up VWorld imagery; not surveyed."
+  },
+  "demoPoint": {
+    "lng": 126.8970733,
+    "lat": 37.5683536,
+    "zoneKey": "A",
+    "surfaceOffsetMeters": 0.44
   }
 }

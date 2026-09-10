@@ -11,6 +11,21 @@
 행사 생성·코드 인증·신고 API는 이 지도 시연에 구현되어 있지 않으며 후속 연동 대상입니다.
 앱을 종료했다 다시 실행했을 때의 로그인·행사 유지 방식은 보류합니다.
 
+## 소유권과 조회 흐름
+
+행사에 연결된 장소·모델 배치·구역·게이트·데모 지점의 소유자는 **백엔드**입니다.
+프론트는 행사 ID로 지도 API를 호출하고 응답을 렌더링합니다. 로컬 JSON 대체 응답은 두지 않습니다.
+
+1. 데모 페이지는 기본 행사 ID `69cbb93b-d6cb-5785-a7c8-e606c7279d3d` 또는 `?eventId=...`를 선택합니다.
+2. `GET /api/v1/demo/events/{eventId}/map`으로 모델 URL·위치·회전·구역·게이트·데모 지점을 받습니다.
+3. 모델과 내려받기 파일은 같은 행사의 `/assets/{assetName}`에서 받습니다.
+4. 지형에 따른 높이 계산·카메라·선택·핀 표시는 프론트 어댑터가 처리합니다.
+
+현재는 백엔드가 소유한 **읽기 전용 데모 seed 파일**을 저장소 계층에서 조회합니다. 업무 DB에 저장하는 구현은 아닙니다.
+모르는 행사 ID는 지도와 파일 모두 404이며, 허용된 세 파일 외 경로는 제공하지 않습니다.
+이 경로는 공개 가상 데모 전용입니다. 인증된 `events/current/map`을 구현한 것으로 간주하지 않습니다.
+[데모 API 계약](../api/demo-map.md)을 참고합니다.
+
 ## 배치와 데이터 원본
 
 | 항목 | 채택한 값 |
@@ -27,16 +42,16 @@
 중심과 회전각은 북쪽이 위인 브이월드 영상의 잔디면 장축을 기준으로 시각 보정했습니다.
 좌석 표현 수는 실제 판매 좌석 수나 수용 인원이 아닙니다. 경기장 관중석·지붕 자체의 독립 3D 모델은 포함하지 않습니다.
 
-배치 원본은 [concert-layout.json](../../frontend/demo/concert-layout.json)입니다.
+배치 원본은 [concert-layout.json](../../backend/demo/concert-layout.json)입니다.
 기준점에서 동쪽·북쪽 방향의 미터 좌표를 정의하고,
-[build-concert.py](../../frontend/scripts/build-concert.py)가 같은 기준으로 GLB와 WGS84 좌표를 생성합니다.
+[build-concert.py](../../backend/scripts/build-concert.py)가 같은 기준으로 GLB와 WGS84 좌표를 생성합니다.
 
 | 생성 파일 | 사용처 |
 |---|---|
-| [seoul-worldcup.json](../../frontend/public/demo/seoul-worldcup.json) | 행사·구역·게이트·모델 위치 데이터 |
-| [concert.glb](../../frontend/public/demo/concert.glb) | 콘서트 3D 모델, 1단위 = 1m |
-| [concert-zones.geojson](../../frontend/public/demo/concert-zones.geojson) | 닫힌 Polygon 6개와 게이트 Point 3개 |
-| [concert-coordinates.csv](../../frontend/public/demo/concert-coordinates.csv) | 구역 꼭짓점·게이트 좌표, UTF-8 BOM |
+| [seoul-worldcup.json](../../backend/demo/assets/seoul-worldcup.json) | 행사·구역·게이트·모델 위치 데이터 |
+| [concert.glb](../../backend/demo/assets/concert.glb) | 콘서트 3D 모델, 1단위 = 1m |
+| [concert-zones.geojson](../../backend/demo/assets/concert-zones.geojson) | 닫힌 Polygon 6개와 게이트 Point 3개 |
+| [concert-coordinates.csv](../../backend/demo/assets/concert-coordinates.csv) | 구역 꼭짓점·게이트 좌표, UTF-8 BOM |
 
 구역 ID는 구역 키에서 결정적으로 생성합니다. 위치를 조정해도 키를 유지하면 ID는 유지됩니다.
 후속 연동은 생성된 `id`로 구역을 참조합니다. 좌표는 WGS84이며 GeoJSON 배열 순서는 **[경도, 위도]**입니다.
@@ -62,7 +77,7 @@
 
 브이월드 어댑터에서 이 점의 높이는 **`modelGroundHeight + 0.44`m**입니다.
 `modelGroundHeight`는 모델 바닥 범위 15개 지형 표본과 기준 높이에서 계산하는 런타임 값이며,
-고정 해발고도나 좌표 API의 확정 필드가 아닙니다. `0.44`는 이 데모의 바닥·선택 표면에 맞춘 오프셋입니다.
+고정 해발고도가 아닙니다. 데모 API의 `demoPoint.surfaceOffsetMeters`로 오프셋 0.44를 받습니다. `0.44`는 이 데모의 바닥·선택 표면에 맞춘 오프셋입니다.
 
 처음 적용했던 `+2m`는 점이 바닥에서 떠 보여 제거했습니다. 점은 높이 계산 후 표시하고 지형 갱신 시 함께 보정합니다.
 다른 렌더러에 연동할 때는 경도·위도를 그대로 사용하되, 이 데모 모델의 바닥 표면에 맞춰 높이를 계산합니다.
@@ -73,9 +88,13 @@ GLB의 Y-up과 지도상의 위도/고도를 혼동하지 않습니다. Cesium �
 프로젝트 루트 `.env`에 `VWORLD_API_KEY`를 설정합니다. 실제 키는 저장소에 포함하지 않습니다.
 
 ```sh
+# 터미널 1: 저장소 루트에서 백엔드 실행
+uv run --directory backend python scripts/build-concert.py  # 배치 수정 시
+uv run --directory backend uvicorn app.main:app --host 127.0.0.1 --port 8001
+
+# 터미널 2: 프론트 실행
 cd frontend
 npm ci
-python3 scripts/build-concert.py  # 배치를 수정한 경우 재생성
 npm run dev
 ```
 
@@ -86,7 +105,7 @@ npm run dev
 
 SDK 키는 Vite 개발 서버가 이 HTML에만 주입합니다. 일반 앱 번들에는 키를 넣지 않습니다.
 브라우저용 SDK 요청에는 키가 전달됩니다. 이 HTML은 개발 서버 전용이며 프로덕션 앱의 진입점에 포함하지 않습니다.
-`public/demo`의 데이터·모델 파일은 일반 Vite 빌드에도 복사됩니다.
+Vite는 `/api`를 `127.0.0.1:8001`로 프록시합니다. 모델·좌표는 프론트 public 및 앱 빌드에 포함하지 않습니다.
 
 ## 브이월드 연동과 API 경계
 
@@ -101,6 +120,10 @@ SDK 키는 Vite 개발 서버가 이 HTML에만 주입합니다. 일반 앱 번�
 
 ## 검증 결과와 후속 범위
 
+백엔드 통합 검증에서 행사별 응답·모델 URL·세 파일의 원본 일치, 모르는 행사 404,
+허용되지 않은 파일 차단을 검사합니다. 제품 인증·DB 계약은 후속 범위입니다.
+
+
 실제 브이월드 SDK·영상·건물 요청을 사용하는 Playwright Chromium 소프트웨어 WebGL 환경에서 확인했습니다.
 외부 서비스를 가짜 응답으로 대체하지 않았습니다. 제공자 `document.write` 경고는 관찰됩니다.
 
@@ -113,6 +136,8 @@ SDK 키는 Vite 개발 서버가 이 HTML에만 주입합니다. 일반 앱 번�
 | 화면 | 데스크톱 및 390px 가로 넘침 없음 |
 | 구조 | GLB 버퍼 범위, 닫힌 Polygon, 구역 장축 13.5° 확인 |
 | 앱 검사 | 빌드·린트·JS 문법·diff 공백 검사 통과 |
+| 백엔드 | 132 passed, 3 skipped (별도 PostgreSQL 테스트 DB 미설정), Ruff·Pyrefly 통과 |
+| API 통합 | 실제 백엔드 응답으로 모델·좌표·다운로드 표시, API 실패 시 로컬 데이터 대체 없음 |
 
 기능 검증은 `QA_FAST=1 node scripts/check-concert.mjs`로 실행합니다.
 스크린샷까지 저장하려면 `QA_FAST`를 생략합니다. Playwright Chromium과 시스템 라이브러리가 필요합니다.

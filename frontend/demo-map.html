@@ -50,7 +50,7 @@
           건물 3D 타일 로딩 중…
         </p>
         <p id="model-status" class="help" role="status">콘서트 모델 로딩 중…</p>
-        <p class="help">배치 정렬: 북쪽에서 시계방향 13.5° · 영상 기준 보정</p><div class="section-title">03 / 구역별 경계 좌표</div>
+        <p class="help">배치 위치·방향·구역은 행사 지도 API에서 가져옵니다.</p><div class="section-title">03 / 구역별 경계 좌표</div>
         <div id="legend"></div><p class="help">구역을 선택하면 경계 꼭짓점의 경도·위도를 확인합니다.</p><output id="zone-detail">구역을 선택하세요.</output>
         <div class="section-title">04 / 좌표 확인</div>
         <p class="help">
@@ -59,7 +59,7 @@
         </p>
         <output id="coordinate">지도에서 위치를 선택하세요.</output
         ><button id="export">구역·게이트 JSON 내려받기</button>
-        <div class="downloads"><a href="/demo/concert-zones.geojson" download>GeoJSON 경계</a><a href="/demo/concert-coordinates.csv" download>CSV 좌표표</a><a href="/demo/concert.glb" download>3D 모델 GLB</a></div>
+        <div class="downloads"><a data-asset="concert-zones.geojson" download>GeoJSON 경계</a><a data-asset="concert-coordinates.csv" download>CSV 좌표표</a><a data-asset="concert.glb" download>3D 모델 GLB</a></div>
         <p class="help">
           좌표는 모델 배치와 같은 기준점에서 계산했습니다. 실측 데이터가 아니며 경기장 자체의 3D 모델은 포함하지 않습니다.
         </p>

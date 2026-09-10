@@ -4,14 +4,19 @@
     status.textContent = message;
     status.classList.add("error");
   };
+  const eventId = new URLSearchParams(location.search).get('eventId') || '69cbb93b-d6cb-5785-a7c8-e606c7279d3d';
+  const apiBase = `/api/v1/demo/events/${encodeURIComponent(eventId)}`;
   let data;
   try {
-    const r = await fetch("/demo/seoul-worldcup.json");
+    const r = await fetch(`${apiBase}/map`);
     if (!r.ok) throw Error();
     data = await r.json();
   } catch {
     fail("데모 데이터를 불러오지 못했습니다. 새로고침해 주세요.");
     return;
+  }
+  for (const link of document.querySelectorAll('[data-asset]')) {
+    link.href = `${apiBase}/assets/${link.dataset.asset}`;
   }
   const inRing = (lng, lat, ring) => {
     let inside = false;
@@ -156,7 +161,7 @@
     document.getElementById('stage-view').onclick=()=>focusZone('STAGE',78,-22);
     document.getElementById('seats-view').onclick=()=>focusZone('A',82,-48);
     document.getElementById("wide").onclick = () => {
-      viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(data.center.lng,data.center.lat,20),100),
+      viewer.camera.flyToBoundingSphere(new C.BoundingSphere(C.Cartesian3.fromDegrees(data.center.lng,data.center.lat,window.demoMap.modelGroundHeight??0),100),
         {duration:.8,offset:new C.HeadingPitchRange(C.Math.toRadians(data.model.headingDegrees),-.85,600)});
     };
     const entities = viewer.entities || viewer._viewer?.entities;
@@ -164,7 +169,7 @@
     const demoPoint = entities.add({
       id: 'demo-single-point',
       show: false,
-      position: C.Cartesian3.fromDegrees(126.8970733,37.5683536,20),
+      position: C.Cartesian3.fromDegrees(data.demoPoint.lng,data.demoPoint.lat,0),
       point: {pixelSize:16,color:C.Color.fromCssColorString('#ff574f'),outlineColor:C.Color.WHITE,outlineWidth:3,disableDepthTestDistance:Infinity},
       label: {text:'데모 지점',font:'15px sans-serif',showBackground:true,pixelOffset:new C.Cartesian2(0,-30),disableDepthTestDistance:Infinity},
     });
@@ -238,7 +243,7 @@
       h = Math.max(h,...sampled);
       window.demoMap.modelGroundHeight = h;
       // Match the zone surface just above the concert floor.
-      demoPoint.position=C.Cartesian3.fromDegrees(126.8970733,37.5683536,h+.44);
+      demoPoint.position=C.Cartesian3.fromDegrees(data.demoPoint.lng,data.demoPoint.lat,h+data.demoPoint.surfaceOffsetMeters);
       demoPoint.show=true;
 
       stage.modelMatrix = matrixAt(h);

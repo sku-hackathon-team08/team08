@@ -242,8 +242,14 @@
       "zoneId": "d939b2ca-e205-5b3f-832e-b2b78a8bd4fe"
     }
   ],
+  "demoPoint": {
+    "lng": 126.8970733,
+    "lat": 37.5683536,
+    "zoneId": "aa9d260d-0125-5c81-a99c-4cd24d0ae015",
+    "surfaceOffsetMeters": 0.44
+  },
   "model": {
-    "uri": "/demo/concert.glb",
+    "uri": "/api/v1/demo/events/69cbb93b-d6cb-5785-a7c8-e606c7279d3d/assets/concert.glb",
     "position": {
       "lng": 126.89721,
       "lat": 37.56817

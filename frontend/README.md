@@ -73,11 +73,12 @@ npm run lint           # oxlint
 
 ## 서울 콘서트 데모 작업 기준
 
-로컬 서버 실행 후 `/demo-map.html`에서 확인합니다. 프로젝트 루트 `.env`의 `VWORLD_API_KEY`를 사용합니다.
+백엔드를 `uv run --directory backend uvicorn app.main:app --host 127.0.0.1 --port 8001`로 실행한 뒤
+프론트 서버의 `/demo-map.html`에서 확인합니다. `/api`는 8001 포트로 프록시합니다. 프로젝트 루트 `.env`의 `VWORLD_API_KEY`를 사용합니다.
 실행 범위·데이터·검증 기준은 [브이월드 로컬 검증](../docs/integrations/vworld-demo.md)을 참고합니다.
 
-콘서트 모델과 구역 좌표를 변경하려면 `demo/concert-layout.json`을 수정한 뒤
-`python3 scripts/build-concert.py`를 실행합니다. 로컬 `/demo-map.html`에서
+콘서트 모델과 구역 좌표는 백엔드 소유입니다. `backend/demo/concert-layout.json`을 수정한 뒤
+저장소 루트에서 `uv run --directory backend python scripts/build-concert.py`를 실행합니다. 로컬 `/demo-map.html`에서
 구역 선택, 좌표 확인 및 JSON·GeoJSON·CSV·GLB 다운로드를 제공합니다.
 배치와 검증 범위는 [브이월드 데모 문서](../docs/integrations/vworld-demo.md)를 참고하세요.
 

@@ -33,12 +33,16 @@ try {
  await page.locator('#wide').click();await page.waitForFunction(()=>!demoMap.viewer.camera._currentFlight);await page.waitForTimeout(500);await page.locator('#home').click();await page.waitForFunction(()=>!demoMap.viewer.camera._currentFlight);await page.waitForTimeout(500);
  for(const [selector,file] of [['#export','seoul-worldcup.json'],['a[href$="geojson"]','concert-zones.geojson'],['a[href$="csv"]','concert-coordinates.csv'],['a[href$="glb"]','concert.glb']]){
   const promise=page.waitForEvent('download');await page.locator(selector).click();const download=await promise;await download.saveAs(out+'/'+file);
-  const expected=await readFile(new URL('../public/demo/'+file,import.meta.url));const got=await readFile(out+'/'+file);
+  const expected=await readFile(new URL('../../backend/demo/assets/'+file,import.meta.url));const got=await readFile(out+'/'+file);
   if(file.endsWith('.json'))assert.deepEqual(JSON.parse(got),JSON.parse(expected));else assert.deepEqual(got,expected);
  }
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await capture(page,{path:out+'/final.png',timeout:60000});
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(1200);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await capture(page,{path:out+'/mobile.png',timeout:60000});
  await writeFile(out+'/results.json',JSON.stringify({modelReady:true,marker,zones:6,gates:3,coordinateSelection:'A',downloads:4,overflow:false,errors},null,2));
+ await page.route('**/api/v1/demo/events/*/map',r=>r.fulfill({status:503,body:'unavailable'}));
+ await page.goto('http://127.0.0.1:5173/demo-map.html',{waitUntil:'domcontentloaded'});
+ await page.waitForFunction(()=>document.getElementById('status').classList.contains('error'));
+ assert.equal(await page.evaluate(()=>Boolean(window.demoMap)),false);
  assert.deepEqual(errors,[]);console.log('PASS: GLB readiness (visual inspection required), zone selection, map point classification, controls, 4 exports, desktop/mobile fit.');
 } finally {await b.close()}

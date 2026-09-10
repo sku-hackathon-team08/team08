@@ -60,7 +60,7 @@ assert.deepEqual(
   JSON.parse(await readFile(out + "/export.json", "utf8")),
   JSON.parse(
     await readFile(
-      new URL("../public/demo/seoul-worldcup.json", import.meta.url),
+      new URL("../../backend/demo/assets/seoul-worldcup.json", import.meta.url),
       "utf8",
     ),
   ),
@@ -97,7 +97,7 @@ await page.route("**/js/webglMapInit.js.do**", (r) => r.abort());
 await page.reload({ waitUntil: "domcontentloaded" });
 await page.waitForTimeout(1000);
 console.log("SDK failure:", await page.locator("#status").innerText());
-await page.route("**/demo/seoul-worldcup.json", (r) =>
+await page.route("**/api/v1/demo/events/*/map", (r) =>
   r.fulfill({ status: 503, body: "unavailable" }),
 );
 await page.reload({ waitUntil: "domcontentloaded" });
