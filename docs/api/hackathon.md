@@ -117,12 +117,38 @@
 | Method | 경로 | 요청 / 결과 |
 |---|---|---|
 | GET | `/admin/stats` | 행사 전체 DashboardStats, 필터 없음 |
-| GET | `/staff/activity-report` | period=TODAY/WEEK/ALL·cursor?·pageSize? → ActivityReport |
-| GET | `/staff/activity-report/export` | period=TODAY/WEEK/ALL → application/pdf |
+| GET | `/admin/activity-report` | ADMIN 전용. period=TODAY/WEEK/ALL·cursor?·pageSize? → AdminActivityReport |
+| GET | `/admin/activity-report/export` | ADMIN 전용. period=TODAY/WEEK/ALL → application/pdf |
+| GET | `/staff/activity-report` | 폐기 예정 호환 API. 기존 STAFF 전용 ActivityReport |
+| GET | `/staff/activity-report/export` | 폐기 예정 호환 API. 기존 STAFF 전용 PDF |
 
-관제 total에는 취소도 포함합니다. 개인 리포트도 취소 기록을 보존합니다. 기간 기본 TODAY, 한국 시간 자정·월요일 시작 주간·접수일 기준 `[from,to)`를 사용하며 ALL은 경계 null입니다. 평균은 최종 배정→완료, 완료·배정 시각이 있는 완료 건만 집계하고 0건은 null입니다. API는 초 단위 평균 원값을 반환합니다.
+관리자 집계는 같은 행사의 `report_logs.actor_id = 현재 세션 actor.id`를 기준으로 합니다. 작성자·현재 담당자 필터로 대체하지 않습니다. 포함 행위·재배정 귀속·프론트 전환 정책은 [관리자 처리 리포트](../features/activity-report.md)를 따릅니다. 신규 계정·이름 기반 과거 세션 병합은 제공하지 않습니다.
 
-개인 리포트는 자신의 신고만 집계하고 관리자 내부 메모·취소 사유는 포함하지 않습니다. 전체 기간 요약·유형 분포는 현재 페이지에 제한되지 않습니다. PDF는 선택 기간의 전체 내역을 읽어 즉시 생성하며 저장 파일/다운로드 토큰을 만들지 않습니다. 응답은 attachment·Cache-Control:no-store이며 재다운로드는 당시 데이터로 다시 생성합니다. 서버 PDF 생성은 스레드에서 실행하지만 대규모 부하/무제한 내역의 성능은 미검증입니다.
+기간 기본 TODAY. 처리 로그 occurredAt 기준 한국 시간 자정·월요일 시작 주간 `[from,to)`이며 ALL은 경계 null입니다. 정렬은 occurredAt 내림차순·로그 ID 내림차순, 기본 pageSize=20·최대 100입니다. 커서는 관리자·경로·필터에 귀속합니다. 진행 중인 신고라도 선택 기간에 본인 행위가 없으면 집계되지 않습니다.
+
+### AdminActivityReport DTO
+
+- `actor`: 현재 관리자 `{id,name,team}`. 관리자의 team은 null입니다.
+- `range`: `{from,to,timeZone:"Asia/Seoul"}`.
+- `summary`: `totalReports`(고유 신고 수), `totalActions`(처리 로그 수), `claimed`, `released`, `classificationChanged`, `resolved`, `cancelled`(각 행위 횟수), `averageProcessingSeconds`(본인 완료 로그의 최종 배정→완료 초 단위 평균, 대상 없으면 null).
+- `typeDistribution`: `{type,count}[]`. 기간 내 처리한 고유 신고를 현재 유형으로 집계. 다섯 유형 모두 반환합니다.
+- `items`: 아래 AdminActivityItem 배열. `nextCursor`, `asOf`는 기존 목록과 같은 의미입니다.
+
+AdminActivityItem:
+
+| 필드 | 의미 |
+|---|---|
+| id / reportId | 처리 로그 UUID / 신고 UUID. 목록 키는 id를 사용 |
+| action | REPORT_CLAIMED / ASSIGNMENT_RELEASED / CLASSIFICATION_CHANGED / REPORT_RESOLVED / REPORT_CANCELLED |
+| occurredAt | 본인 행위가 발생한 UTC 시각 |
+| changes / note | 이 로그의 변경 전후 `{field,before,after}[]` / 본인이 기록한 처리 메모 또는 취소 사유, 없으면 null |
+| contentFinal / currentType / currentStatus / zone | 신고의 현재 내용·유형·상태·구역. 과거 행위 시점 스냅샷이 아님 |
+| createdAt | 신고 접수 시각. 기간 필터 기준이 아님 |
+| processingSeconds | 완료 행위의 최종 배정→완료 초, 다른 행위 또는 배정 시각 없으면 null |
+
+전체 요약·유형 분포는 현재 페이지에 제한되지 않습니다. PDF는 동일 서비스의 선택 기간 전체 이력·요약·본인 메모를 사용하며 페이지 크기/커서 입력을 사용하지 않습니다. 응답은 attachment; filename="admin-activity-report.pdf"·Cache-Control:no-store입니다. 파일/다운로드 토큰은 저장하지 않습니다. 재다운로드는 당시 데이터로 다시 생성하고, 페이지 조회와 내보내기 사이 고정 스냅샷은 보장하지 않습니다. PDF는 스레드에서 생성하며 대규모 내역 성능은 미검증입니다.
+
+관제 stats.total은 행사 전체 취소도 포함하며 개인 실적과 구분합니다. 기존 STAFF 호환 API는 작성자·접수일 기준, 취소 포함, 내부 메모 제외 정책을 유지합니다. OpenAPI deprecated로 표시하며 프론트 전환 확인 후 삭제 시점을 정합니다. STAFF의 신규 관리자 API 접근은 403이며 기존 `/staff/reports`는 유지합니다.
 
 ## 실행 경계
 
