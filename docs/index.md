@@ -20,10 +20,17 @@ docs/
 │   ├── index.md       # PRD 목차
 │   ├── context.md     # 문제·사용자·목표
 │   ├── scope.md       # MVP 범위·우선순위
-│   └── success-criteria.md # 성공 기준·데모 흐름
+│   ├── success-criteria.md # 성공 기준·데모 흐름
+│   ├── spec-review.md # 확정 결정·미정 목록
+│   └── sources/      # 원본 보존 자료·index.md
 ├── architecture.md    # 시스템 구성·레이어 역할·의존 방향
 ├── features/
-│   └── index.md       # 기능 명세 목록
+│   ├── index.md       # 기능 명세 목록
+│   ├── event-entry.md # 행사 진입
+│   ├── report-intake.md # 신고 입력
+│   ├── report-lifecycle.md # 담당·취소·지원
+│   ├── command-dashboard.md # 관제·미확인
+│   └── activity-report.md # 내역·리포트
 ├── api/
 │   ├── index.md       # API 계약 목록·관리 원칙
 │   ├── errors.md      # 공통 오류 형식·코드·구현 범위·OpenAPI·완료 기준
@@ -65,6 +72,6 @@ docs/
 ## 현재 상태
 
 백엔드는 Python 3.13·FastAPI·uv, 로컬 DB는 SQLite로 정했습니다. 배포용 PostgreSQL은 후보이며 [아키텍처](architecture.md)에 상태를 기록합니다.
-앱 상태 확인 API·백엔드 CI·환경 설정과 기본 DB URL 선택은 구현했습니다. 기본 로깅과 SQLite·PostgreSQL 연결·시작/종료 처리를 구현했고 업무 모델·마이그레이션은 후속 작업입니다. 공통 오류 응답의 기본 형식·코드 5개는 합의했으며 400·404·405·500의 핸들러·스키마·OpenAPI 연결을 구현했습니다. 422는 FastAPI 기본 응답을 유지하고 공통 형식·필드 오류 변환은 후속 작업입니다. API 필드 네이밍의 공통 스키마·별칭과 HTTP·내부 생성의 입력 경계는 구현했습니다. 프론트는 Vite·React·TypeScript 기반 초기 구성을 완료했으며 상세 스택은 [아키텍처](architecture.md#프론트-환경)에 기록합니다. 서비스 주제·기능 API·데이터 모델은 미정입니다. 빈 문서의 항목은 작성 틀이며 확정된 요구사항이 아닙니다.
+앱 상태 확인 API·백엔드 CI·환경 설정과 기본 DB URL 선택은 구현했습니다. 기본 로깅과 SQLite·PostgreSQL 연결·시작/종료 처리를 구현했고 업무 모델·마이그레이션은 후속 작업입니다. 공통 오류 응답의 기본 형식·코드 5개는 합의했으며 400·404·405·500의 핸들러·스키마·OpenAPI 연결을 구현했습니다. 422는 FastAPI 기본 응답을 유지하고 공통 형식·필드 오류 변환은 후속 작업입니다. API 필드 네이밍의 공통 스키마·별칭과 HTTP·내부 생성의 입력 경계는 구현했습니다. 프론트는 Vite·React·TypeScript 기반 초기 구성을 완료했으며 상세 스택은 [아키텍처](architecture.md#프론트-환경)에 기록합니다. 서비스는 현장의 지금으로 정했으며 [PRD v1.2](prd/index.md)에 인터뷰·최종 화면 흐름의 기획 결정을 반영했습니다. 스태프는 앱으로 개발하며 방식·OS는 미정입니다. 기능 API·업무 데이터 모델은 후속 작성 대상입니다. 기획 명세의 미정 항목과 기술 문서의 작성 틀은 확정 요구사항이 아닙니다.
 SDD의 세부 절차도 검토안이며, 문서 구조를 만드는 것만으로 명세 승인이나 구현 완료를 의미하지 않습니다.
 문서를 변경할 때는 [SOT의 인덱스 갱신 기준](sot.md#인덱스-갱신-기준)에 따라 관련 목록·설명·링크를 함께 확인합니다.
