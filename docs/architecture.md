@@ -22,9 +22,9 @@
 ## 백엔드 레이어 구성
 
 레이어별 패키지를 만들고, 앱 조립·상태 확인 라우터·응답 스키마를 분리했습니다.
-`core/config.py`에 환경 설정, `core/logging.py`에 앱 로그 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`, `repositories/`, `models/`는 패키지 경계만 준비한 상태입니다.
+`core/config.py`에 환경 설정, `core/logging.py`에 앱 로그 설정, `db/session.py`에 연결·세션 수명, `api/dependencies.py`에 요청별 세션 제공을 구현했습니다. `services/`·`models/`에 행사·분석·신고·지원·활동 리포트를 구현했습니다. 저장 구조와 마이그레이션은 [DB 계약](db/storage.md), 현재 API는 [해커톤 계약](api/hackathon.md)입니다.
 `schemas/base.py`의 `ApiModel`은 공통 별칭·직렬화와 내부 모델 생성을 담당하며 `HealthResponse`에 적용했습니다. HTTP 입력은 FastAPI의 기본 모델 검증에 연결합니다. 사용 방법은 [API 필드 별칭 가이드](guides/backend.md#api-필드-별칭)에 있습니다.
-`schemas/errors.py`와 `api/errors.py`는 일반 HTTP 오류 스키마와 변환을 담당하고 `main.py`에서 핸들러·OpenAPI를 연결합니다. 현재 적용 범위와 남은 422 변환은 [공통 오류 계약](api/errors.md), 기록 책임은 [오류 처리 가이드](guides/backend.md#오류-처리-구현과-연동)에 있습니다.
+`schemas/errors.py`와 `api/errors.py`는 일반 HTTP 오류 스키마와 변환을 담당하고 `main.py`에서 핸들러·OpenAPI를 연결합니다. 422는 schemas/validation.py·api/validation.py가 담당합니다. 현재 적용 범위는 [공통 오류 계약](api/errors.md), 기록 책임은 [오류 처리 가이드](guides/backend.md#오류-처리-구현과-연동)에 있습니다.
 각 패키지의 `__init__.py`는 역할 설명만 담고 초기화 코드·재노출 import를 넣지 않습니다.
 
 ```text
@@ -185,3 +185,8 @@ SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우�
 - 실행·배포 구성
 
 선택의 이유는 [결정 기록](decisions.md), 요청·응답 계약은 [API 명세](api/index.md), 저장 구조·제약은 [DB 명세](db/index.md), 외부 제공자와의 통신은 [외부 연동 명세](integrations/index.md)에 작성합니다.
+
+
+## 해커톤 실행 구성
+
+단일 Uvicorn 워커/인스턴스로 실행합니다. 요청 의존성은 DB 세션을 제공하고 기능 경계에서 트랜잭션을 완료합니다. 멱등 생성 요청은 전용 서비스가 키 선점과 업무 결과의 저장을 소유합니다. OpenAI 호출은 BackgroundTasks에서 실행하며 시작 시 미완료 분석을 실패로 표시하고 자동 재실행하지 않습니다. 다중 워커·분산 큐는 이번 구성에 포함하지 않습니다. 브라우저 CORS와 키·모델 설정, 마이그레이션·seed 명령은 [백엔드 README](../backend/README.md)에 있습니다.

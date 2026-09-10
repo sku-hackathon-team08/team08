@@ -53,4 +53,4 @@ async def test_unknown_event_and_unlisted_assets_are_not_served(tmp_path: Path) 
             assert response.status_code == 404
             assert response.json()["code"] == "NOT_FOUND"
         assert (await client.get(f"{BASE}/assets/.env")).status_code == 422
-        assert (await client.get("/api/v1/events/current/map")).status_code == 404
+        assert (await client.get("/api/v1/events/current/map")).status_code == 401

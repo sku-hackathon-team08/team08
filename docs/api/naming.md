@@ -37,4 +37,4 @@ Python 코드에서 `snake_case` 키워드 인자로 모델을 생성하는 것�
 변환 설정과 적용 범위는 [백엔드 별칭 구현 가이드](../guides/backend.md#api-필드-별칭)를 참고합니다.
 필드별 타입·필수 여부·기본값은 기능별 API 명세에서 정합니다.
 
-현재 공통 구현은 [`app/schemas/base.py`](../../backend/app/schemas/base.py), 모델 검증은 [`tests/unit/test_schemas.py`](../../backend/tests/unit/test_schemas.py), 실제 HTTP·응답·OpenAPI 검증은 [`tests/integration/test_api_naming.py`](../../backend/tests/integration/test_api_naming.py)에 있습니다. HTTP 검증용 모델·라우트는 테스트 안에만 두며 서비스 API를 추가하지 않습니다. 축제 API의 미등록 입력 거절과 오류 경로 계약은 확정했으며 적용·변환 테스트는 #54의 후속 구현입니다.
+현재 공통 구현은 [`app/schemas/base.py`](../../backend/app/schemas/base.py), 모델 검증은 [`tests/unit/test_schemas.py`](../../backend/tests/unit/test_schemas.py), 실제 HTTP·응답·OpenAPI 검증은 [`tests/integration/test_api_naming.py`](../../backend/tests/integration/test_api_naming.py)에 있습니다. HTTP 검증용 모델·라우트는 테스트 안에만 두며 서비스 API를 추가하지 않습니다. 축제 API의 미등록 입력 거절과 오류 경로 계약은 확정했으며 오류 변환 테스트는 구현했고 축제 입력 모델의 엄격 검증과 중복 키 검출은 후속 구현입니다.
