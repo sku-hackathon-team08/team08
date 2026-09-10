@@ -131,3 +131,12 @@ LOG_LEVEL=DEBUG uv run uvicorn app.main:app --reload
 ```
 
 DB 연결 확인·풀 정리 완료와 명시적 HTTP 500의 안전한 진단은 앱에서, 앱 시작·종료·접근·lifespan 실패와 예상하지 못한 요청 오류의 원인·스택은 Uvicorn에서 기록합니다. `LOG_LEVEL`은 앱 로그에만 적용됩니다. Uvicorn 레벨은 `--log-level info`처럼 별도 지정합니다. 상세 기준과 서버 로그 노출 범위는 [기본 로깅](../docs/guides/backend.md#기본-로깅)을 참고합니다.
+
+## 공개 콘서트 데모
+
+행사 지도·구역·게이트·모델은 `demo/concert-layout.json`과 `demo/assets/`에서 관리합니다.
+`uv run python scripts/build-concert.py`로 재생성하고,
+`uv run uvicorn app.main:app --host 127.0.0.1 --port 8001`로 실행합니다.
+프론트 담당자에게 8001 포트의 지도 API와 행사 ID를 전달합니다. 프론트 구현은 이 PR에 포함하지 않습니다.
+[데모 API 계약](../docs/api/demo-map.md)과 [작업 기준](../docs/integrations/vworld-demo.md)을 참고하세요.
+읽기 전용 공개 seed이며 제품 인증·업무 DB 저장 구현과 구분합니다.

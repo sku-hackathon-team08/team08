@@ -37,11 +37,13 @@ docs/
 │   ├── naming.md      # JSON·쿼리 필드 네이밍·외부 입력 지원 범위
 │   ├── integration-contracts.md # 프론트·백엔드 계약 검토
 │   ├── festival.md    # 축제 API 공통 계약·기능별 명세 및 DTO 검토안
+│   ├── demo-map.md    # 백엔드 소유 데모 행사 지도·파일 조회
 │   └── health.md      # 앱 상태 확인 계약
 ├── db/
 │   └── index.md       # DB 모델·ERD·저장 제약 명세 목록
 ├── integrations/
-│   └── index.md       # 외부 제공자 연동 명세 목록
+│   ├── index.md       # 외부 제공자 연동 명세 목록
+│   └── vworld-demo.md # 서울 콘서트 데모 작업 기준·좌표
 ├── guides/
 │   ├── index.md       # 가이드 목차
 │   ├── development.md # 개발 컨벤션
