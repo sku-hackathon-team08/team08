@@ -49,8 +49,24 @@ npm run lint           # oxlint
 
 ## 현재 구성
 
-라우터·QueryClientProvider·Tailwind 배선과 최소 화면 두 개(`/`, `/example`)만 있습니다.
-`src/` 하위 폴더 구조와 파일명 컨벤션은 후속 작업입니다.
+`src/`는 다음과 같이 나뉩니다.
+
+- `app/router.tsx` — `createBrowserRouter` 라우트 정의
+- `app/providers.tsx` — 전역 Provider 조립(`AppProviders`, 현재 `QueryClientProvider`)
+- `routes/` — 화면 컴포넌트. 공통 진입(`LandingPage`), 역할별 레이아웃·임시 페이지(`admin/`, `staff/`), `NotFoundPage`
+- `App.tsx` — `RouterProvider`만 렌더 · `main.tsx` — `AppProviders`로 감싼 진입점
+
+라우트:
+
+| 경로 | 화면 |
+|---|---|
+| `/` | 공통 진입 화면(관리자·스태프 링크) |
+| `/admin` | 관리자 임시 화면 |
+| `/staff` | 스태프 임시 화면 |
+| 그 외 | Not Found |
+
+관리자·스태프는 경로(역할) 기준으로만 나뉘며 기기 감지나 인증은 아직 없습니다.
+실제 화면·인증·API 연동과 파일명·타입·오류 처리 세부 컨벤션은 후속 작업입니다.
 
 작업 전 [문서 지도](../docs/index.md)에서 관련 기능·기술 명세를 확인합니다.
 프로젝트 소개는 [루트 README](../README.md)에 있습니다.
