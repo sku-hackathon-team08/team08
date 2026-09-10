@@ -8,6 +8,6 @@
 | [신고 입력](report-intake.md) | 음성·텍스트·확인·전송·직접 신고·고정 위치·구역 판정 제외 |
 | [신고 처리](report-lifecycle.md) | 담당·취소·완료·지원·이력 |
 | [관제](command-dashboard.md) | 지도·목록·미확인 시간 |
-| [활동 리포트](activity-report.md) | 내 신고·집계·PDF |
+| [활동 리포트](activity-report.md) | 내 신고·관리자 처리 이력·PDF·스태프 호환 API 전환 |
 
 관련: [PRD](../prd/index.md), [후속 미정](../prd/spec-review.md), [문서 지도](../index.md).

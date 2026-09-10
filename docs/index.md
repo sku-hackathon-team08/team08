@@ -30,7 +30,7 @@ docs/
 │   ├── report-intake.md # 신고 입력·데모 고정 위치
 │   ├── report-lifecycle.md # 담당·취소·지원
 │   ├── command-dashboard.md # 관제·미확인
-│   └── activity-report.md # 내역·리포트
+│   └── activity-report.md # 내 신고·관리자 처리 리포트
 ├── api/
 │   ├── index.md       # API 계약 목록·관리 원칙
 │   ├── errors.md      # 공통 오류 형식·코드·구현 범위·OpenAPI·완료 기준
