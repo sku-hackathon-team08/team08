@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from pypdf import PdfReader
+from sqlalchemy import update
 
 from app.models.reports import Analysis, Report, ReportLog
 
@@ -112,6 +113,14 @@ async def test_admin_history_reassignment_cancel_progress_and_roles(
         "2026-09-11T00:20:00.000Z",
         resolveNote="조치 <완료> & 확인",
     )
+    # 로그 저장은 완료 시각보다 늦어질 수 있다. 처리시간은 실제 완료 시각으로 계산한다.
+    async with app.state.database.sessions() as db:
+        await db.execute(
+            update(ReportLog)
+            .where(ReportLog.report_id == report, ReportLog.action == "REPORT_RESOLVED")
+            .values(occurred_at="2026-09-11T00:20:00.500Z")
+        )
+        await db.commit()
     monkeypatch.setattr(
         "app.services.admin_activity.now", lambda: "2026-09-11T02:00:00.000Z"
     )

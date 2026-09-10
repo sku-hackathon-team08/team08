@@ -45,9 +45,9 @@ async def admin_activity_data(
     for log, report in records:
         seconds = None
         # 완료 후 재개방/재배정은 금지되어 최종 배정 시각이 보존된다.
-        if log.action == "REPORT_RESOLVED" and report.claimed_at:
+        if log.action == "REPORT_RESOLVED" and report.claimed_at and report.resolved_at:
             seconds = (
-                datetime.fromisoformat(log.occurred_at)
+                datetime.fromisoformat(report.resolved_at)
                 - datetime.fromisoformat(report.claimed_at)
             ).total_seconds()
             durations.append(seconds)
