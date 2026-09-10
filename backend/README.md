@@ -137,6 +137,6 @@ DB 연결 확인·풀 정리 완료와 명시적 HTTP 500의 안전한 진단은
 행사 지도·구역·게이트·모델은 `demo/concert-layout.json`과 `demo/assets/`에서 관리합니다.
 `uv run python scripts/build-concert.py`로 재생성하고,
 `uv run uvicorn app.main:app --host 127.0.0.1 --port 8001`로 실행합니다.
-프론트 데모는 8001 포트의 지도 API를 호출합니다.
+프론트 담당자에게 8001 포트의 지도 API와 행사 ID를 전달합니다. 프론트 구현은 이 PR에 포함하지 않습니다.
 [데모 API 계약](../docs/api/demo-map.md)과 [작업 기준](../docs/integrations/vworld-demo.md)을 참고하세요.
 읽기 전용 공개 seed이며 제품 인증·업무 DB 저장 구현과 구분합니다.

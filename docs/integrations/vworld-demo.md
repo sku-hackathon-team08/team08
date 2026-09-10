@@ -14,9 +14,9 @@
 ## 소유권과 조회 흐름
 
 행사에 연결된 장소·모델 배치·구역·게이트·데모 지점의 소유자는 **백엔드**입니다.
-프론트는 행사 ID로 지도 API를 호출하고 응답을 렌더링합니다. 로컬 JSON 대체 응답은 두지 않습니다.
+프론트 담당자는 행사 ID로 지도 API를 호출하고 응답을 렌더링합니다. 이 PR에는 프론트 구현·SDK 설정을 포함하지 않습니다.
 
-1. 데모 페이지는 기본 행사 ID `69cbb93b-d6cb-5785-a7c8-e606c7279d3d` 또는 `?eventId=...`를 선택합니다.
+1. 프론트 담당자는 데모 행사 ID `69cbb93b-d6cb-5785-a7c8-e606c7279d3d`로 API를 호출합니다.
 2. `GET /api/v1/demo/events/{eventId}/map`으로 모델 URL·위치·회전·구역·게이트·데모 지점을 받습니다.
 3. 모델과 내려받기 파일은 같은 행사의 `/assets/{assetName}`에서 받습니다.
 4. 지형에 따른 높이 계산·카메라·선택·핀 표시는 프론트 어댑터가 처리합니다.
@@ -70,7 +70,7 @@
 
 - GeoJSON 좌표: `[126.8970733, 37.5683536]`
 - 연결할 구역 ID: `aa9d260d-0125-5c81-a99c-4cd24d0ae015` (플로어 A)
-- 현재 마커 구현: [map.js](../../frontend/public/demo/map.js)의 `demo-single-point`
+- 마커 입력: 지도 API의 `demoPoint` 필드. 렌더링 구현은 프론트 담당 범위입니다.
 - 기대 동작: 해당 좌표를 표시하면 플로어 A 내부에 위치하며, 구역 판정에서도 A로 분류됩니다.
 
 ### 높이 적용
@@ -83,34 +83,30 @@
 다른 렌더러에 연동할 때는 경도·위도를 그대로 사용하되, 이 데모 모델의 바닥 표면에 맞춰 높이를 계산합니다.
 GLB의 Y-up과 지도상의 위도/고도를 혼동하지 않습니다. Cesium 어댑터는 `upAxis=Y`, `forwardAxis=X`를 사용합니다.
 
-## 로컬 실행과 수정
+## 백엔드 실행과 프론트 전달
 
-프로젝트 루트 `.env`에 `VWORLD_API_KEY`를 설정합니다. 실제 키는 저장소에 포함하지 않습니다.
+저장소 루트에서 다음 명령으로 실행합니다. 백엔드의 저장된 데모 데이터 조회에는 브이월드 키가 필요하지 않습니다.
 
 ```sh
-# 터미널 1: 저장소 루트에서 백엔드 실행
 uv run --directory backend python scripts/build-concert.py  # 배치 수정 시
 uv run --directory backend uvicorn app.main:app --host 127.0.0.1 --port 8001
-
-# 터미널 2: 프론트 실행
-cd frontend
-npm ci
-npm run dev
 ```
 
-`http://localhost:5173/demo-map.html`에서 확인합니다. 포트는 5173으로 고정하며 사용 중이면 서버가 실패합니다.
-`콘서트 가까이`, `위에서 보기`, `경기장 전체 보기`, `무대 자세히`, `좌석·통로 보기`로 시점을 변경합니다.
-구역 선택 시 꼭짓점 좌표를 표시하며 JSON·GeoJSON·CSV·GLB를 다운로드할 수 있습니다.
-지도 클릭은 지표면 위치를 계산합니다. 건물·층·좌석 개별 선택 기능은 구현하지 않았습니다.
+지도 조회:
 
-SDK 키는 Vite 개발 서버가 이 HTML에만 주입합니다. 일반 앱 번들에는 키를 넣지 않습니다.
-브라우저용 SDK 요청에는 키가 전달됩니다. 이 HTML은 개발 서버 전용이며 프로덕션 앱의 진입점에 포함하지 않습니다.
-Vite는 `/api`를 `127.0.0.1:8001`로 프록시합니다. 모델·좌표는 프론트 public 및 앱 빌드에 포함하지 않습니다.
+```sh
+curl http://127.0.0.1:8001/api/v1/demo/events/69cbb93b-d6cb-5785-a7c8-e606c7279d3d/map
+```
+
+프론트 담당자에게 [API 계약](../api/demo-map.md), 행사 ID, `model.uri`와 배치 정보,
+구역·게이트·`demoPoint`를 전달합니다. 브이월드 SDK·키 설정·API 프록시 또는 CORS 연동·카메라·표시는
+프론트 통합 단계에서 구성합니다. 반환되는 상대 URL은 백엔드 origin 기준입니다.
+프론트 구현과 npm 의존성·Vite 설정은 이 PR에서 변경하지 않습니다.
 
 ## 브이월드 연동과 API 경계
 
 - SDK: `https://map.vworld.kr/js/webglMapInit.js.do`, version 3.0.
-- 엔진 어댑터: [map.js](../../frontend/public/demo/map.js).
+- 브이월드 렌더러 구현은 프론트 담당 범위이며, 아래 내용은 별도 로컬 검증에서 확인한 참고 사항입니다.
 - 건물 데이터: `https://cdn.vworld.kr/TDServer/services/map4/TG9ENA.json`.
 - 기본 `facility_build` 래퍼는 관찰 당시 타일 1개에서 정체되어 숨겼습니다. SDK에 포함된 Cesium의
   `Cesium3DTileset`으로 같은 제공자 데이터를 직접 로드해 주변 입체 건물을 확인했습니다.
@@ -124,25 +120,19 @@ Vite는 `/api`를 `127.0.0.1:8001`로 프록시합니다. 모델·좌표는 프�
 허용되지 않은 파일 차단을 검사합니다. 제품 인증·DB 계약은 후속 범위입니다.
 
 
-실제 브이월드 SDK·영상·건물 요청을 사용하는 Playwright Chromium 소프트웨어 WebGL 환경에서 확인했습니다.
-외부 서비스를 가짜 응답으로 대체하지 않았습니다. 제공자 `document.write` 경고는 관찰됩니다.
-
-| 검증 | 결과 |
+| 백엔드 검증 | 결과 |
 |---|---|
-| 상세 모델·회전 | 전체 배치, 무대 상세, 좌석·통로 스크린샷에서 시각 확인 |
-| 기능 | 구역 선택·지표 클릭 A 판정·카메라 전환·토글 통과 |
-| 데모 지점 | 지정 경도·위도와 기준 높이 +0.44m, 표시 상태 검사 통과 |
-| 내보내기 | JSON·GeoJSON·CSV·GLB 다운로드와 원본 일치 |
-| 화면 | 데스크톱 및 390px 가로 넘침 없음 |
+| API 통합 | 행사 데이터·파일 원본 일치, 다른 행사 404, 허용 목록 외 파일 차단 |
 | 구조 | GLB 버퍼 범위, 닫힌 Polygon, 구역 장축 13.5° 확인 |
-| 앱 검사 | 빌드·린트·JS 문법·diff 공백 검사 통과 |
-| 백엔드 | 132 passed, 3 skipped (별도 PostgreSQL 테스트 DB 미설정), Ruff·Pyrefly 통과 |
-| API 통합 | 실제 백엔드 응답으로 모델·좌표·다운로드 표시, API 실패 시 로컬 데이터 대체 없음 |
+| 테스트 | 132 passed, 3 skipped (별도 PostgreSQL 테스트 DB 미설정) |
+| 정적 검사 | Ruff lint/format·Pyrefly 통과 |
 
-기능 검증은 `QA_FAST=1 node scripts/check-concert.mjs`로 실행합니다.
-스크린샷까지 저장하려면 `QA_FAST`를 생략합니다. Playwright Chromium과 시스템 라이브러리가 필요합니다.
-카메라 이동 도중 좌표 검사가 실행된 실패는 이동 완료를 기다리도록 검사 흐름을 수정해 해결했습니다.
-스크린샷·실행 결과는 `/tmp/seoul-concert-qa`에 저장하므로 다른 환경에서 재실행해 확인합니다.
+재현 명령: `uv run --directory backend pytest`, `uv run --directory backend ruff check .`,
+`uv run --directory backend ruff format --check .`, `uv run --directory backend pyrefly check`.
+
+별도로 만든 로컬 화면에서는 실제 브이월드 SDK·영상과 상세 모델의 정렬·좌표·높이를 확인했습니다.
+이 시각 검증용 프론트와 Playwright 스크립트는 PR 산출물이 아닙니다.
+프론트 담당자의 서비스 화면 통합과 기기별 검증은 후속 작업입니다.
 
 실측 경계·실제 출입구 검증, 경기장 본체 모델링, 로그인·신고 API와 DB 저장,
 운영 배포·기기별 성능은 완료 범위에 포함하지 않습니다. 현재 데이터는 후속 데모 작업을 시작할 기준입니다.

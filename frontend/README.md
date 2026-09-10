@@ -28,7 +28,7 @@ npm run dev
 ```
 
 개발 서버는 기본적으로 <http://localhost:5173> 에서 열립니다.
-포트는 5173으로 고정하며, 사용 중이면 개발 서버가 실패합니다.
+포트가 사용 중이면 Vite가 다음 포트를 자동으로 선택합니다.
 
 ## 검사
 
@@ -43,7 +43,7 @@ npm run lint           # oxlint
 
 ## 환경 변수
 
-일반 앱은 아직 환경 변수를 사용하지 않습니다. 로컬 지도 검증 화면은 루트 `.env`의 `VWORLD_API_KEY`를 사용합니다. 백엔드 연결 주소가 정해지면
+현재 사용하는 환경 변수는 없습니다. 백엔드 연결 주소가 정해지면
 `.env.example`에 키 이름과 공개 가능한 예시 값을 추가합니다.
 연결 주소·CORS는 [프론트·백엔드 계약 검토](../docs/api/integration-contracts.md)에서 관리합니다.
 
@@ -70,17 +70,3 @@ npm run lint           # oxlint
 
 작업 전 [문서 지도](../docs/index.md)에서 관련 기능·기술 명세를 확인합니다.
 프로젝트 소개는 [루트 README](../README.md)에 있습니다.
-
-## 서울 콘서트 데모 작업 기준
-
-백엔드를 `uv run --directory backend uvicorn app.main:app --host 127.0.0.1 --port 8001`로 실행한 뒤
-프론트 서버의 `/demo-map.html`에서 확인합니다. `/api`는 8001 포트로 프록시합니다. 프로젝트 루트 `.env`의 `VWORLD_API_KEY`를 사용합니다.
-실행 범위·데이터·검증 기준은 [브이월드 로컬 검증](../docs/integrations/vworld-demo.md)을 참고합니다.
-
-콘서트 모델과 구역 좌표는 백엔드 소유입니다. `backend/demo/concert-layout.json`을 수정한 뒤
-저장소 루트에서 `uv run --directory backend python scripts/build-concert.py`를 실행합니다. 로컬 `/demo-map.html`에서
-구역 선택, 좌표 확인 및 JSON·GeoJSON·CSV·GLB 다운로드를 제공합니다.
-배치와 검증 범위는 [브이월드 데모 문서](../docs/integrations/vworld-demo.md)를 참고하세요.
-
-현재 배치와 첫 시연 지점(경도 126.8970733, 위도 37.5683536)을 후속 데모 작업 기준으로 채택했습니다.
-높이는 렌더러에서 계산하며 [기준 문서](../docs/integrations/vworld-demo.md#높이-적용)를 따릅니다.
