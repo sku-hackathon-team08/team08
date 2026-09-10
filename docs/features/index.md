@@ -5,7 +5,7 @@
 | 문서 | 범위 |
 |---|---|
 | [행사 진입](event-entry.md) | 신청·코드·제공자 지도 준비 |
-| [신고 입력](report-intake.md) | 음성·텍스트·확인·전송·직접 신고 |
+| [신고 입력](report-intake.md) | 음성·텍스트·확인·전송·직접 신고·데모 고정 위치 |
 | [신고 처리](report-lifecycle.md) | 담당·취소·완료·지원·이력 |
 | [관제](command-dashboard.md) | 지도·목록·미확인 시간 |
 | [활동 리포트](activity-report.md) | 내 신고·집계·PDF |
