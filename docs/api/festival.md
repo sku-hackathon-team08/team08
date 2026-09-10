@@ -8,11 +8,9 @@
 이 문서 하나에서 전체 API를 리뷰할 수 있습니다. 목차 링크는 모두 같은 문서 안에서 이동합니다.
 
 - 처음 보는 경우: 아래 **API 목록**에서 필요한 기능을 선택합니다.
-- 공통 응답 필드: [응답 모델 사전](#models)
-- 인증·오류·재전송 확인: [공통 규칙](#common)
-- 아직 결정하지 않은 내용: [검토 목록](#review)
-
-<a id="api-list"></a>
+- 공통 응답 필드: [응답 모델 사전](#응답-모델-사전)
+- 인증·오류·재전송 확인: [공통 규칙](#공통-모델요청-규칙)
+- 아직 결정하지 않은 내용: [검토 목록](#api-검증결정-목록)
 
 ## API 목록
 
@@ -20,50 +18,50 @@
 
 | ID | 기능 | Method |
 |---|---|---|
-| E01 | [행사 신청](#e01) | `POST` |
-| E02 | [행사 신청 조회](#e02) | `GET` |
-| E03 | [세션 생성](#e03) | `POST` |
-| E04 | [내 세션 조회](#e04) | `GET` |
-| E05 | [행사 지도 조회](#e05) | `GET` |
+| E01 | [행사 신청](#e01--행사-신청) | `POST` |
+| E02 | [행사 신청 조회](#e02--행사-신청-조회) | `GET` |
+| E03 | [세션 생성](#e03--세션-생성) | `POST` |
+| E04 | [내 세션 조회](#e04--내-세션-조회) | `GET` |
+| E05 | [행사 지도 조회](#e05--행사-지도-조회) | `GET` |
 
 ### 신고 입력
 
 | ID | 기능 | Method |
 |---|---|---|
-| I01 | [신고 내용 분석](#i01) | `POST` |
-| I02 | [분석 결과 조회](#i02) | `GET` |
-| I03 | [스태프 신고 전송](#i03) | `POST` |
-| I04 | [관리자 직접 신고](#i04) | `POST` |
+| I01 | [신고 내용 분석](#i01--신고-내용-분석) | `POST` |
+| I02 | [분석 결과 조회](#i02--분석-결과-조회) | `GET` |
+| I03 | [스태프 신고 전송](#i03--스태프-신고-전송) | `POST` |
+| I04 | [관리자 직접 신고](#i04--관리자-직접-신고) | `POST` |
 
 ### 조회·처리·지원
 
 | ID | 기능 | Method |
 |---|---|---|
-| R01 | [내 신고 목록](#r01) | `GET` |
-| R02 | [내 신고 상세](#r02) | `GET` |
-| R03 | [관제 신고 목록](#r03) | `GET` |
-| R04 | [관제 신고 상세](#r04) | `GET` |
-| R05 | [지도 핀 목록](#r05) | `GET` |
-| R06 | [신고 처리 이력](#r06) | `GET` |
-| R07 | [담당 배정·분류 확정](#r07) | `PATCH` |
-| R08 | [유형·위험도 수정](#r08) | `PATCH` |
-| R09 | [신고 완료](#r09) | `PATCH` |
-| R10 | [담당 배정 취소](#r10) | `PATCH` |
-| R11 | [신고 취소](#r11) | `PATCH` |
-| R12 | [지원요청 시작](#r12) | `POST` |
-| R13 | [지원요청 종료](#r13) | `PATCH` |
-| R14 | [지원 참여 목록](#r14) | `GET` |
-| R15 | [지원 참여](#r15) | `POST` |
-| R16 | [본인 지원 참여 취소](#r16) | `PATCH` |
+| R01 | [내 신고 목록](#r01--내-신고-목록) | `GET` |
+| R02 | [내 신고 상세](#r02--내-신고-상세) | `GET` |
+| R03 | [관제 신고 목록](#r03--관제-신고-목록) | `GET` |
+| R04 | [관제 신고 상세](#r04--관제-신고-상세) | `GET` |
+| R05 | [지도 핀 목록](#r05--지도-핀-목록) | `GET` |
+| R06 | [신고 처리 이력](#r06--신고-처리-이력) | `GET` |
+| R07 | [담당 배정·분류 확정](#r07--담당-배정분류-확정) | `PATCH` |
+| R08 | [유형·위험도 수정](#r08--유형위험도-수정) | `PATCH` |
+| R09 | [신고 완료](#r09--신고-완료) | `PATCH` |
+| R10 | [담당 배정 취소](#r10--담당-배정-취소) | `PATCH` |
+| R11 | [신고 취소](#r11--신고-취소) | `PATCH` |
+| R12 | [지원요청 시작](#r12--지원요청-시작) | `POST` |
+| R13 | [지원요청 종료](#r13--지원요청-종료) | `PATCH` |
+| R14 | [지원 참여 목록](#r14--지원-참여-목록) | `GET` |
+| R15 | [지원 참여](#r15--지원-참여) | `POST` |
+| R16 | [본인 지원 참여 취소](#r16--본인-지원-참여-취소) | `PATCH` |
 
 ### 통계·내보내기
 
 | ID | 기능 | Method |
 |---|---|---|
-| O01 | [관제 통계](#o01) | `GET` |
-| O02 | [내 활동 리포트](#o02) | `GET` |
-| O03 | [활동 리포트 PDF](#o03) | `GET` |
-| O04 | [접근 경로 조회](#o04) | `GET` |
+| O01 | [관제 통계](#o01--관제-통계) | `GET` |
+| O02 | [내 활동 리포트](#o02--내-활동-리포트) | `GET` |
+| O03 | [활동 리포트 PDF](#o03--활동-리포트-pdf) | `GET` |
+| O04 | [접근 경로 조회](#o04--접근-경로-조회) | `GET` |
 
 ## 화면에서 API까지
 
@@ -80,18 +78,11 @@
 
 전체 29개 작업의 요청·응답·권한·실패 조건을 작성했습니다. 행사 신청·세션, 집계·PDF·경로는 미정 의존성을 명시했습니다. ERD·마이그레이션·외부 제공자 계약·앱 방식은 변경하지 않습니다. 아래에서 제시한 자원은 공개 API 표현이며 테이블과 일대일 대응할 필요가 없습니다.
 
-
 ---
-
-<a id="common"></a>
-
-<a id="common-공통-모델요청-규칙"></a>
 
 ## 공통 모델·요청 규칙
 
 > 검토안·미구현. 모든 축제 API에 적용할 제안입니다. 기존 `/health` 계약은 변경하지 않습니다.
-
-<a id="common-표현-규칙"></a>
 
 ### 표현 규칙
 
@@ -103,8 +94,6 @@
 - 입력 문자열은 앞뒤 공백 제거 후 필수 문자열이 비어 있으면 422입니다. 길이·음성 크기 상한은 미정이며 임의 숫자를 확정하지 않습니다.
 - 성공은 모델 자체를 반환하고 `{data: ...}`로 감싸지 않습니다. 204는 본문 없이 응답합니다.
 
-<a id="common-역할인증"></a>
-
 ### 역할·인증
 
 Bearer 세션을 시작안으로 제안합니다. 세션은 행사·역할·행위자 한 명에 귀속합니다. 서버는 이 값에서 조회 범위·변경자를 결정합니다. 클라이언트의 eventId/adminId로 다른 행사·사용자를 선택하지 않습니다.
@@ -113,21 +102,15 @@ Bearer 세션을 시작안으로 제안합니다. 세션은 행사·역할·행�
 
 인증 없음/무효는 401, 같은 행사에서 역할 부족은 403, 다른 행사 또는 다른 스태프 소유 자원은 존재를 노출하지 않는 404 제안입니다. 관리자 상세는 같은 행사 취소 신고도 읽을 수 있습니다. 모든 변경·재전송 응답 복구에서도 현재 자원 접근 권한을 검사합니다.
 
-<a id="common-응답-모델"></a>
-
 ### 응답 모델
 
-필드별 타입은 [응답 모델 사전](#models)에서 확인합니다.
-
-<a id="common-목록"></a>
+필드별 타입은 [응답 모델 사전](#응답-모델-사전)에서 확인합니다.
 
 ### 목록
 
 페이지 목록은 `{items:T[], nextCursor:string|null, asOf:string}`입니다. `cursor?`는 불투명 문자열, `pageSize?`는 정수 기본 20·최대 100 제안입니다. 경계 초과·잘못된 커서는 422입니다. 커서는 행사·행위자·필터·정렬에 귀속하고 다른 조건으로 재사용하면 422입니다.
 
 완전한 시점 스냅샷은 보장하지 않는 시작안입니다. 클라이언트는 ID로 중복 제거하고 첫 페이지를 새로고침합니다. 상태가 바뀌는 목록에서 페이지 사이 누락이 생길 수 있으며 영구 누락처럼 유지하지 않도록 새로고침합니다. 원문·이력 전체를 목록에 포함하지 않습니다.
-
-<a id="common-재전송동시성"></a>
 
 ### 재전송·동시성
 
@@ -140,8 +123,6 @@ Bearer 세션을 시작안으로 제안합니다. 세션은 행사·역할·행�
 보고서의 담당·분류·종결·지원 요청·참여 변경마다 report.version을 증가시키는 단순안을 제안합니다. 지원자가 동시에 여러 명 참여하면 일부가 STALE_VERSION을 받을 수 있어 새 상세 조회 후 다시 시도합니다. 인원 상한으로 거절하는 것은 아닙니다. 이 경합 비용은 A-05에서 검토합니다.
 
 GET 응답의 version이 클라이언트 보유 값보다 낮으면 현재 상태를 되돌리지 않습니다. `isUnacknowledged`는 시간만으로 바뀔 수 있으므로 같은 version에서는 asOf가 최신인 조회를 적용합니다. 리스트와 지도는 각각의 asOf를 갖고 원자적 스냅샷으로 간주하지 않습니다.
-
-<a id="common-오류"></a>
 
 ### 오류
 
@@ -179,19 +160,10 @@ GET 응답의 version이 클라이언트 보유 값보다 낮으면 현재 상�
 
 ---
 
-<a id="event-entry"></a>
-
-<a id="event-entry-행사세션제공자-지도-api"></a>
-
 ## 행사·세션·제공자 지도 API
 
-> 검토안·미구현. 기준: [행사 진입](../features/event-entry.md). 공통 접두사·모델·오류는 [공통 규칙](#common).
+> 검토안·미구현. 기준: [행사 진입](../features/event-entry.md). 공통 접두사·모델·오류는 [공통 규칙](#공통-모델요청-규칙).
 > **조건부:** TBD-01·02·04(코드 발급, 자격, 지도 매칭, 앱 방식). 사용자 구역 편집 API는 없습니다.
-
-
-<a id="e01"></a>
-
-<a id="event-entry-e01--행사-신청"></a>
 
 ### E01 · 행사 신청
 
@@ -200,8 +172,6 @@ POST /api/v1/event-applications
 ```
 
 행사 신청을 생성합니다. 신청자 자격 방식은 미정이며 공개 무인증 운영을 채택한 것이 아닙니다.
-
-<a id="event-entry-요청-body"></a>
 
 #### 요청 Body
 
@@ -214,8 +184,6 @@ POST /api/v1/event-applications
 | `endDate` | YYYY-MM-DD | 필수 |
 
  시작일≤종료일. 날짜를 자동으로 운영 시작/종료 시각으로 해석하지 않습니다. 장소 자유문자와 제공자 데이터의 매칭 방식은 TBD-02입니다. zones·gates·폴리곤 입력은 받지 않습니다.
-
-<a id="event-entry-성공-응답--201"></a>
 
 #### 성공 응답 · 201
 
@@ -232,10 +200,6 @@ ISSUED일 때 eventId/eventCode를 함께 제공하고 PENDING에는 둘 다 nul
 
 **오류:** 422 입력 오류, 401/403 신청자 자격 오류(정책 결정 후), 공통 멱등성 오류. 미지원 장소의 반려·재신청은 상태/오류를 임의 확정하지 않고 A-01에서 결정합니다.
 
-<a id="e02"></a>
-
-<a id="event-entry-e02--행사-신청-조회"></a>
-
 ### E02 · 행사 신청 조회
 
 ```http
@@ -244,10 +208,6 @@ GET /api/v1/event-applications/{applicationId}
 
 신청자 본인만 조회합니다. 200 Application. 본인 증명 수단은 A-01 미정이며 ID를 안다는 것만으로 행사 코드를 노출하지 않습니다. 401/403/404.
 
-<a id="e03"></a>
-
-<a id="event-entry-e03--세션-생성"></a>
-
 ### E03 · 세션 생성
 
 ```http
@@ -255,8 +215,6 @@ POST /api/v1/sessions
 ```
 
 역할별 진입을 하나의 계약으로 제안합니다.
-
-<a id="event-entry-요청-body-1"></a>
 
 #### 요청 Body
 
@@ -268,7 +226,6 @@ POST /api/v1/sessions
 | `team` | string | STAFF만 필수; ADMIN은 전송하지 않음 |
 
 - 관리자 자격 증명 입력은 아직 정의하지 않았습니다. 현재 필드만으로 운영 인증을 구현하지 않습니다.
-<a id="event-entry-성공-응답--201-1"></a>
 
 #### 성공 응답 · 201
 
@@ -290,10 +247,6 @@ POST /api/v1/sessions
 - 같은 이름의 동명이인을 자동으로 기존 계정으로 복구하지 않습니다. 역할·세션 재진입 동일인 처리와 코드 오류 표시는 A-02에서 결정합니다.
 - **오류:** 422, 자격 불충족 401/403, 공통 멱등성 오류. 토큰 생성·만료 길이·발급 재시도 정책은 조건부입니다.
 
-<a id="e04"></a>
-
-<a id="event-entry-e04--내-세션-조회"></a>
-
 ### E04 · 내 세션 조회
 
 ```http
@@ -301,10 +254,6 @@ GET /api/v1/sessions/me
 ```
 
 인증한 본인의 `role,event,actor,expiresAt`을 200으로 반환합니다. token을 재노출하지 않습니다. 팀은 소속 표시이며 zoneId 필드는 없습니다. 401.
-
-<a id="e05"></a>
-
-<a id="event-entry-e05--행사-지도-조회"></a>
 
 ### E05 · 행사 지도 조회
 
@@ -333,8 +282,6 @@ GET /api/v1/events/current/map
 - 잘못된 행사·준비되지 않은 데이터를 빈 구역 배열로 성공 처리해 준비 완료처럼 보이지 않습니다. 준비중 상태의 HTTP/코드는 A-01에서 결정합니다.
 - **오류:** 401/404, 실제 동기 제공자 호출 실패는 503. 저장된 구역 조회와 외부 지도 렌더 실패를 같은 오류로 취급하지 않습니다.
 
-<a id="event-entry-예시"></a>
-
 ### 예시
 
 ```json
@@ -350,19 +297,10 @@ GET /api/v1/events/current/map
 
 ---
 
-<a id="intake"></a>
-
-<a id="intake-분석신고-접수-api"></a>
-
 ## 분석·신고 접수 API
 
-> 검토안·미구현. 기준: [입력 흐름](../features/report-intake.md). 공통은 [공통 규칙](#common).
+> 검토안·미구현. 기준: [입력 흐름](../features/report-intake.md). 공통은 [공통 규칙](#공통-모델요청-규칙).
 > GPS 실패·위치 허용 오차·입력/파일 제한·분석 실패 대안은 TBD-03·06입니다. 아래 접수는 정상 GPS 확보 흐름만 정의하며 GPS 실패 때 전송 차단/수동 대체를 확정하지 않습니다.
-
-
-<a id="i01"></a>
-
-<a id="intake-i01--신고-내용-분석"></a>
 
 ### I01 · 신고 내용 분석
 
@@ -381,8 +319,6 @@ POST /api/v1/report-analyses
 | `inputMethod` | "TEXT" |
 | `text` | string |
 
-<a id="intake-요청-body--음성"></a>
-
 #### 요청 Body · 음성
 
 `Content-Type: multipart/form-data`
@@ -393,7 +329,6 @@ POST /api/v1/report-analyses
 | `audio` | 바이너리 파일 1개 | 필수 |
 
 녹음 종료 후 업로드하는 제안입니다.
-<a id="intake-성공-응답--202"></a>
 
 #### 성공 응답 · 202
 
@@ -409,10 +344,6 @@ Location은 `/api/v1/report-analyses/{id}`입니다.
 **오류:** 401/403, 422 빈 텍스트/필드 오류, 413/415 파일 제한, 공통 멱등성 오류.
 - 허용 코덱·MIME·파일 크기·녹음 길이·텍스트 길이·분석 보관 기간은 A-03 미정입니다.
 
-<a id="i02"></a>
-
-<a id="intake-i02--분석-결과-조회"></a>
-
 ### I02 · 분석 결과 조회
 
 ```http
@@ -420,8 +351,6 @@ GET /api/v1/report-analyses/{analysisId}
 ```
 
 행사·분석 소유자 일치 시 200 Analysis를 반환합니다. 다른 행위자 분석은 404. 폴링을 시작안으로 제안하며 주기는 미정입니다.
-
-<a id="intake-성공-응답--200-analysis"></a>
 
 #### 성공 응답 · 200 Analysis
 
@@ -443,10 +372,6 @@ GET /api/v1/report-analyses/{analysisId}
 - expiresAt은 실제 유효기간을 정한 후 채웁니다. null은 유효기간 정책 미설정이며 무기한 보존 확정이 아닙니다.
 - 실패 분석에서 자동으로 ‘기타/주의’ 신고를 만들지 않습니다. 수동 전송 허용과 fallback 분류는 미정입니다.
 
-<a id="i03"></a>
-
-<a id="intake-i03--스태프-신고-전송"></a>
-
 ### I03 · 스태프 신고 전송
 
 ```http
@@ -454,8 +379,6 @@ POST /api/v1/staff/reports
 ```
 
 STAFF의 확인 화면 ‘전송하기’입니다.
-
-<a id="intake-요청-body"></a>
 
 #### 요청 Body
 
@@ -465,16 +388,15 @@ STAFF의 확인 화면 ‘전송하기’입니다.
 | `contentFinal` | string | 필수 |
 | `type` | ReportType | 필수 |
 | `urgency` | Urgency | 필수 |
-| `position` | [Position](#models-position) | 필수 |
+| `position` | [Position](#position) | 필수 |
 
  inputMethod·원문·최초 AI 제안은 분석에서 가져옵니다.
 
 - analysisId는 같은 행사·본인 소유·READY·유효한 분석이어야 합니다.
-<a id="intake-성공-응답--201"></a>
 
 #### 성공 응답 · 201
 
-[StaffReport](#models-staffreport). 상태 RECEIVED, claimedBy/claimedAt/resolvedAt/cancelledAt=null. createdAt은 서버 최종 접수 시각입니다. Location은 `/api/v1/staff/reports/{id}`입니다.
+[StaffReport](#staffreport). 상태 RECEIVED, claimedBy/claimedAt/resolvedAt/cancelledAt=null. createdAt은 서버 최종 접수 시각입니다. Location은 `/api/v1/staff/reports/{id}`입니다.
 - 서버가 GPS 위치 출처와 현재 구역을 판정합니다. zoneId·positionSource·reporter·status·createdAt 입력은 거절합니다.
 - 최종 type/urgency가 AI 제안과 다르면 STAFF_EDITED, 같으면 AI_SUGGESTED로 기록하는 제안입니다. 수정했다 원래 값으로 되돌린 UI 과정까지 ‘최종 값 변경’으로 기록하지 않습니다.
 - 분석 하나는 최종 신고 하나에만 사용할 수 있는 제안입니다. 같은 Idempotency-Key 재시도는 최초 201을 복구하고, 다른 키로 재사용하면 409 ANALYSIS_ALREADY_USED입니다.
@@ -497,10 +419,6 @@ STAFF의 확인 화면 ‘전송하기’입니다.
 
 예시 좌표와 시각은 실제 신고가 아닙니다. 위치 정확도·유효 시간 기준을 나타내지 않습니다.
 
-<a id="i04"></a>
-
-<a id="intake-i04--관리자-직접-신고"></a>
-
 ### I04 · 관리자 직접 신고
 
 ```http
@@ -509,8 +427,6 @@ POST /api/v1/admin/reports
 
 ADMIN의 지도 선택 직접 신고입니다.
 
-<a id="intake-요청-body-1"></a>
-
 #### 요청 Body
 
 | 필드 | 타입 | 필수 여부 |
@@ -518,25 +434,19 @@ ADMIN의 지도 선택 직접 신고입니다.
 | `analysisId` | string | 필수 |
 | `contentFinal` | string | 필수 |
 | `type` | ReportType | 필수 |
-| `position` | [Position](#models-position) | 필수 |
+| `position` | [Position](#position) | 필수 |
 
  분석은 본인 TEXT/READY여야 합니다. urgency 입력은 받지 않고 분석의 위험도 제안을 사용합니다.
 
-<a id="intake-성공-응답--201-1"></a>
-
 #### 성공 응답 · 201
 
-[ReportDetail](#models-reportdetail). 상태 RECEIVED, 담당 없음. type.source=ADMIN_SELECTED, urgency.source=AI_SUGGESTED입니다. `confirmedBy/confirmedAt`은 null이며 생성이 담당 배정·분류 확정을 대체하지 않습니다. positionSource=MAP_SELECTED입니다. 이후 claim으로 맡아야 합니다.
+[ReportDetail](#reportdetail). 상태 RECEIVED, 담당 없음. type.source=ADMIN_SELECTED, urgency.source=AI_SUGGESTED입니다. `confirmedBy/confirmedAt`은 null이며 생성이 담당 배정·분류 확정을 대체하지 않습니다. positionSource=MAP_SELECTED입니다. 이후 claim으로 맡아야 합니다.
 
 분석 소유권·단일 사용·멱등성·오류는 I03과 같습니다. 관리자가 편집할 위치의 capturedAt은 지도 선택 시각, accuracyMeters는 null입니다. 상세 확인 UI의 분석 호출 위치는 화면 연결 시 검토합니다.
-
-<a id="intake-오프라인-경계"></a>
 
 ### 오프라인 경계
 
 음성·텍스트 초안과 전송 대기는 아직 서버 신고가 아닙니다. READY 분석을 참조한 최종 전송의 응답만 유실되었다면 동일 키로 복구합니다. 앱이 오프라인에서 새 분석을 완료했다고 표시하지 않습니다. 임시 분석 만료 후 대기 신고 처리, 앱 재설치·세션 만료 후 동일인 복구, 키 보관 기간은 A-02~04에서 결정합니다.
-
-<a id="intake-최종-접수-성공-응답-예시"></a>
 
 ### 최종 접수 성공 응답 예시
 
@@ -579,22 +489,11 @@ ADMIN의 지도 선택 직접 신고입니다.
 
 ---
 
-<a id="report-queries"></a>
-
-<a id="report-queries-신고-조회-api"></a>
-
 ## 신고 조회 API
 
-> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#common).
-
-<a id="report-queries-조회"></a>
+> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#공통-모델요청-규칙).
 
 ### 조회
-
-
-<a id="r01"></a>
-
-<a id="report-queries-r01--내-신고-목록"></a>
 
 ### R01 · 내 신고 목록
 
@@ -602,27 +501,17 @@ ADMIN의 지도 선택 직접 신고입니다.
 GET /api/v1/staff/reports
 ```
 
-<a id="report-queries-권한요청"></a>
-
 #### 권한·요청
 
 STAFF 본인, cursor?,pageSize?
-
-<a id="report-queries-성공-응답"></a>
 
 #### 성공 응답
 
 **200** · Page<StaffReport>
 
-<a id="report-queries-오류"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="r02"></a>
-
-<a id="report-queries-r02--내-신고-상세"></a>
 
 ### R02 · 내 신고 상세
 
@@ -630,27 +519,17 @@ STAFF 본인, cursor?,pageSize?
 GET /api/v1/staff/reports/{reportId}
 ```
 
-<a id="report-queries-권한요청-1"></a>
-
 #### 권한·요청
 
 STAFF 본인
-
-<a id="report-queries-성공-응답-1"></a>
 
 #### 성공 응답
 
 **200** · StaffReport
 
-<a id="report-queries-오류-1"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="r03"></a>
-
-<a id="report-queries-r03--관제-신고-목록"></a>
 
 ### R03 · 관제 신고 목록
 
@@ -658,27 +537,17 @@ STAFF 본인
 GET /api/v1/admin/reports
 ```
 
-<a id="report-queries-권한요청-2"></a>
-
 #### 권한·요청
 
 ADMIN 같은 행사, sort?=recent 또는 urgency, types?,statuses?,cursor?,pageSize?
-
-<a id="report-queries-성공-응답-2"></a>
 
 #### 성공 응답
 
 **200** · Page<ReportCard>
 
-<a id="report-queries-오류-2"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="r04"></a>
-
-<a id="report-queries-r04--관제-신고-상세"></a>
 
 ### R04 · 관제 신고 상세
 
@@ -686,27 +555,17 @@ ADMIN 같은 행사, sort?=recent 또는 urgency, types?,statuses?,cursor?,pageS
 GET /api/v1/admin/reports/{reportId}
 ```
 
-<a id="report-queries-권한요청-3"></a>
-
 #### 권한·요청
 
 ADMIN 같은 행사
-
-<a id="report-queries-성공-응답-3"></a>
 
 #### 성공 응답
 
 **200** · ReportDetail
 
-<a id="report-queries-오류-3"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="r05"></a>
-
-<a id="report-queries-r05--지도-핀-목록"></a>
 
 ### R05 · 지도 핀 목록
 
@@ -714,27 +573,17 @@ ADMIN 같은 행사
 GET /api/v1/admin/map-reports
 ```
 
-<a id="report-queries-권한요청-4"></a>
-
 #### 권한·요청
 
 ADMIN 같은 행사, types?,statuses?,cursor?,pageSize?
-
-<a id="report-queries-성공-응답-4"></a>
 
 #### 성공 응답
 
 **200** · Page<MapPin>
 
-<a id="report-queries-오류-4"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="r06"></a>
-
-<a id="report-queries-r06--신고-처리-이력"></a>
 
 ### R06 · 신고 처리 이력
 
@@ -742,25 +591,17 @@ ADMIN 같은 행사, types?,statuses?,cursor?,pageSize?
 GET /api/v1/admin/reports/{reportId}/logs
 ```
 
-<a id="report-queries-권한요청-5"></a>
-
 #### 권한·요청
 
 ADMIN 같은 행사, cursor?,pageSize?
-
-<a id="report-queries-성공-응답-5"></a>
 
 #### 성공 응답
 
 **200** · Page<Log>
 
-<a id="report-queries-오류-5"></a>
-
 #### 오류
 
 조회 공통 오류: 401 / 403 / 404, 쿼리 검증 422.
-
-<a id="report-queries-공통-처리-규칙"></a>
 
 ### 공통 처리 규칙
 
@@ -776,35 +617,21 @@ Log.action 제안: REPORT_CREATED, REPORT_CLAIMED, CLASSIFICATION_CHANGED, ASSIG
 
 조회 오류: 공통 401/403/404, 쿼리 검증 422. 실시간 갱신은 조회 기반 시작안이며 WebSocket·SSE 계약을 확정하지 않습니다.
 
-
 ---
-
-<a id="report-actions"></a>
-
-<a id="report-actions-신고-담당완료취소-api"></a>
 
 ## 신고 담당·완료·취소 API
 
-> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#common).
-
-<a id="report-actions-처리-액션"></a>
+> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#공통-모델요청-규칙).
 
 ### 처리 액션
 
 모든 작업은 ADMIN 같은 행사, Idempotency-Key 및 expectedVersion이 필요합니다. 성공은 **200 ReportDetail**이며 변경 후 version을 반환합니다. 업무 변경과 이력은 함께 기록합니다. 성공 재전송은 최초 결과를 돌려줍니다. 새 키로 같은 종결 동작을 반복하면 409 INVALID_REPORT_STATE입니다.
-
-
-<a id="r07"></a>
-
-<a id="report-actions-r07--담당-배정분류-확정"></a>
 
 ### R07 · 담당 배정·분류 확정
 
 ```http
 PATCH /api/v1/admin/reports/{reportId}/claim
 ```
-
-<a id="report-actions-요청-body"></a>
 
 #### 요청 Body
 
@@ -814,35 +641,23 @@ PATCH /api/v1/admin/reports/{reportId}/claim
 | `type` | ReportType | 필수 |
 | `urgency` | Urgency | 필수 |
 
-<a id="report-actions-성공-응답"></a>
-
 #### 성공 응답
 
-**200** · [ReportDetail](#models-reportdetail)
-
-<a id="report-actions-권한처리-규칙"></a>
+**200** · [ReportDetail](#reportdetail)
 
 #### 권한·처리 규칙
 
 RECEIVED. 담당·IN_PROGRESS·유형/위험도 ADMIN_CONFIRMED를 함께 저장
 
-<a id="report-actions-오류"></a>
-
 #### 오류
 
-[처리 액션 공통 규칙](#report-actions-처리-액션)을 따릅니다.
-
-<a id="r08"></a>
-
-<a id="report-actions-r08--유형위험도-수정"></a>
+[처리 액션 공통 규칙](#처리-액션)을 따릅니다.
 
 ### R08 · 유형·위험도 수정
 
 ```http
 PATCH /api/v1/admin/reports/{reportId}/classification
 ```
-
-<a id="report-actions-요청-body-1"></a>
 
 #### 요청 Body
 
@@ -852,35 +667,23 @@ PATCH /api/v1/admin/reports/{reportId}/classification
 | `type` | ReportType | 선택 |
 | `urgency` | Urgency | 선택 |
 
-<a id="report-actions-성공-응답-1"></a>
-
 #### 성공 응답
 
-**200** · [ReportDetail](#models-reportdetail)
-
-<a id="report-actions-권한처리-규칙-1"></a>
+**200** · [ReportDetail](#reportdetail)
 
 #### 권한·처리 규칙
 
 IN_PROGRESS 현재 담당자, type/urgency 최소 하나, null 불가
 
-<a id="report-actions-오류-1"></a>
-
 #### 오류
 
-[처리 액션 공통 규칙](#report-actions-처리-액션)을 따릅니다.
-
-<a id="r09"></a>
-
-<a id="report-actions-r09--신고-완료"></a>
+[처리 액션 공통 규칙](#처리-액션)을 따릅니다.
 
 ### R09 · 신고 완료
 
 ```http
 PATCH /api/v1/admin/reports/{reportId}/resolve
 ```
-
-<a id="report-actions-요청-body-2"></a>
 
 #### 요청 Body
 
@@ -889,27 +692,17 @@ PATCH /api/v1/admin/reports/{reportId}/resolve
 | `expectedVersion` | integer ≥ 1 | 필수 |
 | `resolveNote` | string 또는 null | 선택 |
 
-<a id="report-actions-성공-응답-2"></a>
-
 #### 성공 응답
 
-**200** · [ReportDetail](#models-reportdetail)
-
-<a id="report-actions-권한처리-규칙-2"></a>
+**200** · [ReportDetail](#reportdetail)
 
 #### 권한·처리 규칙
 
 IN_PROGRESS 현재 담당자, RESOLVED·resolvedAt 기록. 메모 생략/null/공백은 null 제안
 
-<a id="report-actions-오류-2"></a>
-
 #### 오류
 
-[처리 액션 공통 규칙](#report-actions-처리-액션)을 따릅니다.
-
-<a id="r10"></a>
-
-<a id="report-actions-r10--담당-배정-취소"></a>
+[처리 액션 공통 규칙](#처리-액션)을 따릅니다.
 
 ### R10 · 담당 배정 취소
 
@@ -917,43 +710,29 @@ IN_PROGRESS 현재 담당자, RESOLVED·resolvedAt 기록. 메모 생략/null/�
 PATCH /api/v1/admin/reports/{reportId}/release
 ```
 
-<a id="report-actions-요청-body-3"></a>
-
 #### 요청 Body
 
 | 필드 | 타입 | 필수 여부 |
 |---|---|---|
 | `expectedVersion` | integer ≥ 1 | 필수 |
 
-<a id="report-actions-성공-응답-3"></a>
-
 #### 성공 응답
 
-**200** · [ReportDetail](#models-reportdetail)
-
-<a id="report-actions-권한처리-규칙-3"></a>
+**200** · [ReportDetail](#reportdetail)
 
 #### 권한·처리 규칙
 
 IN_PROGRESS 현재 담당자, RECEIVED·현재 담당/claimedAt 해제, createdAt·과거 이력 유지
 
-<a id="report-actions-오류-3"></a>
-
 #### 오류
 
-[처리 액션 공통 규칙](#report-actions-처리-액션)을 따릅니다.
-
-<a id="r11"></a>
-
-<a id="report-actions-r11--신고-취소"></a>
+[처리 액션 공통 규칙](#처리-액션)을 따릅니다.
 
 ### R11 · 신고 취소
 
 ```http
 PATCH /api/v1/admin/reports/{reportId}/cancel
 ```
-
-<a id="report-actions-요청-body-4"></a>
 
 #### 요청 Body
 
@@ -962,25 +741,17 @@ PATCH /api/v1/admin/reports/{reportId}/cancel
 | `expectedVersion` | integer ≥ 1 | 필수 |
 | `cancelReason` | string | 필수 |
 
-<a id="report-actions-성공-응답-4"></a>
-
 #### 성공 응답
 
-**200** · [ReportDetail](#models-reportdetail)
-
-<a id="report-actions-권한처리-규칙-4"></a>
+**200** · [ReportDetail](#reportdetail)
 
 #### 권한·처리 규칙
 
 RECEIVED 또는 IN_PROGRESS, 같은 행사 관리자 누구나, 필수 사유·cancelledBy·cancelledAt 기록
 
-<a id="report-actions-오류-4"></a>
-
 #### 오류
 
-[처리 액션 공통 규칙](#report-actions-처리-액션)을 따릅니다.
-
-<a id="report-actions-공통-처리-규칙"></a>
+[처리 액션 공통 규칙](#처리-액션)을 따릅니다.
 
 ### 공통 처리 규칙
 
@@ -1005,27 +776,15 @@ R10에서 note를 받지 않는 것은 사유 정책 미정(TBD-07)에 대한 �
 }
 ```
 
-
 ---
-
-<a id="support"></a>
-
-<a id="support-지원-요청참여-api"></a>
 
 ## 지원 요청·참여 API
 
-> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#common).
-
-<a id="support-지원-요청"></a>
+> 검토안·미구현. 기준: [처리 권한](../features/report-lifecycle.md), [관제](../features/command-dashboard.md). 모델·오류·경합 우선순위는 [공통 규칙](#공통-모델요청-규칙).
 
 ### 지원 요청
 
 요청과 참여에 각각 ID를 부여합니다. 새 요청은 새 ID, 본인 취소 후 재참여도 새 참여 ID입니다. 과거 참여를 다시 활성화하지 않는 API 제안으로 지연된 취소가 새 참여를 끝내지 못하게 합니다.
-
-
-<a id="r12"></a>
-
-<a id="support-r12--지원요청-시작"></a>
 
 ### R12 · 지원요청 시작
 
@@ -1033,27 +792,17 @@ R10에서 note를 받지 않는 것은 사유 정책 미정(TBD-07)에 대한 �
 POST /api/v1/admin/reports/{reportId}/support-requests
 ```
 
-<a id="support-권한요청"></a>
-
 #### 권한·요청
 
 expectedVersion, IN_PROGRESS 담당자·현재 활성 요청 없음
-
-<a id="support-성공-응답"></a>
 
 #### 성공 응답
 
 201 `{supportRequest:SupportRequest,reportVersion:integer}`
 
-<a id="support-오류"></a>
-
 #### 오류
 
 지원 공통 오류: 401 / 403 / 404 / 422 / 409. 상세 조건은 아래 공통 처리 규칙을 따릅니다.
-
-<a id="r13"></a>
-
-<a id="support-r13--지원요청-종료"></a>
 
 ### R13 · 지원요청 종료
 
@@ -1061,27 +810,17 @@ expectedVersion, IN_PROGRESS 담당자·현재 활성 요청 없음
 PATCH /api/v1/admin/reports/{reportId}/support-requests/{requestId}/close
 ```
 
-<a id="support-권한요청-1"></a>
-
 #### 권한·요청
 
 expectedVersion, 현재 담당자·해당 활성 요청
-
-<a id="support-성공-응답-1"></a>
 
 #### 성공 응답
 
 200 `{supportRequest:SupportRequest,reportVersion:integer}`
 
-<a id="support-오류-1"></a>
-
 #### 오류
 
 지원 공통 오류: 401 / 403 / 404 / 422 / 409. 상세 조건은 아래 공통 처리 규칙을 따릅니다.
-
-<a id="r14"></a>
-
-<a id="support-r14--지원-참여-목록"></a>
 
 ### R14 · 지원 참여 목록
 
@@ -1089,27 +828,17 @@ expectedVersion, 현재 담당자·해당 활성 요청
 GET /api/v1/admin/reports/{reportId}/support-requests/{requestId}/participants
 ```
 
-<a id="support-권한요청-2"></a>
-
 #### 권한·요청
 
 같은 행사 ADMIN, cursor?,pageSize?
-
-<a id="support-성공-응답-2"></a>
 
 #### 성공 응답
 
 Page<Participation>
 
-<a id="support-오류-2"></a>
-
 #### 오류
 
 지원 공통 오류: 401 / 403 / 404 / 422 / 409. 상세 조건은 아래 공통 처리 규칙을 따릅니다.
-
-<a id="r15"></a>
-
-<a id="support-r15--지원-참여"></a>
 
 ### R15 · 지원 참여
 
@@ -1117,27 +846,17 @@ Page<Participation>
 POST /api/v1/admin/reports/{reportId}/support-requests/{requestId}/participants
 ```
 
-<a id="support-권한요청-3"></a>
-
 #### 권한·요청
 
 expectedVersion, 같은 행사 타 관리자·활성 요청
-
-<a id="support-성공-응답-3"></a>
 
 #### 성공 응답
 
 201 `{participation:Participation,reportVersion:integer}`
 
-<a id="support-오류-3"></a>
-
 #### 오류
 
 지원 공통 오류: 401 / 403 / 404 / 422 / 409. 상세 조건은 아래 공통 처리 규칙을 따릅니다.
-
-<a id="r16"></a>
-
-<a id="support-r16--본인-지원-참여-취소"></a>
 
 ### R16 · 본인 지원 참여 취소
 
@@ -1145,25 +864,17 @@ expectedVersion, 같은 행사 타 관리자·활성 요청
 PATCH /api/v1/admin/reports/{reportId}/support-requests/{requestId}/participants/{participationId}/cancel
 ```
 
-<a id="support-권한요청-4"></a>
-
 #### 권한·요청
 
 expectedVersion, 참여 본인·해당 참여 활성
-
-<a id="support-성공-응답-4"></a>
 
 #### 성공 응답
 
 200 `{participation:Participation,reportVersion:integer}`
 
-<a id="support-오류-4"></a>
-
 #### 오류
 
 지원 공통 오류: 401 / 403 / 404 / 422 / 409. 상세 조건은 아래 공통 처리 규칙을 따릅니다.
-
-<a id="support-공통-처리-규칙"></a>
 
 ### 공통 처리 규칙
 
@@ -1176,29 +887,17 @@ expectedVersion, 참여 본인·해당 참여 활성
 - 모든 경로 ID의 부모 reportId/requestId 일치를 검사합니다. 불일치는 404입니다. 성공·실패 모두 원래 담당자·claimedAt을 지원자로 바꾸지 않습니다.
 - 오류는 공통 401/403/404/422/409입니다. reportVersion은 report.version과 같은 값입니다.
 
-<a id="support-지원과-담당-해제종결--조건부-보완안"></a>
-
 ### 지원과 담당 해제·종결 — 조건부 보완안
 
 TBD-07에 대해 release/resolve/cancel 시 활성 요청을 함께 닫고 해당 참여를 종료하는 방안을 제안합니다. closeReason은 각각 REPORT_RELEASED / REPORT_RESOLVED / REPORT_CANCELLED이며 참여 endReason은 REQUEST_CLOSED입니다. 신고 변경·요청 종료·참여 종료·이력은 함께 반영합니다.
 
 이는 사용자가 확정한 ‘담당자의 수동 지원요청 종료’와 별개인 **미확정 제안**입니다. 이 정책이 채택되기 전에는 관련 동작의 전체 계약을 구현 승인으로 해석하지 않습니다. 어떤 경우에도 종결 뒤 새 지원을 생성하거나 과거 요청이 새 참여를 수정해서는 안 됩니다.
 
-
 ---
-
-<a id="outputs"></a>
-
-<a id="outputs-활동-리포트pdf경로-api"></a>
 
 ## 활동 리포트·PDF·경로 API
 
 > **조건부 검토안·미구현**. 기준: [활동 리포트](../features/activity-report.md), [관제](../features/command-dashboard.md). 집계·PDF·경로 제공자를 이번 문서에서 확정하지 않습니다.
-
-
-<a id="o01"></a>
-
-<a id="outputs-o01--관제-통계"></a>
 
 ### O01 · 관제 통계
 
@@ -1219,10 +918,6 @@ GET /api/v1/admin/stats
 | `asOf` | string |
 
  제안입니다. total의 취소 포함 여부는 TBD-05/10을 먼저 결정해야 합니다. 쿼리는 없습니다. 목록 필터의 통계인지 행사 전체 통계인지도 A-06에서 결정합니다. 401/403.
-
-<a id="o02"></a>
-
-<a id="outputs-o02--내-활동-리포트"></a>
 
 ### O02 · 내 활동 리포트
 
@@ -1260,10 +955,6 @@ GET /api/v1/staff/activity-report
 
 평균의 시작·종료는 담당 배정→완료입니다. 단일 배정의 경우 접수 10:00·배정 10:05·완료 10:15이면 600초입니다. 완료 0건의 null 및 소수 반올림은 검토안입니다. 재배정된 건을 제외하거나 최신 claimedAt만 쓰는 정책은 확정하지 않습니다. 401/403/422.
 
-<a id="o03"></a>
-
-<a id="outputs-o03--활동-리포트-pdf"></a>
-
 ### O03 · 활동 리포트 PDF
 
 ```http
@@ -1276,10 +967,6 @@ STAFF 본인, `period=TODAY|WEEK|ALL` 제안입니다. 이 경로와 매체는 P
 - 앱에서 PDF를 만들기로 하면 이 경로 대신 전체 범위 export 데이터 계약을 작성합니다. 페이지 제한 없는 조회의 규모·시간 제한도 함께 정합니다.
 - 어느 방식이든 선택 기간 전체 요약과 내역을 사용하며 마지막 페이지 누락이 없어야 합니다. 다른 스태프 데이터는 포함하지 않습니다.
 - 생성 시점 스냅샷, 파일 보관·유효기간·다운로드 재시도·장시간 생성의 비동기 전환은 A-07 미정입니다. 401/403/422, 생성 오류의 실제 계약은 방식 선정 후 정의합니다.
-
-<a id="o04"></a>
-
-<a id="outputs-o04--접근-경로-조회"></a>
 
 ### O04 · 접근 경로 조회
 
@@ -1310,16 +997,9 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 
 ---
 
-<a id="models"></a>
-
-<a id="models-응답-모델-사전"></a>
-
 ## 응답 모델 사전
 
 > 검토안·미구현. 필드명·타입·null 허용은 기존 v0.1 제안과 같습니다.
-
-
-<a id="models-actor"></a>
 
 #### Actor
 
@@ -1327,8 +1007,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 |---|---|
 | `id` | string |
 | `name` | string |
-
-<a id="models-position"></a>
 
 #### Position
 
@@ -1339,8 +1017,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `capturedAt` | string |
 | `accuracyMeters` | number≥0 또는 null |
 
-<a id="models-classification"></a>
-
 #### Classification
 
 | 필드 | 타입·허용값 |
@@ -1349,8 +1025,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `source` | AI_SUGGESTED / STAFF_EDITED / ADMIN_SELECTED / ADMIN_CONFIRMED |
 | `confirmedBy` | Actor 또는 null |
 | `confirmedAt` | string 또는 null |
-
-<a id="models-reportcard"></a>
 
 #### ReportCard
 
@@ -1374,11 +1048,9 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `supportRequestId` | string 또는 null |
 | `activeSupporterCount` | integer≥0 |
 
-<a id="models-reportdetail"></a>
-
 #### ReportDetail
 
-[ReportCard](#models-reportcard)의 모든 필드에 아래를 추가합니다.
+[ReportCard](#reportcard)의 모든 필드에 아래를 추가합니다.
 
 | 필드 | 타입·허용값 |
 |---|---|
@@ -1393,8 +1065,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `cancelledAt` | string 또는 null |
 | `cancelledBy` | Actor 또는 null |
 | `cancelReason` | string 또는 null |
-
-<a id="models-staffreport"></a>
 
 #### StaffReport
 
@@ -1415,8 +1085,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `resolvedAt` | string 또는 null |
 | `cancelledAt` | string 또는 null |
 
-<a id="models-log"></a>
-
 #### Log
 
 | 필드 | 타입·허용값 |
@@ -1428,8 +1096,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `changes` | Change[] |
 | `note` | string 또는 null |
 
-<a id="models-change"></a>
-
 #### Change
 
 | 필드 | 타입·허용값 |
@@ -1437,8 +1103,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `field` | string |
 | `before` | JSON 값 또는 null |
 | `after` | JSON 값 또는 null |
-
-<a id="models-supportrequest"></a>
 
 #### SupportRequest
 
@@ -1450,8 +1114,6 @@ AVAILABLE은 실제 제공자 경로·거리·시간·provider가 non-null, NO_R
 | `openedAt` | string |
 | `closedAt` | string 또는 null |
 | `closeReason` | MANUAL / REPORT_RELEASED / REPORT_RESOLVED / REPORT_CANCELLED 또는 null |
-
-<a id="models-participation"></a>
 
 #### Participation
 
@@ -1474,15 +1136,9 @@ StaffReport는 내역용 최소 공개 모델입니다. 관리자 내부 메모�
 
 ---
 
-<a id="review"></a>
-
-<a id="review-api-검증결정-목록"></a>
-
 ## API 검증·결정 목록
 
 > 상태: 검토안. 문서 검토 결과와 실제 API 테스트를 구분합니다. 이번 작업은 코드·ERD 구현을 포함하지 않습니다.
-
-<a id="review-구현-전-검토-대상"></a>
 
 ### 구현 전 검토 대상
 
@@ -1499,8 +1155,6 @@ StaffReport는 내역용 최소 공개 모델입니다. 관리자 내부 메모�
 | A-09 | 접두사·UUID/시각·null·새 업무 코드·미등록 필드 거절 제안 | 전체 계약·공통 핸들러 후속 확장 |
 
 API 영문 enum·필드명이 기획 확정을 대신하지 않습니다. 고정된 ‘최대 지원 인원’이나 ‘자동 긴급 승격’을 추가하지 않았습니다. 동시성 제안을 채택하더라도 담당 권한·취소 권한 자체는 PRD 확정 기준을 따릅니다.
-
-<a id="review-인수-조건-연결"></a>
 
 ### 인수 조건 연결
 
@@ -1522,8 +1176,6 @@ API 영문 enum·필드명이 기획 확정을 대신하지 않습니다. 고정
 | 오류·문서 연결 | 기존 공통 규칙 | 상태/code/필드 camelCase 일치, 미구현 422 변환을 구현된 것으로 표시하지 않음 |
 
 지원 정리·기간 산식·GPS 실패 등 조건부 행위는 먼저 정책을 채택한 뒤 테스트 기대값을 확정합니다. 문서 속 예시 응답을 mock으로 반환한 결과는 실제 동시성·접수·AI·지도 기능 검증이 아닙니다.
-
-<a id="review-검토-후-순서"></a>
 
 ### 검토 후 순서
 
