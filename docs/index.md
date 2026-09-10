@@ -37,7 +37,7 @@ docs/
 │   ├── naming.md      # JSON·쿼리 필드 네이밍·외부 입력 지원 범위
 │   ├── integration-contracts.md # 프론트·백엔드 계약 검토
 │   ├── festival.md    # 축제 API v0.1 검토안 목차
-│   ├── festival/      # index·common·event-entry·intake·reports·outputs·review
+│   ├── festival/      # index·common·models·event-entry·intake·reports·report-queries·report-actions·support·outputs·review
 │   └── health.md      # 앱 상태 확인 계약
 ├── db/
 │   └── index.md       # DB 모델·ERD·저장 제약 명세 목록

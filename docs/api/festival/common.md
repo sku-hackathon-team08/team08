@@ -20,28 +20,9 @@ Bearer 세션을 시작안으로 제안합니다. 세션은 행사·역할·행�
 
 인증 없음/무효는 401, 같은 행사에서 역할 부족은 403, 다른 행사 또는 다른 스태프 소유 자원은 존재를 노출하지 않는 404 제안입니다. 관리자 상세는 같은 행사 취소 신고도 읽을 수 있습니다. 모든 변경·재전송 응답 복구에서도 현재 자원 접근 권한을 검사합니다.
 
-## 공개 모델
+## 응답 모델
 
-| 모델 | 필드·타입 |
-|---|---|
-| Actor | id:string, name:string |
-| Position | lat:number[-90,90], lng:number[-180,180], capturedAt:string, accuracyMeters:number≥0 또는 null |
-| Classification | value:유형 또는 위험도 enum, source:AI_SUGGESTED / STAFF_EDITED / ADMIN_SELECTED / ADMIN_CONFIRMED, confirmedBy:Actor 또는 null, confirmedAt:string 또는 null |
-| ReportCard | id:string, version:integer≥1, contentFinal:string, type:Classification, urgency:Classification, status:ReportStatus, position:Position, positionSource:GPS / MAP_SELECTED, zone:{id:string,name:string} 또는 null, createdAt:string, claimedBy:Actor 또는 null, claimedAt:string 또는 null, isUnacknowledged:boolean, supportRequestId:string 또는 null, activeSupporterCount:integer≥0 |
-| ReportDetail | ReportCard + reporter:Actor, inputMethod:VOICE / TEXT, transcriptRaw:string, contentSuggested:string, typeSuggested:ReportType, urgencySuggested:Urgency, resolvedAt:string 또는 null, resolveNote:string 또는 null, cancelledAt:string 또는 null, cancelledBy:Actor 또는 null, cancelReason:string 또는 null |
-| StaffReport | id:string, contentFinal:string, type:Classification, urgency:Classification, status:ReportStatus, position:Position, zone:{id:string,name:string} 또는 null, createdAt:string, claimedBy:Actor 또는 null, claimedAt:string 또는 null, resolvedAt:string 또는 null, cancelledAt:string 또는 null |
-| Log | id:string, action:string, actor:Actor, occurredAt:string, changes:Change[], note:string 또는 null |
-| Change | field:string, before:JSON 값 또는 null, after:JSON 값 또는 null |
-| SupportRequest | id:string, reportId:string, openedBy:Actor, openedAt:string, closedAt:string 또는 null, closeReason:MANUAL / REPORT_RELEASED / REPORT_RESOLVED / REPORT_CANCELLED 또는 null |
-| Participation | id:string, supportRequestId:string, actor:Actor, joinedAt:string, endedAt:string 또는 null, endReason:SELF_CANCELLED / REQUEST_CLOSED 또는 null |
-
-ReportType은 EMERGENCY(긴급), FACILITY(시설), CROWD(혼잡), LOST(미아/분실), OTHER(기타), Urgency는 NORMAL(일반), CAUTION(주의), URGENT(긴급)입니다. ReportStatus는 RECEIVED / IN_PROGRESS / RESOLVED / CANCELLED입니다. 영문 값은 API 제안이며 UI의 한국어 기획 의미를 유지합니다.
-
-미확인·지원요청은 신고 상태 enum에 추가하지 않습니다. 자동 위험도 승격 출처·시각은 이번 모델에 넣지 않습니다. 위치 출처는 역할별 접수 경로에서 서버가 결정합니다. `confirmedBy`·`confirmedAt`은 관리자 확정/수정에서만 채우며 AI·스태프 단계에는 null입니다.
-
-`createdAt`은 최초 서버 접수 시각이며 변경하지 않습니다. `claimedAt`은 현재 배정 시각으로 해제 시 null입니다. 과거 배정 시각은 이력에 남깁니다. 재배정 신고의 처리시간은 이 필드 하나로 임의 계산하지 않습니다.
-
-StaffReport는 내역용 최소 공개 모델입니다. 관리자 내부 메모·취소 사유 공개 범위는 TBD-10이므로 이 모델에 노출하지 않는 제안입니다. 확정 후 확장합니다. 상세 이력·지원 목록은 무한 배열로 넣지 않고 별도 조회합니다.
+필드별 타입은 [응답 모델 사전](models.md)에서 확인합니다.
 
 ## 목록
 
@@ -85,7 +66,12 @@ GET 응답의 version이 클라이언트 보유 값보다 낮으면 현재 상�
 인증·자원 범위 → 멱등 재응답 → 입력/버전·업무 조건 확인 순서를 적용하는 제안입니다. 버전과 상태가 모두 다르면 STALE_VERSION을 우선합니다. 422는 입력 파싱 단계에서 먼저 발생할 수 있습니다. 서버 오류는 500 INTERNAL_SERVER_ERROR, 지원하지 않는 메서드는 기존 405를 따릅니다.
 
 ```json
-{"status":409,"code":"STALE_VERSION","detail":"신고 정보가 변경되었습니다. 최신 내용을 확인해주세요.","errors":[]}
+{
+  "status": 409,
+  "code": "STALE_VERSION",
+  "detail": "신고 정보가 변경되었습니다. 최신 내용을 확인해주세요.",
+  "errors": []
+}
 ```
 
 헤더·요청 취소·네트워크 오류를 JSON 업무 오류와 혼동하지 않습니다. 타임아웃은 서버 작업 취소를 의미하지 않습니다. 오류 보관 정책·재시도 간격·요청 제한은 후속 결정입니다.

@@ -3,16 +3,63 @@
 > 상태: **검토안·미구현** · 2026-09-10 · 기준: [PRD v1.2](../prd/index.md).
 > 경로·필드·인증·오류·동시성 방식은 이번에 작성한 제안입니다. 제품 확정과 API 계약 확정을 구분합니다. 기존 [네이밍](naming.md)·[공통 오류](errors.md)의 확정 사항은 유지합니다.
 
-## 읽는 순서
+## 문서 안내
 
-| 문서 | 책임 |
-|---|---|
-| [공통 모델·요청 규칙](festival/common.md) | 인증 경계·타입·재전송·버전·오류 |
-| [행사·세션·지도](festival/event-entry.md) | 신청·코드 진입·본인 세션·제공자 지도 |
-| [분석·신고 접수](festival/intake.md) | 음성/텍스트 분석과 최종 접수 |
-| [조회·담당·취소·지원](festival/reports.md) | 관제·내 신고·처리 액션·이력·지원 수명 |
-| [활동 리포트·PDF·경로](festival/outputs.md) | 미정 기획에 의존하는 조건부 계약 |
-| [검증·결정 목록](festival/review.md) | 인수 조건 연결·구현 전 결정 대상 |
+- 처음 보는 경우: 아래 **API 목록**에서 필요한 기능을 선택합니다.
+- 필드 의미 확인: [응답 모델 사전](festival/models.md)
+- 인증·오류·재전송 확인: [공통 규칙](festival/common.md)
+- 아직 결정하지 않은 내용: [검토 목록](festival/review.md)
+
+## API 목록
+
+### 행사·진입
+
+| ID | 기능 | Method |
+|---|---|---|
+| E01 | [행사 신청](festival/event-entry.md#e01) | `POST` |
+| E02 | [행사 신청 조회](festival/event-entry.md#e02) | `GET` |
+| E03 | [세션 생성](festival/event-entry.md#e03) | `POST` |
+| E04 | [내 세션 조회](festival/event-entry.md#e04) | `GET` |
+| E05 | [행사 지도 조회](festival/event-entry.md#e05) | `GET` |
+
+### 신고 입력
+
+| ID | 기능 | Method |
+|---|---|---|
+| I01 | [신고 내용 분석](festival/intake.md#i01) | `POST` |
+| I02 | [분석 결과 조회](festival/intake.md#i02) | `GET` |
+| I03 | [스태프 신고 전송](festival/intake.md#i03) | `POST` |
+| I04 | [관리자 직접 신고](festival/intake.md#i04) | `POST` |
+
+### 조회·처리·지원
+
+| ID | 기능 | Method |
+|---|---|---|
+| R01 | [내 신고 목록](festival/report-queries.md#r01) | `GET` |
+| R02 | [내 신고 상세](festival/report-queries.md#r02) | `GET` |
+| R03 | [관제 신고 목록](festival/report-queries.md#r03) | `GET` |
+| R04 | [관제 신고 상세](festival/report-queries.md#r04) | `GET` |
+| R05 | [지도 핀 목록](festival/report-queries.md#r05) | `GET` |
+| R06 | [신고 처리 이력](festival/report-queries.md#r06) | `GET` |
+| R07 | [담당 배정·분류 확정](festival/report-actions.md#r07) | `PATCH` |
+| R08 | [유형·위험도 수정](festival/report-actions.md#r08) | `PATCH` |
+| R09 | [신고 완료](festival/report-actions.md#r09) | `PATCH` |
+| R10 | [담당 배정 취소](festival/report-actions.md#r10) | `PATCH` |
+| R11 | [신고 취소](festival/report-actions.md#r11) | `PATCH` |
+| R12 | [지원요청 시작](festival/support.md#r12) | `POST` |
+| R13 | [지원요청 종료](festival/support.md#r13) | `PATCH` |
+| R14 | [지원 참여 목록](festival/support.md#r14) | `GET` |
+| R15 | [지원 참여](festival/support.md#r15) | `POST` |
+| R16 | [본인 지원 참여 취소](festival/support.md#r16) | `PATCH` |
+
+### 통계·내보내기
+
+| ID | 기능 | Method |
+|---|---|---|
+| O01 | [관제 통계](festival/outputs.md#o01) | `GET` |
+| O02 | [내 활동 리포트](festival/outputs.md#o02) | `GET` |
+| O03 | [활동 리포트 PDF](festival/outputs.md#o03) | `GET` |
+| O04 | [접근 경로 조회](festival/outputs.md#o04) | `GET` |
 
 ## 화면에서 API까지
 
