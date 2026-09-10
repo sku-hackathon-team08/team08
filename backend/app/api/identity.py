@@ -7,7 +7,8 @@ from app.api.dependencies import get_session
 from app.services.entry import Identity, authenticate
 from app.services.errors import ServiceError
 
-Db = Annotated[AsyncSession, Depends(get_session)]
+# 응답 본문 생성 후 세션을 닫아 백그라운드 AI 대기에 연결을 넘기지 않는다.
+Db = Annotated[AsyncSession, Depends(get_session, scope="function")]
 
 
 async def current_identity(request: Request, db: Db) -> Identity:

@@ -22,12 +22,12 @@ DB의 FK·UNIQUE가 참조와 경합을 보장하며 행사/소유자 권한은 
 
 ## 트랜잭션
 
-- 요청 의존성은 세션을 닫기만 합니다. 서비스 작업을 호출한 HTTP 경계가 commit하며 실패 시 닫힌 세션은 rollback됩니다.
+- 요청 의존성은 응답 본문 생성 후 백그라운드 작업 시작 전에 세션을 닫습니다. 서비스 작업을 호출한 HTTP 경계가 commit하며 실패 시 닫힌 세션은 rollback됩니다.
 - 멱등 POST는 전용 서비스가 commit을 소유합니다. 짧은 최초 트랜잭션에서 키를 선점한 다음 업무 변경·이력·응답 결과를 함께 commit합니다. 경쟁 요청은 DB 유일성 제약 이후 기존 결과를 조회합니다.
 - 공개 가능한 업무 거절은 업무 트랜잭션을 rollback한 다음 실패 결과만 저장합니다. 서버 오류·프로세스 중단처럼 결과가 불명확하면 pending 기록을 유지하고 자동 재실행하지 않습니다.
 - PATCH/지원 POST는 `UPDATE reports SET version=version+1 WHERE id=:id AND version=:expected` 결과를 확인하고 해당 행 잠금 안에서 상태·권한·분류·지원·이력을 갱신합니다. 업무 거절은 버전 증가도 rollback합니다.
 - 분석 1회 사용은 분석 행 쓰기 잠금과 reports.analysis_id UNIQUE로 보장합니다.
-- 분석은 업무 DB 트랜잭션 밖에서 외부 제공자를 호출합니다. PENDING을 원자적으로 PROCESSING으로 선점해 중복 실행을 막습니다. 단일 프로세스 시작 시 남은 PENDING/PROCESSING을 FAILED로 처리합니다.
+- 분석은 외부 제공자를 기다리는 동안 DB 세션·연결을 유지하지 않습니다. PENDING을 원자적으로 PROCESSING으로 선점한 뒤 세션을 닫고, 음성 원문·최종 결과 저장 시 각각 새 세션을 엽니다. 단일 프로세스 시작 시 남은 PENDING/PROCESSING을 FAILED로 처리합니다.
 
 ## 마이그레이션
 

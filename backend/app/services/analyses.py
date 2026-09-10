@@ -58,33 +58,49 @@ async def run_analysis(
             .values(status="PROCESSING")
             .returning(Analysis.id)
         )
-        await db.commit()
         if changed is None:
+            await db.commit()
             return
         row = await db.get(Analysis, analysis_id)
         assert row is not None
-        stage = "TRANSCRIPTION_FAILED" if audio is not None else "ANALYSIS_FAILED"
-        owned = provider is None
-        try:
-            provider = provider or OpenAIAnalysis(settings)
-            if audio is not None:
-                row.transcript_raw = await provider.transcribe(audio, mime, filename)
+        transcript = row.transcript_raw
+        await db.commit()
+
+    # 외부 호출 중에는 요청 세션과 별개인 분석 세션도 연결을 점유하지 않는다.
+    stage = "TRANSCRIPTION_FAILED" if audio is not None else "ANALYSIS_FAILED"
+    owned = provider is None
+    try:
+        provider = provider or OpenAIAnalysis(settings)
+        if audio is not None:
+            transcript = await provider.transcribe(audio, mime, filename)
+            async with sessions() as db:
+                await db.execute(
+                    update(Analysis)
+                    .where(Analysis.id == analysis_id)
+                    .values(transcript_raw=transcript)
+                )
                 await db.commit()
-            stage = "ANALYSIS_FAILED"
-            assert row.transcript_raw is not None
-            result = await provider.analyze(row.transcript_raw)
-            row.content_suggested = result.summary
-            row.type_suggested = result.type
-            row.urgency_suggested = urgency_from_signals(result.signals)
-            row.status = "READY"
-        except Exception:
-            # 제공자 예외에는 원문·헤더가 포함될 수 있어 원본 예외를 기록하지 않는다.
-            logger.warning("신고 분석을 완료하지 못했습니다 (%s).", stage)
-            row.status, row.failure_code = "FAILED", stage
-        finally:
-            if owned and provider is not None:
-                try:
-                    await provider.close()
-                except Exception:
-                    logger.warning("OpenAI 연결 정리에 실패했습니다.")
+        stage = "ANALYSIS_FAILED"
+        assert transcript is not None
+        result = await provider.analyze(transcript)
+        values = {
+            "content_suggested": result.summary,
+            "type_suggested": result.type,
+            "urgency_suggested": urgency_from_signals(result.signals),
+            "status": "READY",
+        }
+    except Exception:
+        # 제공자 예외에는 원문·헤더가 포함될 수 있어 원본 예외를 기록하지 않는다.
+        logger.warning("신고 분석을 완료하지 못했습니다 (%s).", stage)
+        values = {"status": "FAILED", "failure_code": stage}
+    finally:
+        if owned and provider is not None:
+            try:
+                await provider.close()
+            except Exception:
+                logger.warning("OpenAI 연결 정리에 실패했습니다.")
+    async with sessions() as db:
+        await db.execute(
+            update(Analysis).where(Analysis.id == analysis_id).values(**values)
+        )
         await db.commit()

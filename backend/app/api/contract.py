@@ -1,3 +1,4 @@
+import email.message
 import json
 from collections.abc import Callable, Coroutine
 from typing import Any
@@ -107,7 +108,12 @@ class ContractRoute(APIRoute):
             content_type = (
                 request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
             )
-            if content_type == "application/json":
+            message = email.message.Message()
+            message["content-type"] = request.headers.get("content-type", "")
+            subtype = message.get_content_subtype()
+            if message.get_content_maintype() == "application" and (
+                subtype == "json" or subtype.endswith("+json")
+            ):
                 try:
                     json.loads(await request.body(), object_pairs_hook=unique_object)
                 except DuplicateKey:

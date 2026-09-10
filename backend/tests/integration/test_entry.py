@@ -133,3 +133,30 @@ async def test_event_map_scope_and_unprepared_map(entry: AsyncClient) -> None:
     )
     assert response.status_code == 409
     assert response.json()["code"] == "MAP_NOT_READY"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "content_type",
+    [
+        "application/json",
+        "application/vnd.test+json",
+        "application/vnd.test+json; charset=utf-8",
+    ],
+)
+async def test_duplicate_json_keys_never_create_sessions(entry, content_type):
+    from sqlalchemy import func, select
+
+    from app.models.entry import Actor
+
+    headers = {} if content_type is None else {"Content-Type": content_type}
+    response = await entry.post(
+        "/api/v1/sessions",
+        headers=headers,
+        content='{"eventCode":"OTHER26","eventCode":"DEMO26","role":"ADMIN","name":"test"}',
+    )
+    assert response.status_code == 422, response.text
+    assert response.json()["errors"][0]["code"] == "DUPLICATE_FIELD"
+    app = entry._transport.app
+    async with app.state.database.sessions() as db:
+        assert await db.scalar(select(func.count()).select_from(Actor)) == 0

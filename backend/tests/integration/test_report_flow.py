@@ -390,3 +390,66 @@ async def test_cors_and_multipart_duplicate_contract(festival):
     assert any(
         error["code"] == "DUPLICATE_FIELD" for error in duplicate.json()["errors"]
     )
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("method", ["TEXT", "VOICE"])
+async def test_analysis_waits_do_not_hold_database_connections(
+    festival, monkeypatch, method
+):
+    from sqlalchemy import select
+
+    from app.models.reports import Analysis
+
+    client, app = festival
+    headers = await login(client)
+    provider = app.state.analysis_provider
+    started = asyncio.Queue()
+    release = asyncio.Event()
+    original = provider.transcribe if method == "VOICE" else provider.analyze
+
+    async def blocked(*args):
+        await started.put(True)
+        await release.wait()
+        return await original(*args)
+
+    monkeypatch.setattr(
+        provider, "transcribe" if method == "VOICE" else "analyze", blocked
+    )
+    requests = []
+    try:
+        for _ in range(5):
+            payload = (
+                {"json": {"inputMethod": "TEXT", "text": "혼잡 신고"}}
+                if method == "TEXT"
+                else {
+                    "data": {"inputMethod": "VOICE"},
+                    "files": {"audio": ("test.webm", b"voice", "audio/webm")},
+                }
+            )
+            requests.append(
+                asyncio.create_task(
+                    client.post(
+                        "/api/v1/report-analyses",
+                        headers={**headers, "Idempotency-Key": str(uuid4())},
+                        **payload,
+                    )
+                )
+            )
+            await asyncio.wait_for(started.get(), timeout=5)
+        assert app.state.database.engine.pool.checkedout() == 0
+        async with asyncio.timeout(5):
+            assert (
+                await client.get("/api/v1/sessions/me", headers=headers)
+            ).status_code == 200
+            async with app.state.database.sessions() as db:
+                rows = list((await db.scalars(select(Analysis))).all())
+                assert len(rows) == 5
+                assert all(row.status == "PROCESSING" for row in rows)
+    finally:
+        release.set()
+        responses = await asyncio.gather(*requests)
+    for response in responses:
+        assert response.status_code == 202
+        ready = await client.get(response.headers["location"], headers=headers)
+        assert ready.json()["status"] == "READY"
