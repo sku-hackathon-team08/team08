@@ -40,7 +40,8 @@ docs/
 ├── db/
 │   └── index.md       # DB 모델·ERD·저장 제약 명세 목록
 ├── integrations/
-│   └── index.md       # 외부 제공자 연동 명세 목록
+│   ├── index.md       # 외부 제공자 연동 명세 목록
+│   └── vworld-demo.md # 서울 콘서트 데모 작업 기준·좌표
 ├── guides/
 │   ├── index.md       # 가이드 목차
 │   ├── development.md # 개발 컨벤션

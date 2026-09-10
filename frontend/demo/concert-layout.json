@@ -1,0 +1,112 @@
+{
+  "name": "서울월드컵경기장 콘서트 데모",
+  "status": "DEMO_DRAFT_NOT_SURVEYED",
+  "dataVersion": "seoul-concert-03",
+  "anchor": {
+    "lng": 126.89721,
+    "lat": 37.56817,
+    "headingDegrees": 13.5
+  },
+  "zones": [
+    {
+      "key": "A",
+      "name": "플로어 A",
+      "boundsMeters": [
+        -29,
+        5,
+        -4,
+        29
+      ],
+      "color": "#58d6b1"
+    },
+    {
+      "key": "B",
+      "name": "플로어 B",
+      "boundsMeters": [
+        4,
+        5,
+        29,
+        29
+      ],
+      "color": "#6fa7ff"
+    },
+    {
+      "key": "C",
+      "name": "플로어 C",
+      "boundsMeters": [
+        -29,
+        -26,
+        -4,
+        -3
+      ],
+      "color": "#c29af0"
+    },
+    {
+      "key": "D",
+      "name": "플로어 D",
+      "boundsMeters": [
+        4,
+        -26,
+        29,
+        -3
+      ],
+      "color": "#dfbd6b"
+    },
+    {
+      "key": "STAGE",
+      "name": "무대·백스테이지",
+      "boundsMeters": [
+        -25,
+        36,
+        25,
+        55
+      ],
+      "color": "#f08783"
+    },
+    {
+      "key": "FOH",
+      "name": "음향·조명 운영",
+      "boundsMeters": [
+        -7,
+        -43,
+        7,
+        -32
+      ],
+      "color": "#70cbdc"
+    }
+  ],
+  "gates": [
+    {
+      "key": "WEST",
+      "name": "데모 서측 입장",
+      "positionMeters": [
+        -34,
+        -39
+      ],
+      "zoneKey": null
+    },
+    {
+      "key": "EAST",
+      "name": "데모 동측 입장",
+      "positionMeters": [
+        34,
+        -39
+      ],
+      "zoneKey": null
+    },
+    {
+      "key": "STAFF",
+      "name": "데모 운영 진입",
+      "positionMeters": [
+        -32,
+        45
+      ],
+      "zoneKey": "STAGE"
+    }
+  ],
+  "alignment": {
+    "method": "VISUAL_AERIAL_ALIGNMENT",
+    "headingReference": "clockwise from true north",
+    "note": "Field long axis visually estimated from north-up VWorld imagery; not surveyed."
+  }
+}
