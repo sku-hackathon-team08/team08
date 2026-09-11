@@ -2,6 +2,22 @@
 @import "tailwindcss";
 @import "./styles/tokens.css";
 
+/*
+ * VWorld 지도 SDK(index.html)가 함께 불러오는 api.v30.css가 `* { padding:0; margin:0;
+ * border:0; ... }`로 문서 전체를 리셋한다. 이 규칙은 layer 없이(unlayered) 들어오는데,
+ * Tailwind 유틸리티는 전부 @layer 안에서 생성돼서 CSS Cascade Layers 명세상 명시도와
+ * 무관하게 항상 진다(unlayered가 layer 안 규칙을 무조건 이김) — 2026-09-14 실제 재현:
+ * header의 px-[27px]가 DOM엔 있는데 getComputedStyle().paddingLeft는 0px으로 나옴.
+ * 그래서 이 파일도 같은 unlayered 취급을 받도록 @layer 밖에 그대로 두고, #root 안에서만
+ * Tailwind가 낸 값으로 되돌린다(#root 밖 VWorld 자체 위젯엔 손대지 않음. Cesium 버튼 등은
+ * .cesium-button처럼 더 구체적인 자기 selector가 있어서 범용 `*` 리셋에도 원래 안전했음).
+ */
+#root * {
+  padding: revert-layer;
+  margin: revert-layer;
+  border-width: revert-layer;
+}
+
 /* S2(스태프 음성 녹음) 웨이브폼·리플·REC 점멸 — 관리자 화면 플로우(최종!).dc.html 원본 keyframes 그대로. */
 @keyframes eq {
   0%, 100% { transform: scaleY(.35); }
