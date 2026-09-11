@@ -49,3 +49,23 @@ export function clearSession(role: SessionRole): void {
     // 무시
   }
 }
+
+/**
+ * 세션에 저장된 실제 로그인 사용자(actor) 정보. api/sessions.ts의 SessionCreated 응답을
+ * 그대로 setSession()에 넣어 저장하므로 그 안의 actor{id,name,team}를 꺼내 쓴다.
+ * "내가 담당인가" 같은 판정은 항상 이 id로 해야 한다(이름 문자열 비교는 동명이인에서 틀림).
+ */
+export function getActor(role: SessionRole): { id: string; name: string; team: string | null } | null {
+  const session = getSession(role)
+  const actor = session?.actor
+  if (
+    typeof actor !== 'object' ||
+    actor === null ||
+    typeof (actor as Record<string, unknown>).id !== 'string' ||
+    typeof (actor as Record<string, unknown>).name !== 'string'
+  ) {
+    return null
+  }
+  const a = actor as { id: string; name: string; team: string | null }
+  return { id: a.id, name: a.name, team: a.team ?? null }
+}

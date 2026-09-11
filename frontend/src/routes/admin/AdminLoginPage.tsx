@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import bubblesBackground from '../../assets/bubbles-admin.png'
 import { BrandLogo } from '../../components/BrandLogo'
 import { buttonClasses } from '../../components/buttonStyles'
-import { getSession, setSession } from '../../lib/session'
+import { getSession, setSession, clearSession } from '../../lib/session'
+import { ApiError } from '../../api/client'
+import { createAdminSession, getMySession } from '../../api/sessions'
 
 /**
  * 00(스플래시) → 00-1(로딩) → 01(로그인) — 관리자 화면 플로우(최종!).dc.html.
@@ -12,25 +13,27 @@ import { getSession, setSession } from '../../lib/session'
  * 넘어가는 전환 연출이라(dc.html 주석: "1~1.5초 노출 후 자동 전환"), 독립 라우트로 만들면
  * 오히려 실제 흐름과 안 맞는다.
  *
- * design-login 스킬 확인 사항:
+ * 2026-09-12 실제 POST /sessions 연동:
+ * - 로딩 단계에서 로컬 세션이 있으면 그냥 믿지 않고 GET /sessions/me로 실제로 아직
+ *   유효한지 확인한다(관리자가 DELETE /sessions/me로 로그아웃했거나 서버가 재시작돼
+ *   세션이 사라졌을 수 있음) — 실패하면 로컬 세션을 지우고 폼으로 보낸다.
  * - 실제 도메인 모델은 eventCode+role+name(+STAFF만 team) 단일 진입이지만, 이 화면은
  *   /admin 전용 로그인이라 role은 화면에 안 보이는 채로 "ADMIN" 고정값을 쓴다(스태프는
  *   S0에서 따로 진입). 비밀번호·회원가입·소셜 로그인 등은 SOT에 없어 넣지 않았다.
- * - 아직 백엔드 진입 API를 안 붙였다(다른 관리자 화면도 전부 목데이터라 이것만 먼저 붙이면
- *   일관성이 깨진다) — 그래서 지금은 필드 비어있지 않은지만 검증하고 lib/session.ts에
- *   role별 세션을 저장한 뒤 /admin으로 보낸다. 실제 Bearer 토큰 발급은 API 연동 때 교체.
- * - /admin 대시보드 자체에는 로그인 여부를 강제하는 가드를 걸지 않았다 — DevNavPanel로
- *   바로 /admin에 들어가서 화면을 확인하는 지금의 개발 흐름을 막고 싶지 않아서다.
+ * - 라우트를 `/`·`/admin`·`/staff` 3개로 고정하면서 이 화면은 더 이상 `/login` 독립
+ *   라우트가 아니라 AdminLayout이 세션 없을 때 같은 자리에서 보여주는 화면이 됐다.
+ *   그래서 navigate 대신 onAuthenticated 콜백으로 부모(AdminLayout)에게 "세션이
+ *   생겼다"만 알리고, 실제 전환(로그인 화면 ↔ 대시보드)은 AdminLayout이 맡는다.
  */
 
 type Phase = 'splash' | 'loading' | 'form'
 
-export function AdminLoginPage() {
-  const navigate = useNavigate()
+export function AdminLoginPage({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [phase, setPhase] = useState<Phase>('splash')
   const [eventCode, setEventCode] = useState('')
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('loading'), 1200)
@@ -39,23 +42,40 @@ export function AdminLoginPage() {
 
   useEffect(() => {
     if (phase !== 'loading') return
+    let cancelled = false
     const t2 = setTimeout(() => {
-      const existing = getSession('admin')
-      if (existing) {
-        navigate('/admin', { replace: true })
-        return
-      }
-      setPhase('form')
+      void (async () => {
+        if (getSession('admin')) {
+          try {
+            await getMySession('admin')
+            if (!cancelled) onAuthenticated()
+            return
+          } catch {
+            clearSession('admin')
+          }
+        }
+        if (!cancelled) setPhase('form')
+      })()
     }, 700)
-    return () => clearTimeout(t2)
-  }, [phase, navigate])
+    return () => {
+      cancelled = true
+      clearTimeout(t2)
+    }
+  }, [phase, onAuthenticated])
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!eventCode.trim() || !name.trim()) return
+    if (!eventCode.trim() || !name.trim() || submitting) return
     setSubmitting(true)
-    setSession('admin', { eventCode: eventCode.trim(), name: name.trim(), role: 'ADMIN' })
-    navigate('/admin', { replace: true })
+    setError(null)
+    try {
+      const session = await createAdminSession({ eventCode: eventCode.trim(), name: name.trim() })
+      setSession('admin', session)
+      onAuthenticated()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : '연결에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -107,12 +127,14 @@ export function AdminLoginPage() {
             </label>
           </div>
 
+          {error && <span className="text-t-body font-semibold text-status-urgent">{error}</span>}
+
           <button
             type="submit"
             disabled={submitting}
             className={buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true, disabled: submitting })}
           >
-            입장하기
+            {submitting ? '입장하는 중…' : '입장하기'}
           </button>
           <span className="text-[17px] font-medium text-ink-300">모든 관리자는 동일 권한을 갖는 간편 로그인입니다</span>
         </form>

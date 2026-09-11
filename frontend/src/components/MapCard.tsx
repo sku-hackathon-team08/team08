@@ -1,13 +1,29 @@
 import { buttonClasses } from './buttonStyles'
+import { VWorldMap, type VWorldMapPin } from './VWorldMap'
+import type { DemoMapResponse } from '../api/demoMap'
 
 /**
  * 관리자 지도 카드 — 02 지도 대시보드 좌측 58% 영역 / 03~05 상세 화면 좌측 46~58% 영역.
- * VWorld 실지도 연동은 이번 해커톤 범위 제외(docs/features/command-dashboard.md 확정)라
- * 플레이스홀더 그라디언트 + 정적 UI만 그린다. 실제 지도 API 연동은 후속 작업.
+ *
+ * 2026-09-12: VWorld API 키를 받아서 실지도 연동 시작(docs/features/command-dashboard.md의
+ * "이번 범위 제외"는 접근 경로 안내·구역 판정 얘기였고, 지도 표시 자체는 제외 대상이
+ * 아니었다 — docs/api/demo-map.md 참고). `real` prop을 주면 그라디언트 자리표시자 대신
+ * VWorldMap(실제 Cesium 3D 지도)을 배경에 깔고, 기존 오버레이 UI(라벨·컨트롤·CTA·출처
+ * 바)는 그대로 위에 얹는다 — real이 없으면 예전처럼 플레이스홀더만 보여준다(지도 데이터
+ * 로딩 실패 시 폴백으로도 재사용).
  *
  * `compact`(04/05 신고 상세용)일 때는 dc.html 원본대로 정보카드 + 핀 하나만 그리고
  * 컨트롤 스택·고도 뱃지·직접 신고 CTA·출처 바를 뺀다(상세 화면 지도엔 그 요소들이 없음).
+ * compact 지도는 아직 플레이스홀더로 남겨뒀다 — Cesium 뷰어를 화면마다 새로 띄우는 비용이
+ * 커서, 지금은 대시보드 메인 지도 하나만 실지도로 연결한다.
  */
+
+export type RealMapProps = {
+  mapData: DemoMapResponse
+  pins: VWorldMapPin[]
+  selectedId?: string | null
+  onSelectPin?: (id: string) => void
+}
 
 export type MapPinData = {
   id: string
@@ -41,6 +57,8 @@ type MapCardProps = {
   lastSyncLabel?: string
   onDirectReport?: () => void
   className?: string
+  /** 있으면 그라디언트 대신 실제 VWorld 3D 지도를 배경에 그린다 */
+  real?: RealMapProps
 }
 
 const CONTROL_ICONS = ['▲', '◎', '+', '−', '⤢']
@@ -55,15 +73,26 @@ export function MapCard({
   lastSyncLabel,
   onDirectReport,
   className = '',
+  real,
 }: MapCardProps) {
   return (
     <div
       className={[
         'relative overflow-hidden rounded-md shadow-map',
-        'bg-[linear-gradient(160deg,rgb(214,224,214)_0%,rgb(197,213,199)_35%,rgb(180,202,190)_65%,rgb(162,190,183)_100%)]',
+        real ? '' : 'bg-[linear-gradient(160deg,rgb(214,224,214)_0%,rgb(197,213,199)_35%,rgb(180,202,190)_65%,rgb(162,190,183)_100%)]',
         className,
       ].join(' ')}
     >
+      {real && !compact && (
+        <VWorldMap
+          mapData={real.mapData}
+          pins={real.pins}
+          selectedId={real.selectedId}
+          onSelectPin={real.onSelectPin}
+          className="absolute inset-0 z-0"
+        />
+      )}
+
       {state === 'error' && <div className="absolute inset-0 z-10 bg-white/55" />}
 
       <div className="absolute left-[15px] top-[15px] z-20 flex flex-col gap-[2px] rounded-[17px] bg-white/92 px-[19px] py-[11px] shadow-panel">
@@ -121,7 +150,8 @@ export function MapCard({
             </span>
           )}
 
-          {state === 'ready' &&
+          {!real &&
+            state === 'ready' &&
             pins.map((pin) => (
               <i
                 key={pin.id}
@@ -135,7 +165,7 @@ export function MapCard({
               />
             ))}
 
-          {state === 'ready' && connector && (
+          {!real && state === 'ready' && connector && (
             <>
               <span
                 className="absolute z-10 border-t-2 border-dashed border-primary"
