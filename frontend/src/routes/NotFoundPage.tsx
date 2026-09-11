@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { DevNavPanel } from '../components/DevNavPanel'
 
 export function NotFoundPage() {
   return (
@@ -8,6 +9,8 @@ export function NotFoundPage() {
       <Link to="/" className="underline">
         공통 진입 화면으로
       </Link>
+
+      <DevNavPanel />
     </main>
   )
 }

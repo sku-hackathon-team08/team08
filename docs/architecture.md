@@ -1,6 +1,6 @@
 # 아키텍처
 
-> 상태: 백엔드 레이어 기반 모놀리식·프레임워크·환경 관리·로컬 DB·비동기 기본 방식 확정. 프론트 스택은 확정했으며 프론트 폴더 구조와 배포 DB는 미정입니다.
+> 상태: 백엔드 레이어 기반 모놀리식·프레임워크·환경 관리·로컬 DB·비동기 기본 방식 확정. 프론트 스택은 확정했고 `src/` 폴더 구조는 검토안이며 배포 DB는 미정입니다.
 > 기술 선택을 기록한 문서이며 앱·DB 연결의 구현 완료를 뜻하지 않습니다.
 
 ## 코드 구성
@@ -120,7 +120,7 @@ flowchart LR
 | 라우팅 | react-router-dom v7 | 확정 |
 | 서버 상태 | @tanstack/react-query v5 | 확정 |
 | 패키지 관리자 | npm | 확정 |
-| 폴더 구조 | 미정 | 후속 작업 |
+| 폴더 구조 | `src/` 아래 역할별 폴더 분리 | 검토안 |
 
 npm으로 프론트 의존성을 관리하며 정확한 버전은
 [`package.json`](../frontend/package.json)과 [`package-lock.json`](../frontend/package-lock.json)에서 관리합니다.
@@ -129,7 +129,35 @@ npm으로 프론트 의존성을 관리하며 정확한 버전은
 
 react-router는 `createBrowserRouter` 기반 데이터 라우터만 사용하고 프레임워크 모드는 쓰지 않습니다.
 Tailwind는 v4 방식으로 `vite.config.ts` 플러그인과 CSS `@import`로 연결하며 `tailwind.config.js`를 두지 않습니다.
-현재 라우터·QueryClientProvider·Tailwind 배선만 확인했으며 실제 화면과 API 연결은 후속 작업입니다.
+
+### 프론트 `src/` 구조
+
+> 상태: 검토안. 프론트 골격 PR(#44·#45)의 배선을 기준으로 역할별 코드 위치를 정리했으며 팀 확정 시 [결정 기록](decisions.md)에 항목을 추가합니다.
+
+```text
+frontend/src/
+├── main.tsx            # AppProviders로 감싼 진입점
+├── App.tsx             # RouterProvider만 렌더
+├── index.css           # Tailwind CSS @import
+├── app/
+│   ├── router.tsx      # createBrowserRouter 라우트 정의
+│   └── providers.tsx   # 전역 Provider 조립(AppProviders·QueryClientProvider)
+├── routes/             # 화면 컴포넌트. 공통 진입(LandingPage)·역할별 레이아웃(admin/·staff/)·NotFoundPage
+├── api/                # HTTP 호출 계층. client.ts — fetch 래퍼·공통 오류 파싱·react-query 기본 옵션
+├── lib/                # 브라우저 유틸. session.ts — localStorage get/set/clear 래퍼, uiConstants.ts — 뷰포트·스케일·토스트 노출시간
+├── types/              # 화면 공유 타입. report.ts — ReportStatus/ReportType/Urgency 등 신고 도메인 타입
+├── styles/             # tokens.css — 관리자 화면 디자인(Claude Design)에서 이식한 Tailwind v4 @theme 토큰
+├── mocks/              # 개발용 목 레이어(MSW 또는 fetch stub)
+└── assets/             # 정적 리소스
+```
+
+`main.tsx`·`App.tsx`·`index.css`·`app/`·`routes/`·`assets/`·`styles/`는 프론트 골격 PR(#44·#45)과 후속 작업에서 구현했습니다.
+`app/`은 라우터·Provider 배선, `routes/`는 화면이며 관리자·스태프는 경로(역할) 기준으로만 나뉘고 기기 감지·인증은 아직 없습니다.
+`api/`·`lib/`·`mocks/`는 역할별 코드 위치를 미리 정한 검토안이며 파일은 기능 구현에서 추가합니다.
+`api/`는 [공통 오류 계약](api/errors.md)과 camelCase [네이밍 계약](api/naming.md)을 전제로 합니다.
+`types/report.ts`는 `backend/app/schemas/reports.py`의 `ReportStatus`/`ReportType`/`Urgency` Literal 정의를 정본으로 이식했습니다
+(`ReportType`은 `OTHER`, `ReportStatus`는 `RESOLVED`이며 디자인 산출물에 있던 `ETC`·`COMPLETED`·자동 위험도 승격 가정은
+[해커톤 API 계약](api/hackathon.md#신고-조회처리)과 달라 채택하지 않았습니다). 나머지 화면·타입·오류 처리 세부 컨벤션은 후속 작업입니다.
 
 ## 백엔드 환경과 DB
 
