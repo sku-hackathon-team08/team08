@@ -176,3 +176,36 @@ uv run pytest
 ```
 
 TEST_DATABASE_URL을 전용 PostgreSQL team08_test DB로 설정하면 PostgreSQL 연결/격리된 업무 스키마 테스트를 함께 실행합니다. 설정하지 않으면 해당 테스트는 skip하며 SQLite만 검증합니다. 실제 기기·브라우저 UI·배포 검증과 제공자 대체 테스트는 구분합니다.
+
+
+## PDF 디자인 반복 개발
+
+별도 개발용 SQLite에 **가상 신고 18건·처리 로그 36건**을 저장하고 실제 관리자 집계 서비스로 PDF를 생성합니다. 나눔고딕을 유지하며 통계 요약·유형/행위 분포·날짜별 차트·처리 타임라인을 확인할 수 있습니다.
+
+`backend/`에서 실행합니다. 이 명령은 `.env`의 업무 DB 대신 지정된 SQLite에 Alembic 마이그레이션과 seed를 실행하며 외부 AI를 호출하지 않습니다.
+
+```sh
+uv run --locked python -m scripts.preview_activity_pdf
+```
+
+- DB: `backend/data/pdf-preview.sqlite3`
+- 결과: `output/pdf/admin-activity-report.pdf` (저장소 루트 기준)
+- 재실행: 기존 데이터·수동 수정은 보존하고 현재 코드로 PDF만 다시 생성합니다.
+- 시나리오: 긴급·시설·혼잡·미아/분실·기타 신고, 완료·진행·취소·해제·분류 변경.
+- 목 세션은 인증용이 아닙니다. CLI가 DB를 조회해 집계 서비스를 직접 호출하며 API 권한·다운로드 계약은 통합 테스트에서 검증합니다.
+
+특정 날짜를 기준으로 새 데이터셋을 만들거나 기간을 바꿀 수 있습니다. `--date`는 **새 DB에 처음 넣을 때만** 적용되며, 오늘·이번 주 필터는 실행 시점의 한국 시간을 사용합니다. 과거 기준일로 만들었다면 `--period ALL`로 확인합니다.
+
+```sh
+uv run --locked python -m scripts.preview_activity_pdf --db data/pdf-preview-v2.sqlite3 --date 2026-09-12
+uv run --locked python -m scripts.preview_activity_pdf --period TODAY --output ../output/pdf/admin-today.pdf
+```
+
+PDF 생성 뒤 Poppler가 설치된 환경에서 PNG로 렌더링해 확인합니다. PDF와 QA 이미지는 Git에서 제외합니다.
+
+```sh
+mkdir -p ../tmp/pdfs
+pdftoppm -scale-to 1400 -png ../output/pdf/admin-activity-report.pdf ../tmp/pdfs/admin-report
+```
+
+레이아웃은 `app/services/admin_activity_pdf.py`, 시나리오는 `scripts/preview_activity_pdf.py`에서 수정합니다. 시나리오를 수정한 뒤에는 새 `--db` 경로로 생성하고, 레이아웃만 수정했으면 같은 명령으로 재추출하면 됩니다. 집계·표현 기준은 [관리자 처리 리포트 명세](../docs/features/activity-report.md#pdf-통계타임라인-표현)를 따릅니다.

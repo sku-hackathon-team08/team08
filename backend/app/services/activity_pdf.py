@@ -311,9 +311,12 @@ def _distribution_rows(
 
 
 def render_activity_pdf(data: dict) -> bytes:
-    admin = "totalActions" in data["summary"]
-    report_title = "내 처리 리포트" if admin else "내 활동 리포트"
-    period_label = "처리 기간" if admin else "접수 기간"
+    if "totalActions" in data["summary"]:
+        from app.services.admin_activity_pdf import render_admin_activity_pdf
+
+        return render_admin_activity_pdf(data)
+    report_title = "내 활동 리포트"
+    period_label = "접수 기간"
     with FONT_LOCK:
         if "NanumGothic" not in pdfmetrics.getRegisteredFontNames():
             pdfmetrics.registerFont(TTFont("NanumGothic", str(FONT_PATH)))
@@ -450,25 +453,15 @@ def render_activity_pdf(data: dict) -> bytes:
         )
     else:
         story.append(p(f"{period_label}: 전체", small))
-    if admin:
-        story.append(p("본인이 수행한 처리만 집계 · 단순 지원 참여 제외", small))
     story.extend([Spacer(1, 4), _hr(), Spacer(1, 14)])
 
     summary = data["summary"]
     average = summary["averageProcessingSeconds"]
-    if admin:
-        cards = [
-            (summary["totalReports"], "처리한 신고", PRIMARY_ULTRA, PRIMARY_ULTRA),
-            (summary["resolved"], "완료", PRIMARY, PRIMARY),
-            (summary["cancelled"], "취소", PRIMARY_LIGHT, INK_500),
-            (summary["totalActions"], "총 처리", PRIMARY_LIGHT, PRIMARY_LIGHT),
-        ]
-    else:
-        cards = [
-            (summary["total"], "전체 신고", PRIMARY_ULTRA, PRIMARY_ULTRA),
-            (summary["resolved"], "완료", PRIMARY, PRIMARY),
-            (summary["cancelled"], "취소", PRIMARY_LIGHT, INK_500),
-        ]
+    cards = [
+        (summary["total"], "전체 신고", PRIMARY_ULTRA, PRIMARY_ULTRA),
+        (summary["resolved"], "완료", PRIMARY, PRIMARY),
+        (summary["cancelled"], "취소", PRIMARY_LIGHT, INK_500),
+    ]
     story.append(_stat_cards(cards, stat_value, stat_label))
     story.append(Spacer(1, 10))
     story.append(
@@ -480,105 +473,18 @@ def render_activity_pdf(data: dict) -> bytes:
         )
     )
 
-    story.append(p("현재 유형별 신고" if admin else "유형별 신고", heading))
+    story.append(p("유형별 신고", heading))
     type_rows = [row for row in data["typeDistribution"] if row["count"] > 0]
     if type_rows:
         story.append(_distribution_rows(type_rows, body, dist_count))
     else:
         story.append(p("아직 처리한 신고가 없습니다.", small))
 
-    story.append(p("처리 이력" if admin else "신고 내역", heading))
-    if admin:
-        story.append(
-            p(
-                f"전체 처리 {summary['totalActions']}회 · 담당 시작 {summary['claimed']}회 · "
-                f"담당 해제 {summary['released']}회 · 분류 변경 {summary['classificationChanged']}회",
-                small,
-            )
-        )
+    story.append(p("신고 내역", heading))
     if not data["items"]:
         story.append(p("선택한 기간의 신고가 없습니다.", small))
 
     for number, item in enumerate(data["items"], 1):
-        if admin:
-            status_bg = (
-                CARD_BG_SOFT if item["currentStatus"] != "CANCELLED" else SURFACE_CHIP
-            )
-            header_row = _chip_row(
-                [
-                    _chip(
-                        TYPES[item["currentType"]], SURFACE_CHIP, INK_600, chip_style
-                    ),
-                    _chip(ACTIONS[item["action"]], PRIMARY_TINT, PRIMARY, chip_style),
-                ],
-                _chip(
-                    STATUS[item["currentStatus"]],
-                    STATUS_TINT[item["currentStatus"]],
-                    STATUS_TEXT[item["currentStatus"]],
-                    chip_style,
-                ),
-            )
-            section = [
-                header_row,
-                Spacer(1, 6),
-                p(item["contentFinal"], item_title),
-                p(
-                    f"{display_time(item['occurredAt'])} · 구역: {item['zone']['name'] if item['zone'] else '미지정 구역'}"
-                    + (
-                        ""
-                        if item["processingSeconds"] is None
-                        else f" · 배정~완료 {round(item['processingSeconds'] / 60)}분"
-                    ),
-                    small,
-                ),
-            ]
-            if item["note"]:
-                section.append(p(f"메모 · {item['note']}", small))
-            field_names = {"status": "상태", "type": "유형", "urgency": "위험도"}
-            labels = {
-                **STATUS,
-                **TYPES,
-                "URGENT": "긴급",
-                "CAUTION": "주의",
-                "NORMAL": "보통",
-            }
-            for change in item["changes"]:
-                if change["field"] in field_names:
-                    before = labels.get(change["before"], change["before"] or "없음")
-                    after = labels.get(change["after"], change["after"] or "없음")
-                    section.append(
-                        p(
-                            f"변경 · {field_names[change['field']]}: {before} → {after}",
-                            small,
-                        )
-                    )
-            card = Table([[section]], colWidths=[CONTENT_WIDTH])
-            card.setStyle(
-                TableStyle(
-                    [
-                        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(status_bg)),
-                        (
-                            "LINEBEFORE",
-                            (0, 0),
-                            (0, -1),
-                            3,
-                            colors.HexColor(STATUS_ACCENT[item["currentStatus"]]),
-                        ),
-                        ("TOPPADDING", (0, 0), (-1, -1), 11),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 11),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 14),
-                        ("RIGHTPADDING", (0, 0), (-1, -1), 11),
-                    ]
-                )
-            )
-            short_entry = len(item["contentFinal"]) + len(item["note"] or "") < 1000
-            story.extend(
-                [KeepTogether([card, Spacer(1, 9)])]
-                if short_entry
-                else [card, Spacer(1, 9)]
-            )
-            continue
-
         header_row = _chip_row(
             [_chip(TYPES[item["type"]["value"]], SURFACE_CHIP, INK_600, chip_style)],
             _chip(
