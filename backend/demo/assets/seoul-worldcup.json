@@ -2,7 +2,7 @@
   "eventId": "69cbb93b-d6cb-5785-a7c8-e606c7279d3d",
   "name": "서울월드컵경기장 콘서트 데모",
   "status": "DEMO_DRAFT_NOT_SURVEYED",
-  "dataVersion": "seoul-concert-03",
+  "dataVersion": "seoul-concert-03-blender-05",
   "center": {
     "lng": 126.89721,
     "lat": 37.56817
@@ -257,8 +257,8 @@
     "headingDegrees": 13.5,
     "metersPerUnit": 1,
     "heightPolicy": "FLAT_DEMO_PLANE_ABOVE_RENDERED_FOOTPRINT",
-    "nodeCount": 15,
-    "componentCount": 5457,
+    "nodeCount": 23,
+    "componentCount": 8691,
     "seatMarkers": 1680
   }
 }

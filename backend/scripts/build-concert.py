@@ -157,7 +157,7 @@ def beam(name, start, end, width, mat):
 
 
 # A single raised protective floor avoids the imagery's sloping terrain obscuring low geometry.
-box("Field protection", 0, 4, -0.14, 73, 111, 0.28, floor)
+box("Field protection", 0, 0, -0.14, 73, 111, 0.28, floor)
 box("Central circulation", 0, 0, 0.025, 7, 63, 0.05, aisle)
 box("Cross aisle", 0, 1, 0.03, 67, 7, 0.06, aisle)
 for x in [-32, 32]:
@@ -202,8 +202,8 @@ for zone in layout["zones"][:4]:
         y += 1.25
 
 # Main stage, thrust, roof frame and LED wall. Dimensions in meters.
-box("Main stage", 0, 44, 1, 32, 12, 2, deck)
-box("Thrust", 0, 33, 1, 5, 10, 2, deck)
+box("Main stage", 0, 44, 1.92, 32, 12, 0.16, deck)
+box("Thrust", 0, 20, 1.92, 5, 36, 0.16, deck)
 box("Central LED", 0, 49, 7, 21, 0.5, 9, screen)
 for x in [-18, 18]:
     box("Side screen frame", x, 44, 6, 6, 1, 10, black)
@@ -265,7 +265,7 @@ for x in [-17, 17]:
             silver,
         )
 for x in [-2.5, 2.5]:
-    box("Runway edge light", x, 33, 2.05, 0.08, 10, 0.08, screen)
+    box("Runway edge light", x, 20, 2.05, 0.08, 36, 0.08, screen)
 for x in range(-12, 13, 4):
     box("Stage monitor", x, 39, 2.35, 1.1, 0.65, 0.65, black)
     box("Backline case", x, 47, 2.55, 1.4, 0.8, 1.1, steel)

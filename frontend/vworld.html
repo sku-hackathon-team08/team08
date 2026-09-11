@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <title>현장의 지금 · 브이월드 3D</title>
+  <script>window.CESIUM_BASE_URL = 'https://map.vworld.kr/js/ws3dmap/WS3DRelease3/';</script>
+  <script src="https://map.vworld.kr/js/webglMapInit.js.do?version=3.0&apiKey=%VITE_VWORLD_API_KEY%"></script>
+</head>
+<body>
+<main class="map-preview">
+ <div id="vworld-map" class="map-canvas"></div>
+ <header class="map-header"><a href="/" target="_parent">현장의 지금<span>VWORLD 3D / LIVE VENUE</span></a><div class="live-status"><i></i><span id="status">브이월드 연결 중</span></div></header>
+ <aside class="map-panel">
+  <p class="eyebrow">REAL WORLD / SEOUL</p><h1>서울월드컵경기장</h1><p class="map-subtitle">실제 지형 위의 콘서트 현장</p>
+  <div class="map-stats"><div><strong>36m</strong><span>돌출 무대</span></div><div><strong>1,680</strong><span>좌석 표현</span></div><div><strong>3D</strong><span>브이월드</span></div></div>
+  <h2>구역 둘러보기</h2><div id="zones" class="zone-list"></div>
+  <label class="overlay-toggle"><input id="buildings" type="checkbox" checked />주변 3D 건물 표시</label>
+  <button id="reload" class="reload-model">↻ 최신 모델 불러오기</button>
+  <p id="details" class="model-note"></p><p id="error" class="map-error" role="alert"></p>
+ </aside>
+ <nav class="camera-controls"><button data-view="overview">전체 보기</button><button data-view="world">주변 도시</button><button data-view="stage">무대 보기</button><button data-view="under">무대 하부</button><button data-view="top">평면 보기</button></nav>
+ <div class="map-help">드래그 이동 · 휠 확대 · Ctrl + 드래그 회전<span>브이월드 3D · 항공영상 · 지형 · 건물</span></div>
+</main>
+<script type="module" src="/src/vworld-preview.js"></script>
+</body>
+</html>
