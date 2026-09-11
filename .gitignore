@@ -8,6 +8,10 @@
 .DS_Store
 Thumbs.db
 
+# Claude 에이전트 화면 검사 도구 (앱 코드 아님, 로컬 산출물만 제외)
+.claude/tools/screencheck/node_modules/
+.claude/tools/screencheck/*.png
+
 # Python environments and generated files
 .venv/
 __pycache__/

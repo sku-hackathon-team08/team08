@@ -1,0 +1,9 @@
+{
+  "name": "screencheck",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Claude 에이전트가 frontend 화면을 스크린샷/콘솔에러로 검사하기 위한 도구. 앱 코드가 아님.",
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}
