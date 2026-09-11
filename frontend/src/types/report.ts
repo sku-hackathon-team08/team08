@@ -120,22 +120,50 @@ export function primaryDisplayLabel(status: ReportStatus, urgency: Urgency): str
 
 export type Report = {
   id: string;
+  /**
+   * 낙관적 동시성 버전 — claim/classification/resolve/release/cancel 호출 시
+   * expectedVersion으로 그대로 보낸다. 백엔드 StaffReport에는 이 필드가 없어서
+   * (관리자 전용 액션이라 스태프 쪽엔 필요 없음) 스태프 조회 결과를 어댑터로 옮길 때는
+   * undefined로 둔다 — 스태프 화면은 애초에 이 필드를 쓸 일이 없다.
+   */
+  version?: number;
   type: ReportType;
   urgency: Urgency;
   status: ReportStatus;
-  /** 스태프 발화 원문 — 가공 금지 */
+  /** 스태프 발화 원문 — 가공 금지. 백엔드 contentFinal과 매핑(api/adapters.ts) */
   message: string;
+  /**
+   * 위치 표시 라벨. 백엔드엔 place가 없고 zone(구역, 이번 범위에선 항상 null)과
+   * lat/lng만 있다 — 2026-09-12 확정: zone 이름이 있으면 그걸, 없으면 "현재 위치"로
+   * 통일 표기한다(좌표를 그대로 노출하지 않음). api/adapters.ts에서 계산해서 채운다.
+   */
   place: string;
   /** 담당자 배정 시(IN_PROGRESS)에만 있음 */
   assigneeName?: string;
+  /**
+   * 담당자 actor id. "내가 담당인가"는 항상 이 값을 세션의 actor.id와 비교해서 판정한다 —
+   * assigneeName(이름) 문자열 비교는 이름이 같은 관리자가 둘 이상이면 틀릴 수 있다.
+   */
+  assigneeId?: string;
   supportRequested: boolean;
   createdAt: string;
+  /**
+   * 서버가 계산한 미확인 여부(위험도별 3/10/30분 임계값, docs/features/command-dashboard.md).
+   * 실제 API 연동 후에는 이 값을 우선 쓰고, 없을 때만 isUnconfirmed()로 클라이언트 계산한다
+   * (서버 시계가 기준이라 클라이언트 시계 오차·다중 사용자 상황에서 더 정확함).
+   */
+  isUnacknowledged?: boolean;
   /** RESOLVED 시 선택 입력한 처리 메모 */
   resolveNote?: string;
-  /** CANCELLED 시 필수였던 취소 사유 */
+  /**
+   * CANCELLED 시 취소 사유. 02-1 "삭제"도 결과적으로 이 필드가 채워진다 — 2026-09-12 API
+   * 감사에서 백엔드엔 별도 delete 액션이 없고 claim/classification/resolve/release/cancel
+   * 5개뿐인 걸 확인했다. cancel은 cancelReason이 필수라 "삭제"는 고정 문구("관리자 삭제")로
+   * 같은 cancel API를 호출한다(가벼운 원클릭 UX는 유지, 화면엔 사유 입력을 안 보여줌).
+   * 옛 deletedFromBoard 플래그는 그래서 없앴다 — CANCELLED 상태를 목록·지도에서 제외하는
+   * 것만으로 "삭제"가 똑같이 동작한다(docs/features/command-dashboard.md AC-C04).
+   */
   cancelReason?: string;
-  /** 삭제됨 — 목록·지도에서만 숨기고 이력에는 남긴다(취소와는 다른 동작) */
-  deletedFromBoard?: boolean;
   /** RESOLVED·CANCELLED로 종결된 시각 — 12(나의 리포트)의 소요시간 계산에 쓴다 */
   closedAt?: string;
 };
