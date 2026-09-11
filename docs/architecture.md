@@ -190,9 +190,3 @@ SQLite와 PostgreSQL 모두 애플리케이션에서는 비동기 접근을 우�
 ## 해커톤 실행 구성
 
 단일 Uvicorn 워커/인스턴스로 실행합니다. 요청 의존성은 DB 세션을 제공하고 기능 경계에서 트랜잭션을 완료합니다. 멱등 생성 요청은 전용 서비스가 키 선점과 업무 결과의 저장을 소유합니다. OpenAI 호출은 BackgroundTasks에서 실행하며 시작 시 미완료 분석을 실패로 표시하고 자동 재실행하지 않습니다. 다중 워커·분산 큐는 이번 구성에 포함하지 않습니다. 브라우저 CORS와 키·모델 설정, 마이그레이션·seed 명령은 [백엔드 README](../backend/README.md)에 있습니다.
-
-## 콘서트 모델 검토 화면
-
-`/map-preview`는 Cesium 기반 모델 검토 화면입니다. OpenStreetMap 배경·평면 지형 위에 공개 데모 API의 위치·회전·GLB를 표시합니다. 지도 모듈은 해당 경로에서만 지연 로드하며 Cesium 정적 자산은 Vite에서 제공합니다. 브이월드 제품 지도 통합과 구분하며 [데모 기준](integrations/vworld-demo.md)을 따릅니다.
-
-현재 `/map-preview`는 `/vworld.html` 문서를 iframe으로 열어 브이월드 3D SDK를 격리합니다. 공식 SDK의 지형·브이월드 항공영상·3D Tiles와 백엔드 GLB를 함께 렌더링합니다. 초기 Cesium·OSM 컴포넌트는 현재 경로에서 사용하지 않습니다.
