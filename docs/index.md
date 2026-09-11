@@ -45,7 +45,7 @@ docs/
 │   └── storage.md     # 업무 저장·트랜잭션·Alembic
 ├── integrations/
 │   ├── index.md       # 외부 제공자 연동 명세 목록
-│   ├── vworld-demo.md # 서울 콘서트 데모 작업 기준·좌표
+│   ├── vworld-demo.md # 서울 콘서트 좌표·Blender 상세 모델
 │   └── openai.md      # 음성 변환·구조화 분석·실패 처리
 ├── guides/
 │   ├── index.md       # 가이드 목차
