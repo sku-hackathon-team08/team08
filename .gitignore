@@ -29,3 +29,7 @@ htmlcov/
 /backend/**/*.sqlite-*
 /backend/**/*.sqlite3
 /backend/**/*.sqlite3-*
+
+# Local PDF previews and rendered QA pages
+/output/pdf/
+/tmp/pdfs/
