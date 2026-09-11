@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+/* Pretendard 폰트는 index.html의 <link>로 로드한다(이유는 그쪽 주석 참고) */
 @import "tailwindcss";
 @import "./styles/tokens.css";
 

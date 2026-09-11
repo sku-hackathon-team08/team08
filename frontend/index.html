@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>vite-scaffold</title>
     <!--
+      Pretendard 폰트 — index.css의 @import 대신 여기서 <link>로 로드한다. CSS @import는
+      JS 번들이 index.css를 불러온 뒤에야(module 스크립트 실행 시점) 브라우저가 발견하는데,
+      아래 VWorld 스크립트가 document.write로 파싱 자체를 막고 있어서 그 시점이 VWorld 로딩이
+      다 끝난 뒤로 밀린다 — 그동안 시스템 기본 폰트로 먼저 그려지고(칩·버튼처럼 텍스트
+      길이로 폭이 정해지는 요소들이 그 폭으로 자리잡음) 뒤늦게 Pretendard로 교체되면서
+      크기가 눈에 띄게 바뀌었다(2026-09-14 실제 재현). <link>는 이 스크립트보다 먼저 두면
+      HTML 파싱이 시작되자마자(VWorld와 무관하게 병렬로) 요청이 나가 교체가 훨씬 빨라진다.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
+    />
+    <!--
       VWorld 3D 지도 SDK — 관리자(/admin)·스태프(/staff) 둘 다 지도 화면이 있어서 두 경로
       모두에서 로드한다. "/"(공통 진입)·/demo 자체 문서(iframe 두 개를 담는 껍데기일 뿐 지도를
       직접 그리진 않음)에서는 안 불러온다.
