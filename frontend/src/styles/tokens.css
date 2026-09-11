@@ -1,0 +1,129 @@
+/*
+ * ONCUE 디자인 토큰 — Claude Design 핸드오프 정본 그대로 이식.
+ * 출처: design_handoff_oncue/theme.css (Claude Design 프로젝트, projectId
+ *       050ead2c-bb65-49d6-8f5f-6456e1715450, 정본 관리자 화면 플로우(최종!).dc.html)
+ *
+ * 이전 버전(figma-spec.json에서 직접 뽑은 값)을 이 파일로 교체했다. 두 가지가 달라졌다:
+ *   - spacing을 "실측값 그대로(8px 그리드 스냅 금지)"가 아니라 "환산 후 4px 그리드로 스냅"한 값으로 바꿈
+ *   - radius 이름 체계를 pill/frame-lg/modal/card/card-sm/badge/pin → pin/xs/sm/md/lg/xl/2xl/pill로 재편
+ * → 핸드오프 쪽이 실제 구현을 염두에 두고 새로 정리한 최신 정본이므로 이걸 따른다.
+ *
+ * color/radius/shadow/spacing/font는 전부 Tailwind v4 @theme 네임스페이스에 있어
+ * 유틸리티로 바로 쓴다(bg-primary, rounded-lg, shadow-cta, p-3, font-sans).
+ * text-t-* / text-m-*는 Tailwind의 --text-* 폰트사이즈 네임스페이스라 text-t-h1처럼 크기 유틸리티가
+ * 생기지만 font-weight는 별도이므로 컴포넌트에서 font-extrabold 등을 같이 붙인다
+ * (design_handoff_oncue/COMPONENTS.md의 각 컴포넌트 표에 weight가 명시돼 있음).
+ *
+ * index.css에서 이미 `@import "tailwindcss";`를 하므로 여기서는 중복 import하지 않는다.
+ */
+
+@theme {
+  /* ── Brand ─────────────────────────────────────────── */
+  --color-primary: #3366ff; /* 코발트 — 메인 CTA, 처리중, 활성 */
+  --color-primary-press: #2952cc; /* pressed */
+  --color-primary-deep: #2347e0; /* PDF 등 강조 CTA */
+  --color-primary-ultra: #1d3ac4; /* 그래프 1단계 */
+  --color-primary-light: #8aa6ff; /* 그래프 3단계, 일러스트 */
+  --color-primary-sub: #a8c1ff; /* 로고 작은 원 */
+
+  /* ── Ink / Surface ─────────────────────────────────── */
+  --color-ink-900: #171717;
+  --color-ink-600: rgba(55, 56, 60, 0.61);
+  --color-ink-500: rgba(55, 56, 60, 0.5);
+  --color-ink-400: rgba(55, 56, 60, 0.4);
+  --color-ink-300: rgba(55, 56, 60, 0.28);
+  --color-line: rgba(112, 115, 124, 0.16); /* 0.12/0.14/0.18 전부 여기로 통일 */
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7f7f8;
+  --color-surface-chip: #f4f4f5;
+  --color-canvas: #e6e7ea;
+  --color-bezel: #1c1c1e;
+  --color-screen-dark: #0f111a; /* S2 음성 녹음 화면 */
+
+  /* ── Status (처리 상태 축) ─────────────────────────── */
+  --color-status-urgent: #ff4242;
+  --color-status-caution: #ff9200;
+  --color-status-normal: #aeb0b6;
+  --color-status-progress: #3366ff;
+  --color-status-done: #00bf40;
+  --color-status-cancel: rgba(55, 56, 60, 0.28);
+  --color-status-support: #ff9200; /* 형태(사각)로 구분 */
+
+  /* ── Type (신고 유형 축 — status와 절대 혼용 금지) ── */
+  --color-type-emergency: #ff2d2d;
+  --color-type-emergency-ink: #e01b1b;
+  --color-type-facility: #ff9200;
+  --color-type-facility-ink: #d97400;
+  --color-type-crowd: #e23886;
+  --color-type-crowd-ink: #c52470;
+  --color-type-lost: #00bf40;
+  --color-type-lost-ink: #00963a;
+  --color-type-etc: rgba(55, 56, 60, 0.4);
+  --color-type-etc-ink: rgba(55, 56, 60, 0.7);
+
+  /* ── Typography ────────────────────────────────────── */
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* 태블릿 (목업 ×1.9 후 스냅) */
+  --text-t-display: 52px; /* 목업 28 · w800 · 스플래시 워드마크 */
+  --text-t-h1: 28px; /* 목업 15 · w800 */
+  --text-t-h2: 24px; /* 목업 13 · w800 · 카드 제목 */
+  --text-t-title: 20px; /* 목업 11 · w700 */
+  --text-t-body: 18px; /* 목업 10 · w500 */
+  --text-t-label: 16px; /* 목업  9 · w600~700 · 뱃지/버튼 */
+  --text-t-caption: 15px; /* 목업  8 · w500~700 · 타임스탬프 */
+  --text-t-micro: 13px; /* 목업  7 · w500 · 지도 출처 */
+
+  /* 모바일 (목업 ×1.5 후 스냅) */
+  --text-m-h1: 20px; /* 목업 13 · w800 */
+  --text-m-title: 18px; /* 목업 12 · w700~800 */
+  --text-m-body: 16px; /* 목업 10~11 · w500 */
+  --text-m-label: 15px; /* 목업 10 · w600~700 */
+  --text-m-caption: 14px; /* 목업  9 · w600 */
+  --text-m-micro: 12px; /* 목업  8 · w500 */
+
+  /* ── Spacing (환산 후 4px 그리드 스냅) ─────────────── */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+
+  /* ── Radius ────────────────────────────────────────── */
+  --radius-pin: 4px; /* 지도 사각 핀 */
+  --radius-xs: 8px; /* 작은 뱃지 */
+  --radius-sm: 12px; /* 필터칩 사각형, 지도 컨트롤 */
+  --radius-md: 16px; /* 지도 카드, 패널 */
+  --radius-lg: 20px; /* 리포트 카드 */
+  --radius-xl: 24px; /* 입력 필드 */
+  --radius-2xl: 30px; /* 모달 */
+  --radius-pill: 9999px;
+
+  /* ── Shadow ────────────────────────────────────────── */
+  --shadow-card: 0 3px 10px rgba(23, 23, 23, 0.06);
+  --shadow-panel: 0 4px 14px rgba(23, 23, 23, 0.08);
+  --shadow-map: 0 4px 14px rgba(23, 23, 23, 0.12);
+  --shadow-cta: 0 8px 18px rgba(51, 102, 255, 0.3);
+  --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.25);
+  --shadow-sheet: 0 -8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-frame: 0 24px 48px -12px rgba(23, 23, 23, 0.28);
+
+  /* ── Z ─────────────────────────────────────────────── */
+  --z-map-control: 10;
+  --z-sticky: 20;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+}
+
+/* 유형/상태 배지의 soft 톤 — 배경 10%, 테두리 원색, 글씨 ink */
+@utility badge-soft-* {
+  background-color: color-mix(in srgb, --value(--color- *) 10%, transparent);
+  border: 1px solid --value(--color- *);
+}

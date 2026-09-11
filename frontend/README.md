@@ -54,6 +54,7 @@ npm run lint           # oxlint
 - `app/router.tsx` — `createBrowserRouter` 라우트 정의
 - `app/providers.tsx` — 전역 Provider 조립(`AppProviders`, 현재 `QueryClientProvider`)
 - `routes/` — 화면 컴포넌트. 공통 진입(`LandingPage`), 역할별 레이아웃·임시 페이지(`admin/`, `staff/`), `NotFoundPage`
+- `styles/tokens.css` — 관리자 화면 디자인(Claude Design `관리자 화면 플로우(최종!).dc.html`)에서 이식한 컬러·라디우스·섀도우·타이포 토큰. 색상·라디우스·섀도우·폰트는 Tailwind v4 `@theme`로 얹어 유틸리티(`bg-primary`, `rounded-card`, `shadow-cta` 등)로 사용하고, spacing은 Tailwind 기본 스케일과 값이 달라 순수 CSS 변수(`--space-1`~`--space-11`)로만 제공
 - `App.tsx` — `RouterProvider`만 렌더 · `main.tsx` — `AppProviders`로 감싼 진입점
 
 라우트:
