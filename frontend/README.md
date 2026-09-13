@@ -1,6 +1,6 @@
 # 프론트엔드
 
-프론트엔드 코드가 위치할 폴더입니다.
+ONCUE의 시연·관리자·스태프 화면을 구현한 프론트엔드입니다. 해커톤 종료 시점의 실행 안내를 보존합니다.
 Vite · React 19 · TypeScript · Tailwind CSS v4로 구성하며, 라우팅은 react-router-dom,
 서버 상태는 @tanstack/react-query를 사용합니다.
 선택 근거는 [결정 기록](../docs/decisions.md)의 D-026~D-029, 스택 현황은 [아키텍처](../docs/architecture.md#프론트-환경)에 있습니다.
@@ -18,7 +18,8 @@ Vite · React 19 · TypeScript · Tailwind CSS v4로 구성하며, 라우팅은 
 
 ```bash
 cd frontend
-npm install
+npm ci
+cp .env.example .env
 ```
 
 ## 실행
@@ -43,31 +44,31 @@ npm run lint           # oxlint
 
 ## 환경 변수
 
-현재 사용하는 환경 변수는 없습니다. 백엔드 연결 주소가 정해지면
-`.env.example`에 키 이름과 공개 가능한 예시 값을 추가합니다.
-연결 주소·CORS는 [프론트·백엔드 계약 검토](../docs/api/integration-contracts.md)에서 관리합니다.
+`frontend/.env`에 다음 값을 설정하고 개발 서버를 시작합니다.
 
-## 현재 구성
+| 변수 | 용도 | 설정 |
+|---|---|---|
+| `VITE_API_BASE_URL` | 백엔드 API 주소 | 기본값 `http://127.0.0.1:8000/api/v1` |
+| `VITE_VWORLD_API_KEY` | VWorld 3D 지도 SDK | 지도 사용 시 발급받은 키 설정 |
 
-`src/`는 다음과 같이 나뉩니다.
+지도 키는 `index.html`에서 사용합니다. 환경 변수를 바꾸면 개발 서버를 다시 시작하세요.
+백엔드 실행·DB 준비는 [백엔드 안내](../backend/README.md)를 참고하세요. 데모 행사 코드는 `DEMO26`이며, 백엔드 CORS 설정에 프론트 주소가 포함되어야 합니다.
 
-- `app/router.tsx` — `createBrowserRouter` 라우트 정의
-- `app/providers.tsx` — 전역 Provider 조립(`AppProviders`, 현재 `QueryClientProvider`)
-- `routes/` — 화면 컴포넌트. 공통 진입(`LandingPage`), 역할별 레이아웃·임시 페이지(`admin/`, `staff/`), `NotFoundPage`
-- `styles/tokens.css` — 관리자 화면 디자인(Claude Design `관리자 화면 플로우(최종!).dc.html`)에서 이식한 컬러·라디우스·섀도우·타이포 토큰. 색상·라디우스·섀도우·폰트는 Tailwind v4 `@theme`로 얹어 유틸리티(`bg-primary`, `rounded-card`, `shadow-cta` 등)로 사용하고, spacing은 Tailwind 기본 스케일과 값이 달라 순수 CSS 변수(`--space-1`~`--space-11`)로만 제공
-- `App.tsx` — `RouterProvider`만 렌더 · `main.tsx` — `AppProviders`로 감싼 진입점
-
-라우트:
+## 화면 구성
 
 | 경로 | 화면 |
 |---|---|
-| `/` | 공통 진입 화면(관리자·스태프 링크) |
-| `/admin` | 관리자 임시 화면 |
-| `/staff` | 스태프 임시 화면 |
+| `/` | 관리자·스태프 화면을 함께 보여주는 시연 화면 |
+| `/admin` | 관리자 로그인·관제·신고 처리·개인 리포트 |
+| `/staff` | 스태프 로그인·음성/텍스트 신고·내 신고 조회 |
 | 그 외 | Not Found |
 
-관리자·스태프는 경로(역할) 기준으로만 나뉘며 기기 감지나 인증은 아직 없습니다.
-실제 화면·인증·API 연동과 파일명·타입·오류 처리 세부 컨벤션은 후속 작업입니다.
+역할별 레이아웃에서 세션 유무에 따라 로그인 화면과 업무 화면을 표시합니다.
+API 호출 모듈은 `src/api/`, 라우팅은 `src/app/router.tsx`, 화면은 `src/routes/`에 있습니다.
 
-작업 전 [문서 지도](../docs/index.md)에서 관련 기능·기술 명세를 확인합니다.
-프로젝트 소개는 [루트 README](../README.md)에 있습니다.
+## 종료 시점의 검증 기록
+
+[PR #75](https://github.com/sku-hackathon-team08/team08/pull/75)에서 빌드, 실제 백엔드 로그인, 관리자 신고 목록·지도와 스태프 신고 화면 진입을 확인했습니다.
+신고 제출부터 분석·접수·관리자 처리까지의 전체 브라우저 흐름, 실제 기기와 통신 복구는 미검증으로 남겼으며 추가 개발 계획은 없습니다.
+
+전체 구현 범위와 기록은 [문서 지도](../docs/index.md), 수상 결과와 발표 자료는 [프로젝트 README](../README.md)에 있습니다.
