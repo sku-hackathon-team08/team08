@@ -77,8 +77,12 @@ docs/
 
 ## 현재 상태
 
-현재 사용자 채택 범위는 [해커톤 백엔드 API](api/hackathon.md)입니다. 세션·지도·음성/텍스트 분석·최종 접수·관제 조회·담당/분류/종결·지원·통계·PDF를 구현했습니다. SQLite/PostgreSQL과 Alembic 저장·영속 멱등성·버전 경합·422 오류를 검증하며 실제 실행 결과는 PR에 기록합니다.
+**해커톤 종료 · 현재 추가 개발 계획 없음.** 최종 서비스명은 ONCUE이며 [루트 README](../README.md)에 수상 결과와 최종 발표 자료를 보존합니다. 아래 문서는 개발 당시의 명세·결정·검토 기록입니다. 미정·검토안은 종료를 이유로 확정 상태로 변경하지 않습니다.
 
-행사 신청·발급, GPS·구역 판정·접근 경로는 사용자 결정으로 이번 범위에서 제외했습니다. [이전 API v0.1](api/festival.md)은 검토안 보존 자료입니다. 프론트의 실제 화면 연결·기기·배포 검증은 별도이며 백엔드 구현만으로 완료로 표시하지 않습니다.
+채택 범위는 [해커톤 API](api/hackathon.md)입니다. 백엔드의 세션·지도·분석·신고·관제·담당·지원·통계·관리자 PDF와 SQLite/PostgreSQL 저장을 구현했습니다. 검증 근거는 관련 PR에 기록되어 있습니다.
+
+프론트의 실제 API·지도 연결은 [PR #75](https://github.com/sku-hackathon-team08/team08/pull/75), 관리자 PDF 개선은 [PR #77](https://github.com/sku-hackathon-team08/team08/pull/77)에 반영되었습니다. 관리자·스태프 로그인과 화면 진입은 확인했으며, 전체 신고→처리→리포트 브라우저 흐름 및 실제 기기·통신 복구·배포 검증은 미검증으로 남깁니다.
+
+행사 신청·발급, GPS·구역 판정·접근 경로는 이번 범위에서 제외했습니다. [이전 API v0.1](api/festival.md)은 검토안 보존 자료입니다. 남은 검증과 계획은 [이슈 #49](https://github.com/sku-hackathon-team08/team08/issues/49)·[#64](https://github.com/sku-hackathon-team08/team08/issues/64)·[#68](https://github.com/sku-hackathon-team08/team08/issues/68)의 종료 기록에서 확인합니다.
 
 명세 상태와 구현·실행 검증은 구분하며 문서 변경 시 [SOT의 인덱스 기준](sot.md#인덱스-갱신-기준)을 따릅니다.
