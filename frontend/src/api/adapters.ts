@@ -14,7 +14,8 @@ import type { MapPinData } from '../components/MapCard'
  *   "현재 위치"로 통일 표기(2026-09-12 확정 — 좌표를 그대로 노출하지 않는다).
  * - 담당자: claimedBy{id,name} → assigneeName은 name만, 담당자 본인 여부는 이 어댑터가
  *   아니라 호출부에서 claimedBy.id로 직접 비교해야 한다(별도로 rawClaimedById를 남긴다).
- * - 지원요청: supportRequestId(uuid|null) → supportRequested는 null 아님 여부로 파생.
+ * - 지원요청: supportRequestId(uuid|null) → supportRequested는 null 아님 여부로 파생하고, id 자체도
+ *   같이 남긴다(다른 관리자가 지원하기를 누를 때 join 호출에 필요).
  * - 종결시각: resolvedAt ?? cancelledAt → closedAt.
  */
 
@@ -57,6 +58,7 @@ export function fromApiReport(report: ApiReportLike): Report {
     assigneeName: claimedBy?.name,
     assigneeId: claimedBy?.id,
     supportRequested: 'supportRequestId' in report ? report.supportRequestId !== null : false,
+    supportRequestId: 'supportRequestId' in report ? report.supportRequestId : null,
     createdAt: report.createdAt,
     isUnacknowledged: 'isUnacknowledged' in report ? report.isUnacknowledged : undefined,
     resolveNote: resolveNote(report),

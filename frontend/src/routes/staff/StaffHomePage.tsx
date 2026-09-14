@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import bubblePhoneBackground from '../../assets/bubble-phone.png'
 import { BrandLogo } from '../../components/BrandLogo'
 import { AnalysisConfirmScreen, type AnalysisDraft } from '../../components/staff/AnalysisConfirmScreen'
 import { ReportHistoryScreen } from '../../components/staff/ReportHistoryScreen'
@@ -6,16 +7,26 @@ import { TextReportScreen } from '../../components/staff/TextReportScreen'
 import { VoiceRecordScreen } from '../../components/staff/VoiceRecordScreen'
 import { fromApiStaffReport } from '../../api/adapters'
 import { ApiError } from '../../api/client'
-import { createTextAnalysis, pollAnalysis } from '../../api/analyses'
+import { createTextAnalysis, createVoiceAnalysis, pollAnalysis } from '../../api/analyses'
 import { createStaffReport, listStaffReports } from '../../api/reports'
 import { getDemoMap, type DemoMapResponse } from '../../api/demoMap'
 import { VWorldMap } from '../../components/VWorldMap'
 import { getActor } from '../../lib/session'
 import { TOAST_DURATION_MS } from '../../lib/uiConstants'
+import { useEnterTransition } from '../../lib/useEnterTransition'
 import type { StaffReportSummary } from '../../types/staffReport'
-import { REPORT_STATUS_DISPLAY } from '../../types/report'
+import { REPORT_STATUS_DISPLAY, type ReportStatus } from '../../types/report'
 
 const VWORLD_API_KEY = import.meta.env.VITE_VWORLD_API_KEY as string | undefined
+const REPORTS_POLL_MS = 5000
+
+// ReportHistoryScreen의 STATUS_BG(배지 배경)와 같은 상태→색 매핑을 텍스트 색으로 쓴다.
+const STATUS_TEXT: Record<ReportStatus, string> = {
+  RECEIVED: 'text-status-urgent',
+  IN_PROGRESS: 'text-status-progress',
+  RESOLVED: 'text-status-done',
+  CANCELLED: 'text-status-cancel',
+}
 
 /**
  * 스태프 화면 전체 — S1(홈)을 기본으로 두고 S1-1(토스트)·S2(녹음)·S3/S3-1(AI 확인·수정)·
@@ -26,10 +37,12 @@ const VWORLD_API_KEY = import.meta.env.VITE_VWORLD_API_KEY as string | undefined
  * - 텍스트 신고: POST /report-analyses(TEXT) → READY까지 폴링 → 화면에서 확인/수정 →
  *   POST /staff/reports. 성공기준 문서("텍스트도 같은 확인 흐름을 시연") 그대로 B에서
  *   바로 전송하지 않고 S3를 거친다.
- * - "최근 내 신고"/"신고 내역"은 GET /staff/reports로 실제 목록을 받는다.
- * - 음성 녹음(S2)은 아직 실제 마이크(getUserMedia)를 안 쓴다 — 종료를 누르면 마치 그
- *   내용을 말한 것처럼 같은 텍스트 분석 파이프라인(POST /report-analyses TEXT)을 탄다.
- *   실제 오디오 캡처+VOICE 업로드로 교체하는 건 다음 작업.
+ * - "최근 내 신고"/"신고 내역"은 GET /staff/reports로 실제 목록을 받는다. 웹소켓 미구현
+ *   (docs/api/hackathon.md 확정 제외 범위)이라 activity-report.md "조용히 갱신" 요구대로
+ *   REPORTS_POLL_MS 주기 폴링으로 담당·완료 등 상태 변화를 반영한다.
+ * - 음성 녹음(S2)은 VoiceRecordScreen이 실제 마이크(getUserMedia/MediaRecorder)로 잡은
+ *   오디오 Blob을 넘기면 POST /report-analyses(VOICE)로 보낸다 — 텍스트와 같은 폴링→확인
+ *   흐름을 그대로 탄다.
  * - 분석 실패(FAILED, 예: OPENAI_API_KEY 미설정)는 에러를 보여주고 홈으로 돌려보낸다.
  */
 
@@ -44,6 +57,12 @@ export function StaffHomePage() {
   const [submitting, setSubmitting] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
   const [mapData, setMapData] = useState<DemoMapResponse | null>(null)
+  // AdminHomePage의 화면(리스트↔상세) 전환과 같은 목적 — phase가 바뀔 때마다 지금 보이는
+  // 화면이 페이드+슬라이드로 등장한다. phase를 key로 줘서, home이 항상 마운트돼 있고 다른
+  // phase는 그 위에 겹쳐 그리는 지금 구조에서도(아래 141번째 줄 주석) phase가 바뀔 때마다
+  // 다시 재생된다.
+  const entered = useEnterTransition(phase)
+  const enterClass = `transition-all duration-300 ease-out ${entered ? 'translate-x-0 opacity-100' : 'translate-x-[16px] opacity-0'}`
 
   const actor = getActor('staff')
   const name = actor?.name ?? '스태프'
@@ -60,6 +79,8 @@ export function StaffHomePage() {
 
   useEffect(() => {
     void loadReports()
+    const id = setInterval(() => void loadReports(), REPORTS_POLL_MS)
+    return () => clearInterval(id)
   }, [loadReports])
 
   // 지도 배치는 안 바뀌니 한 번만 받는다 — AdminHomePage와 같은 방식.
@@ -80,23 +101,39 @@ export function StaffHomePage() {
     setTimeout(() => setAnalysisError(null), 4000)
   }
 
+  async function finishAnalysis(analysisId: string, fallbackMessage: string) {
+    const analysis = await pollAnalysis('staff', analysisId)
+    if (analysis.status !== 'READY' || !analysis.typeSuggested || !analysis.urgencySuggested) {
+      throw new Error('AI 분석에 실패했습니다. 다시 시도해주세요.')
+    }
+    setAiUrgency(analysis.urgencySuggested)
+    setDraft({
+      analysisId,
+      message: analysis.contentSuggested ?? fallbackMessage,
+      type: analysis.typeSuggested,
+      urgency: analysis.urgencySuggested,
+    })
+    setPhase('confirm')
+  }
+
   async function analyzeThenConfirm(message: string) {
     setPhase('analyzing')
     setAnalysisError(null)
     try {
       const analysisId = await createTextAnalysis('staff', message)
-      const analysis = await pollAnalysis('staff', analysisId)
-      if (analysis.status !== 'READY' || !analysis.typeSuggested || !analysis.urgencySuggested) {
-        throw new Error('AI 분석에 실패했습니다. 다시 시도해주세요.')
-      }
-      setAiUrgency(analysis.urgencySuggested)
-      setDraft({
-        analysisId,
-        message: analysis.contentSuggested ?? message,
-        type: analysis.typeSuggested,
-        urgency: analysis.urgencySuggested,
-      })
-      setPhase('confirm')
+      await finishAnalysis(analysisId, message)
+    } catch (err) {
+      showAnalysisError(err)
+      setPhase('home')
+    }
+  }
+
+  async function analyzeVoiceThenConfirm(audio: Blob) {
+    setPhase('analyzing')
+    setAnalysisError(null)
+    try {
+      const analysisId = await createVoiceAnalysis(audio)
+      await finishAnalysis(analysisId, '')
     } catch (err) {
       showAnalysisError(err)
       setPhase('home')
@@ -124,70 +161,30 @@ export function StaffHomePage() {
     }
   }
 
-  if (phase === 'recording') {
-    return (
-      <VoiceRecordScreen
-        onFinish={() =>
-          void analyzeThenConfirm('메인무대 뒤 트러스 옆에 팬스가 흔들리고 있어요. 사람이 몰리면 위험할 것 같습니다.')
-        }
-        onSwitchToText={() => setPhase('text')}
-      />
-    )
-  }
-
-  if (phase === 'analyzing') {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-[15px] bg-white">
-        <div className="flex items-center gap-[6px]">
-          <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary" />
-          <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary/45" />
-          <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary/18" />
-        </div>
-        <span className="text-m-caption font-semibold text-ink-600">AI가 분석하고 있습니다</span>
-      </div>
-    )
-  }
-
-  if (phase === 'confirm' && draft) {
-    return (
-      <AnalysisConfirmScreen
-        draft={draft}
-        aiUrgency={aiUrgency}
-        submitting={submitting}
-        onChangeDraft={setDraft}
-        onBack={() => {
-          setDraft(null)
-          setPhase('home')
-        }}
-        onRerecord={() => {
-          setDraft(null)
-          setPhase('recording')
-        }}
-        onSubmit={() => void submitDraft()}
-      />
-    )
-  }
-
-  if (phase === 'text') {
-    return <TextReportScreen onBack={() => setPhase('home')} onSubmit={(message) => void analyzeThenConfirm(message)} />
-  }
-
-  if (phase === 'history') {
-    return <ReportHistoryScreen reports={reports} onBack={() => setPhase('home')} />
-  }
-
   const recent = reports[0]
 
+  // phase마다 완전히 다른 화면을 return(=마운트/언마운트)하던 구조를 걷어냈다 — home 안의
+  // VWorldMap이 phase 전환마다 unmount/remount되면서 브이월드 SDK의 map.start()가 두 번
+  // 불려 내부 싱글턴이 깨지는 문제(2026-09-12 Playwright로 재현: "Error constructing
+  // CesiumWidget" — TypeError: Cannot read properties of undefined (reading 'camera'/'scene'))
+  // 때문이다. home을 항상 마운트해 두고 다른 phase는 그 위에 절대위치로 겹쳐 그린다
+  // (useEnterTransition은 마운트 여부와 무관하게 key 변경만으로도 재생되도록 이미 설계돼
+  // 있어 애니메이션은 그대로 유지된다 — lib/useEnterTransition.ts 참고).
   return (
-    <div className="relative flex h-full flex-col bg-white">
-      <div className="h-[30px] shrink-0" />
+    <div className="relative h-full w-full overflow-hidden">
+      <div className={`absolute inset-0 ${phase === 'home' ? '' : 'invisible pointer-events-none'}`}>
+        <div
+          className={`relative flex h-full flex-col bg-cover bg-center ${enterClass}`}
+          style={{ backgroundImage: `url(${bubblePhoneBackground})` }}
+        >
+          <div className="h-[30px] shrink-0" />
 
       <div className="flex h-[45px] shrink-0 items-center justify-between px-[21px]">
         <BrandLogo size={17} orientation="horizontal" />
         <span className="flex items-center gap-[3px] text-m-micro font-bold text-status-done">● 연결됨</span>
       </div>
       <div className="flex items-center justify-between px-[21px] pb-[9px]">
-        <span className="text-m-label font-extrabold text-ink-900">2026 서경대 축제</span>
+        <span className="text-m-label font-extrabold text-ink-900">상암월드컵경기장</span>
         <span className="flex h-[24px] items-center rounded-[8px] bg-primary px-[11px] text-m-micro font-bold text-white">
           {team || '소속 미입력'}
         </span>
@@ -212,6 +209,14 @@ export function StaffHomePage() {
             mapData={mapData}
             pins={[{ id: 'me', lat: mapData.demoPoint.lat, lng: mapData.demoPoint.lng, colorHex: '#3366FF' }]}
             className="absolute inset-0 z-0"
+            // 내 위치(데모 지점) 근처 낮은 시점으로 진입 — 좌석 사이로 3D 모형의 입체감이
+            // 드러나는 구도(2026-09-12 Playwright로 후보 값 비교해 확정 — 사용자 요청 참고
+            // 이미지와 대조). 관리자 대시보드의 전체 조망과 달리 스태프는 "내 위치" 중심.
+            initialView={{
+              pitchDegrees: -15,
+              range: 60,
+              target: { lat: mapData.demoPoint.lat, lng: mapData.demoPoint.lng, heightMeters: 12 },
+            }}
           />
         ) : (
           <i className="absolute left-[68%] top-[26%] h-[14px] w-[14px] rounded-full border-2 border-white bg-primary shadow-[0_0_0_6px_rgba(51,102,255,0.25)]" />
@@ -255,9 +260,9 @@ export function StaffHomePage() {
         </div>
       </div>
 
-      {recent && (
-        <div className="flex shrink-0 flex-col gap-[9px] px-[21px] pb-[21px]">
-          <span className="text-m-caption font-bold text-ink-600">최근 내 신고</span>
+      <div className="flex shrink-0 flex-col gap-[9px] px-[21px] pb-[21px]">
+        <span className="text-m-caption font-bold text-ink-600">최근 내 신고</span>
+        {recent ? (
           <div className="flex flex-col gap-[3px] rounded-[17px] border border-line bg-white p-[14px] shadow-card">
             <div className="flex justify-between">
               <span className="text-m-caption font-bold text-ink-900">{recent.title}</span>
@@ -266,12 +271,16 @@ export function StaffHomePage() {
                 {new Date(recent.createdAt).getMinutes().toString().padStart(2, '0')}
               </span>
             </div>
-            <span className="text-m-micro font-semibold text-ink-600">
+            <span className={`text-m-micro font-semibold ${STATUS_TEXT[recent.status]}`}>
               ● {REPORT_STATUS_DISPLAY[recent.status].label}
             </span>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-center justify-center rounded-[17px] border border-line bg-white p-[14px] text-m-micro font-semibold text-ink-300">
+            아직 신고한 내역이 없습니다
+          </div>
+        )}
+      </div>
 
       {toastVisible && (
         <div className="absolute left-1/2 top-[210px] z-50 -translate-x-1/2 whitespace-nowrap rounded-pill bg-ink-900 px-[18px] py-[11px] text-m-caption font-semibold text-white shadow-modal">
@@ -283,6 +292,62 @@ export function StaffHomePage() {
         <div className="absolute left-1/2 top-[160px] z-50 -translate-x-1/2 whitespace-nowrap rounded-pill bg-status-urgent px-[18px] py-[11px] text-m-caption font-semibold text-white shadow-modal">
           {analysisError}
         </div>
+      )}
+        </div>
+      </div>
+
+      {phase === 'recording' && (
+        <VoiceRecordScreen
+          onFinish={(audio) => void analyzeVoiceThenConfirm(audio)}
+          onSwitchToText={() => setPhase('text')}
+          className={`absolute inset-0 ${enterClass}`}
+        />
+      )}
+
+      {phase === 'analyzing' && (
+        <div className={`absolute inset-0 flex h-full flex-col items-center justify-center gap-[15px] bg-white ${enterClass}`}>
+          <div className="flex items-center gap-[6px]">
+            <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out infinite' }} />
+            <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out .2s infinite' }} />
+            <i className="inline-block h-[8px] w-[8px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out .4s infinite' }} />
+          </div>
+          <span className="text-m-caption font-semibold text-ink-600">AI가 분석하고 있습니다</span>
+        </div>
+      )}
+
+      {phase === 'confirm' && draft && (
+        <AnalysisConfirmScreen
+          draft={draft}
+          aiUrgency={aiUrgency}
+          submitting={submitting}
+          onChangeDraft={setDraft}
+          onBack={() => {
+            setDraft(null)
+            setPhase('home')
+          }}
+          onRerecord={() => {
+            setDraft(null)
+            setPhase('recording')
+          }}
+          onSubmit={() => void submitDraft()}
+          className={`absolute inset-0 ${enterClass}`}
+        />
+      )}
+
+      {phase === 'text' && (
+        <TextReportScreen
+          onBack={() => setPhase('home')}
+          onSubmit={(message) => void analyzeThenConfirm(message)}
+          className={`absolute inset-0 ${enterClass}`}
+        />
+      )}
+
+      {phase === 'history' && (
+        <ReportHistoryScreen
+          reports={reports}
+          onBack={() => setPhase('home')}
+          className={`absolute inset-0 ${enterClass}`}
+        />
       )}
     </div>
   )

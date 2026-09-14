@@ -8,8 +8,11 @@ import type { AdminActivityItem, AdminActivityReport, Change } from '../api/type
 
 /**
  * 12 나의 리포트 — design_handoff_oncue/COMPONENTS.md·관리자 화면 플로우(최종!).dc.html.
- * dc.html 실측: DistributionBar는 유형색이 아니라 블루 3단계(primary-ultra/primary/
- * primary-light)를 값이 큰 순서대로 쓴다(COMPONENTS.md #10 "나머지" 표에도 명시).
+ * dc.html 실측은 DistributionBar를 유형색이 아니라 블루 3단계(primary-ultra/primary/
+ * primary-light)로 값이 큰 순서대로 썼다(COMPONENTS.md #10 "나머지" 표에도 명시). 2026-09-12
+ * 사용자 요청으로 모노블루 대신 REPORT_TYPE_DISPLAY 유형색(TypeBadge.tsx와 동일 토큰)을 쓰도록
+ * 바꿨다 — 필터로 항목 개수가 바뀌어도 같은 유형은 항상 같은 색을 유지한다(랭킹 기반 배색은
+ * 기간을 바꾸면 같은 유형의 색이 바뀌는 문제가 있었다).
  *
  * 2026-09-12 실제 activity-report API 연동: 화면 통계·유형분포·상세 이력·PDF 내보내기 모두
  * GET/GET export `/admin/activity-report(export)`를 쓴다(로컬 reports 배열 근사 집계였던
@@ -22,7 +25,15 @@ type Period = 'today' | 'week' | 'all'
 
 const PERIOD_LABEL: Record<Period, string> = { today: '오늘', week: '이번 주', all: '전체' }
 const PERIOD_TO_API: Record<Period, 'TODAY' | 'WEEK' | 'ALL'> = { today: 'TODAY', week: 'WEEK', all: 'ALL' }
-const DISTRIBUTION_COLORS = ['bg-primary-ultra', 'bg-primary', 'bg-primary-light'] as const
+
+// 유형 분포 막대색 — TypeBadge.tsx와 같은 type-* 토큰(유형별 고정색, status와 혼용 금지).
+const DISTRIBUTION_COLOR: Record<ReportType, string> = {
+  EMERGENCY: 'bg-type-emergency',
+  FACILITY: 'bg-type-facility',
+  CROWD: 'bg-type-crowd',
+  LOST: 'bg-type-lost',
+  OTHER: 'bg-type-etc',
+}
 
 const ACTION_LABEL: Record<AdminActivityItem['action'], string> = {
   REPORT_CLAIMED: '담당 시작',
@@ -103,11 +114,10 @@ export function MyReportView({ currentUserName }: MyReportViewProps) {
     return report.typeDistribution
       .filter((t) => t.count > 0)
       .sort((a, b) => b.count - a.count)
-      .map((t, i) => ({
+      .map((t) => ({
         type: t.type as ReportType,
         count: t.count,
         pct: total ? Math.round((t.count / total) * 100) : 0,
-        colorClass: DISTRIBUTION_COLORS[Math.min(i, DISTRIBUTION_COLORS.length - 1)],
       }))
   }, [report])
 
@@ -173,7 +183,7 @@ export function MyReportView({ currentUserName }: MyReportViewProps) {
           <>
             <div className="grid grid-cols-2 gap-[11px]">
               <StatCard value={summary?.totalReports ?? '—'} label="내가 처리" accent="primary-ultra" />
-              <StatCard value={summary?.resolved ?? '—'} label="완료" accent="primary" />
+              <StatCard value={summary?.resolved ?? '—'} label="완료" accent="done" />
               <StatCard value={summary?.cancelled ?? '—'} label="취소" accent="muted" />
               <StatCard value={summary?.totalActions ?? '—'} label="총 처리" accent="primary-light" />
             </div>
@@ -200,7 +210,7 @@ export function MyReportView({ currentUserName }: MyReportViewProps) {
                         {REPORT_TYPE_DISPLAY[d.type].label}
                       </span>
                       <div className="h-[21px] flex-1 overflow-hidden rounded-pill bg-primary/8">
-                        <div className={['h-full rounded-pill', d.colorClass].join(' ')} style={{ width: `${d.pct}%` }} />
+                        <div className={['h-full rounded-pill', DISTRIBUTION_COLOR[d.type]].join(' ')} style={{ width: `${d.pct}%` }} />
                       </div>
                       <span className="w-[76px] shrink-0 text-right text-[15px] font-bold text-ink-900">
                         {d.count}건 {d.pct}%
@@ -212,8 +222,6 @@ export function MyReportView({ currentUserName }: MyReportViewProps) {
             </div>
           </>
         )}
-
-        <div className="flex-1" />
 
         {pdfError && <span className="text-[13px] font-semibold text-status-urgent">{pdfError}</span>}
         <button

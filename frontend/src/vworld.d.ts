@@ -45,6 +45,9 @@ declare global {
     }
     class HeadingPitchRange {
       constructor(heading: number, pitch: number, range: number)
+      heading: number
+      pitch: number
+      range: number
     }
     class BoundingSphere {
       constructor(center: Cartesian3, radius: number)
@@ -98,6 +101,7 @@ declare global {
       flyTo(options: { destination: Cartesian3; orientation?: { heading: number; pitch: number; roll?: number } }): void
       setView(options: { destination: Cartesian3; orientation?: { heading: number; pitch: number; roll?: number } }): void
       viewBoundingSphere(boundingSphere: BoundingSphere, offset: HeadingPitchRange): void
+      flyToBoundingSphere(boundingSphere: BoundingSphere, options?: { offset?: HeadingPitchRange; duration?: number }): void
     }
     class Viewer {
       entities: EntityCollection

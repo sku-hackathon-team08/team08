@@ -26,6 +26,7 @@ export function AnalysisConfirmScreen({
   onBack,
   onRerecord,
   onSubmit,
+  className = '',
 }: {
   draft: AnalysisDraft
   aiUrgency: Urgency
@@ -34,11 +35,12 @@ export function AnalysisConfirmScreen({
   onBack: () => void
   onRerecord: () => void
   onSubmit: () => void
+  className?: string
 }) {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   return (
-    <div className="relative flex h-full flex-col bg-white">
+    <div className={`relative flex h-full flex-col bg-white ${className}`}>
       <div className="h-[30px] shrink-0" />
       <div className="flex h-[42px] shrink-0 items-center gap-[9px] px-[18px]">
         <button type="button" onClick={onBack} className="text-[18px] text-ink-900">

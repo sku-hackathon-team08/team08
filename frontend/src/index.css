@@ -31,3 +31,13 @@
   0%, 100% { opacity: 1; }
   50% { opacity: .25; }
 }
+
+/* 00-1/S-0-1(로딩) 점 3개·진행 바 — 실제로 움직이도록. */
+@keyframes loadingDot {
+  0%, 100% { opacity: .18; transform: scale(.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}

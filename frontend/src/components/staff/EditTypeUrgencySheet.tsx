@@ -1,4 +1,5 @@
 import { REPORT_TYPE_DISPLAY, URGENCY_DISPLAY, type ReportType, type Urgency } from '../../types/report'
+import { useEnterTransition } from '../../lib/useEnterTransition'
 import { buttonClasses } from '../buttonStyles'
 
 /**
@@ -6,6 +7,10 @@ import { buttonClasses } from '../buttonStyles'
  * S3 위에 뜨는 바텀시트. 여기 칩은 admin의 SelectChip(rounded-[11px] 사각)과 달리
  * dc.html 실측이 radius:1000px 완전 pill이라 모양 자체가 달라서 재사용하지 않고
  * 이 화면 전용으로 작게 둔다 — 색 토큰(bg/border/text-type-*)은 SelectChip과 동일 규칙.
+ *
+ * 부모(AnalysisConfirmScreen)가 sheetOpen && <이 컴포넌트>로 마운트/언마운트하므로
+ * Modal.tsx와 달리 key 없이 useEnterTransition을 쓴다 — 마운트될 때마다 새로 재생된다.
+ * 실제 바텀시트처럼 아래에서 슬라이드업.
  */
 
 const TYPES: ReportType[] = ['EMERGENCY', 'FACILITY', 'CROWD', 'LOST', 'OTHER']
@@ -41,10 +46,20 @@ export function EditTypeUrgencySheet({
   onChangeUrgency: (u: Urgency) => void
   onApply: () => void
 }) {
+  const entered = useEnterTransition()
+
   return (
     <>
-      <div className="absolute inset-0 z-40 bg-ink-900/35" />
-      <div className="absolute inset-x-0 bottom-0 z-50 flex flex-col gap-[18px] rounded-t-[30px] bg-white px-[24px] pb-[30px] pt-[24px] shadow-sheet">
+      <div
+        className={`absolute inset-0 z-40 bg-ink-900/35 transition-opacity duration-200 ease-out ${entered ? 'opacity-100' : 'opacity-0'}`}
+      />
+      <div
+        className={[
+          'absolute inset-x-0 bottom-0 z-50 flex flex-col gap-[18px] rounded-t-[30px] bg-white px-[24px] pb-[30px] pt-[24px] shadow-sheet',
+          'transition-transform duration-300 ease-out',
+          entered ? 'translate-y-0' : 'translate-y-full',
+        ].join(' ')}
+      >
         <span className="text-m-title font-extrabold text-ink-900">유형 · 위험도 수정</span>
 
         <div className="flex flex-col gap-[8px]">
