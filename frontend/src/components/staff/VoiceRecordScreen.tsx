@@ -1,36 +1,100 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * S2(신고 작성, 터치 시작·음성 1순위) — 관리자 화면 플로우(최종!).dc.html.
  * 목업 260×520 값에 ×1.5(SCALE.mobile) 그대로 적용.
  *
- * 실제 마이크 캡처(getUserMedia/MediaRecorder)는 아직 안 붙였다 — 화면이 먼저다(관리자와
- * 같은 순서). 탭하면 타이머만 올라가다가 "종료" 탭 시 onFinish로 넘어간다. 실제 연동 때
- * 이 타이머 로직을 MediaRecorder 이벤트로 교체한다.
+ * 마운트 시 getUserMedia로 마이크 권한을 받고 MediaRecorder로 바로 녹음을 시작한다. 탭하면
+ * 녹음을 멈추고 onFinish(audio)로 Blob을 넘긴다. 백엔드 AUDIO_MIMES
+ * (backend/app/api/routes/analyses.py)는 코덱 파라미터 없는 MIME만 허용해서, 실제로 잡힌
+ * MediaRecorder.mimeType에서 세미콜론 뒷부분(;codecs=...)을 떼고 그 타입으로 Blob을 만든다.
+ * 권한 거부 등으로 녹음을 못 시작하면 안내 문구만 바꾸고, 항상 떠 있는 "직접 입력하기"로
+ * 전환하게 한다.
  *
  * dc.html에도 취소/뒤로가기 버튼이 없다 — "터치로 종료"만 있고 결과 확인(S3)에서 뒤로
  * 가거나 다시 말하기로 되돌리는 구조라 여기 임의로 back 버튼을 추가하지 않았다.
  */
+const PREFERRED_MIME_TYPES = ['audio/webm', 'audio/mp4']
+
+function pickSupportedMimeType(): string | undefined {
+  if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return undefined
+  return PREFERRED_MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type))
+}
+
 export function VoiceRecordScreen({
   onFinish,
   onSwitchToText,
+  className = '',
 }: {
-  onFinish: () => void
+  onFinish: (audio: Blob) => void
   onSwitchToText: () => void
+  className?: string
 }) {
   const [seconds, setSeconds] = useState(0)
+  const [micError, setMicError] = useState(false)
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const onFinishRef = useRef(onFinish)
+  useEffect(() => {
+    onFinishRef.current = onFinish
+  })
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => clearInterval(t)
+    let cancelled = false
+    let stream: MediaStream | null = null
+    let timer: ReturnType<typeof setInterval> | undefined
+
+    void navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((mediaStream) => {
+        if (cancelled) {
+          mediaStream.getTracks().forEach((track) => track.stop())
+          return
+        }
+        stream = mediaStream
+        const chunks: Blob[] = []
+        const recorder = new MediaRecorder(mediaStream, {
+          mimeType: pickSupportedMimeType(),
+        })
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data)
+        }
+        recorder.onstop = () => {
+          const type = recorder.mimeType.split(';', 1)[0].trim().toLowerCase()
+          mediaStream.getTracks().forEach((track) => track.stop())
+          onFinishRef.current(new Blob(chunks, { type }))
+        }
+        recorder.start()
+        recorderRef.current = recorder
+        timer = setInterval(() => setSeconds((s) => s + 1), 1000)
+      })
+      .catch(() => {
+        if (!cancelled) setMicError(true)
+      })
+
+    return () => {
+      cancelled = true
+      if (timer) clearInterval(timer)
+      if (recorderRef.current && recorderRef.current.state !== 'inactive') {
+        recorderRef.current.stop()
+      } else {
+        stream?.getTracks().forEach((track) => track.stop())
+      }
+      recorderRef.current = null
+    }
   }, [])
+
+  function stopRecording() {
+    if (recorderRef.current && recorderRef.current.state === 'recording') {
+      recorderRef.current.stop()
+    }
+  }
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0')
   const ss = String(seconds % 60).padStart(2, '0')
 
   return (
     <div
-      className="flex h-full flex-col"
+      className={`flex h-full flex-col ${className}`}
       style={{
         background:
           'radial-gradient(120% 85% at 50% 38%, rgb(30,44,96) 0%, rgb(17,22,48) 48%, rgb(11,13,28) 100%)',
@@ -50,7 +114,7 @@ export function VoiceRecordScreen({
 
       <button
         type="button"
-        onClick={onFinish}
+        onClick={stopRecording}
         className="flex flex-1 flex-col items-center justify-center gap-[27px]"
       >
         <div className="relative flex h-[156px] w-[156px] shrink-0 items-center justify-center">
@@ -85,13 +149,15 @@ export function VoiceRecordScreen({
         </div>
 
         <div className="flex flex-col items-center gap-[8px]">
-          <span className="text-m-h1 font-bold text-white">듣고 있습니다</span>
+          <span className="text-m-h1 font-bold text-white">
+            {micError ? '마이크를 사용할 수 없습니다' : '듣고 있습니다'}
+          </span>
           <span className="text-m-label font-bold tracking-[.06em] text-[rgb(138,166,255)] tabular-nums">
             {mm}:{ss}
           </span>
         </div>
         <span className="text-m-micro text-center text-white/38">
-          "이 구역에 사람 다쳤어요" 정도면 충분해요
+          {micError ? '아래 직접 입력하기로 전환해주세요' : '"이 구역에 사람 다쳤어요" 정도면 충분해요'}
         </span>
       </button>
 

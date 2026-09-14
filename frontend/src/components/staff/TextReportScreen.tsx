@@ -6,11 +6,19 @@ import { buttonClasses } from '../buttonStyles'
  * "음성이 1순위, 텍스트가 2순위 대체 경로 · 텍스트 입력 경로 상시 노출" 원칙 그대로
  * S1의 ⌨ 아이콘과 S2의 "직접 입력하기"에서 둘 다 이 화면으로 들어온다.
  */
-export function TextReportScreen({ onBack, onSubmit }: { onBack: () => void; onSubmit: (message: string) => void }) {
+export function TextReportScreen({
+  onBack,
+  onSubmit,
+  className = '',
+}: {
+  onBack: () => void
+  onSubmit: (message: string) => void
+  className?: string
+}) {
   const [message, setMessage] = useState('')
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className={`flex h-full flex-col bg-white ${className}`}>
       <div className="h-[30px] shrink-0" />
       <div className="flex h-[42px] shrink-0 items-center gap-[9px] px-[18px]">
         <button type="button" onClick={onBack} className="text-[18px] text-ink-900">

@@ -3,6 +3,7 @@ import bubblesBackground from '../../assets/bubbles-admin.png'
 import { BrandLogo } from '../../components/BrandLogo'
 import { buttonClasses } from '../../components/buttonStyles'
 import { getSession, setSession, clearSession } from '../../lib/session'
+import { useEnterTransition } from '../../lib/useEnterTransition'
 import { ApiError } from '../../api/client'
 import { createAdminSession, getMySession } from '../../api/sessions'
 
@@ -34,6 +35,9 @@ export function AdminLoginPage({ onAuthenticated }: { onAuthenticated: () => voi
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // phase가 바뀔 때마다(00→00-1→01) 다시 페이드+슬라이드로 등장하도록 phase를 key로 준다.
+  const entered = useEnterTransition(phase)
+  const enterClass = `transition-all duration-300 ease-out ${entered ? 'translate-y-0 opacity-100' : 'translate-y-[14px] opacity-0'}`
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('loading'), 1200)
@@ -83,25 +87,25 @@ export function AdminLoginPage({ onAuthenticated }: { onAuthenticated: () => voi
       className="flex min-h-screen flex-col items-center justify-center bg-cover bg-center"
       style={{ backgroundImage: `url(${bubblesBackground})` }}
     >
-      {phase === 'splash' && <BrandLogo size={64} />}
+      {phase === 'splash' && <BrandLogo size={64} className={enterClass} />}
 
       {phase === 'loading' && (
-        <div className="flex flex-col items-center gap-[30px]">
+        <div className={`flex flex-col items-center gap-[30px] ${enterClass}`}>
           <BrandLogo size={55} />
           <div className="flex items-center gap-[11px]">
-            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary" />
-            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary/45" />
-            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary/18" />
+            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out infinite' }} />
+            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out .2s infinite' }} />
+            <i className="inline-block h-[15px] w-[15px] rounded-full bg-primary" style={{ animation: 'loadingDot 1.2s ease-in-out .4s infinite' }} />
           </div>
           <span className="text-[21px] font-semibold text-ink-600">앱을 준비하고 있습니다</span>
           <div className="h-[8px] w-[380px] overflow-hidden rounded-pill bg-primary/14">
-            <div className="h-full w-[62%] rounded-pill bg-primary" />
+            <div className="h-full w-[35%] rounded-pill bg-primary" style={{ animation: 'loadingBar 1.1s ease-in-out infinite' }} />
           </div>
         </div>
       )}
 
       {phase === 'form' && (
-        <form onSubmit={handleSubmit} className="flex w-[532px] flex-col items-center gap-[27px]">
+        <form onSubmit={handleSubmit} className={`flex w-[532px] flex-col items-center gap-[27px] ${enterClass}`}>
           <div className="flex flex-col items-center gap-[4px]">
             <BrandLogo size={49} wordmarkSize={46} tagline />
           </div>

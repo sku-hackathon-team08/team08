@@ -146,6 +146,8 @@ export type Report = {
    */
   assigneeId?: string;
   supportRequested: boolean;
+  /** 활성 지원요청 id. 다른 관리자가 "지원하기"(joinSupportRequest) 호출 시 필요 — supportRequested가 false면 null */
+  supportRequestId?: string | null;
   createdAt: string;
   /**
    * 서버가 계산한 미확인 여부(위험도별 3/10/30분 임계값, docs/features/command-dashboard.md).

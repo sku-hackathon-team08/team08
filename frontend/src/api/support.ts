@@ -2,10 +2,11 @@ import { apiRequest } from './client'
 import type { Page, ParticipationResult, ParticipationView, SupportResult } from './types'
 
 /**
- * 지원요청(support-requests) — 클라이언트 함수는 다 만들어뒀지만 08-A/08-B 화면(다른
- * 관리자 지원 참여·본인 참여 취소)엔 아직 안 붙였다. 지금은 ReportDetailPanel의
- * "지원요청" 버튼이 로컬 state(supportRequested)만 바꾸는 상태 — 다음 단계에서 이 함수로
- * 교체한다.
+ * 지원요청(support-requests) — openSupportRequest/joinSupportRequest는 AdminHomePage의
+ * handleRequestSupport(08-A/08-B 공용)에서 쓴다. closeSupportRequest·cancelParticipation·
+ * listParticipants는 아직 화면에 안 붙였다 — 종료는 report-lifecycle.md 확정대로 완료·취소·
+ * 담당해제 시 백엔드가 자동으로 같이 끝내서 버튼이 필요 없고, 본인 참여취소·참여자 목록 조회는
+ * 이 dc.html 화면 세트에 없어 다음 작업으로 남긴다.
  */
 
 export function openSupportRequest(reportId: string, input: { expectedVersion: number }): Promise<SupportResult> {

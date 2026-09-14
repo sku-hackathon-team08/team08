@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useEnterTransition } from '../lib/useEnterTransition'
 
 /**
  * ONCUE Modal 공용 오버레이+패널 — design_handoff_oncue/COMPONENTS.md #8.
@@ -6,6 +7,10 @@ import type { ReactNode } from 'react'
  * 구분(760/646)이 아니라 화면마다 dc.html에 실제로 쓰인 값이 서로 달라(09/10=760, 11=798),
  * 고정 kind enum 대신 인스턴스별로 그 값을 그대로 받는 형태로 만들었다.
  * panel: radius 30 · padding 38 · shadow-modal (여기까지는 세 모달 공통, dc.html과 일치).
+ *
+ * 오버레이 페이드인 + 패널 살짝 아래에서 떠오르며 등장(진입만, 닫을 때는 즉시 사라짐) —
+ * 실제 앱처럼 느껴지도록 추가. 네 모달(완료/취소/삭제/직접신고) 전부 이 컴포넌트를 쓰므로
+ * 여기 한 곳만 바꾸면 전부 적용된다.
  */
 
 type ModalProps = {
@@ -21,19 +26,24 @@ type ModalProps = {
 }
 
 export function Modal({ open, onClose, overlayOpacity = 0.45, width, gap = 23, padding = 38, children }: ModalProps) {
+  const entered = useEnterTransition(open)
   if (!open) return null
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center">
       <div
-        className="absolute inset-0"
+        className={`absolute inset-0 transition-opacity duration-200 ease-out ${entered ? 'opacity-100' : 'opacity-0'}`}
         style={{ backgroundColor: `rgba(23,23,23,${overlayOpacity})` }}
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
-        className="relative flex max-h-[90%] flex-col overflow-y-auto rounded-[30px] bg-white shadow-modal"
+        className={[
+          'relative flex max-h-[90%] flex-col overflow-y-auto rounded-[30px] bg-white shadow-modal',
+          'transition-all duration-200 ease-out',
+          entered ? 'translate-y-0 opacity-100' : 'translate-y-[12px] opacity-0',
+        ].join(' ')}
         style={{ width, gap, padding }}
       >
         {children}

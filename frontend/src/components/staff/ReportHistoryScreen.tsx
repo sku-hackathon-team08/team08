@@ -38,9 +38,17 @@ function formatDateTime(iso: string) {
   return `${date} ${formatTime(iso)}`
 }
 
-export function ReportHistoryScreen({ reports, onBack }: { reports: StaffReportSummary[]; onBack: () => void }) {
+export function ReportHistoryScreen({
+  reports,
+  onBack,
+  className = '',
+}: {
+  reports: StaffReportSummary[]
+  onBack: () => void
+  className?: string
+}) {
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className={`flex h-full flex-col bg-white ${className}`}>
       <div className="h-[30px] shrink-0" />
       <div className="flex h-[42px] shrink-0 items-center gap-[9px] px-[18px]">
         <button type="button" onClick={onBack} className="text-[18px] text-ink-900">

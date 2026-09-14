@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { DevNavPanel } from '../components/DevNavPanel'
 import { IPadFrame, IPhoneFrame } from '../components/DeviceFrame'
 import { IPAD_OUTER, IPHONE_OUTER } from '../components/deviceFrameSizes'
 
@@ -70,8 +69,6 @@ export function DemoPage() {
           <iframe src="/staff" title="스태프 (iPhone)" className="h-full w-full border-0" />
         </IPhoneFrame>
       </figure>
-
-      <DevNavPanel />
     </main>
   )
 }

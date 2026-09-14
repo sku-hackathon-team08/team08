@@ -10,10 +10,11 @@ import { DevNavPanel } from '../components/DevNavPanel'
  * 배경은 dc.html과 동일하게 uploads/Bubbles.png를 background-size:cover로 사용한다.
  *
  * 미해결 사항(임의로 결정하지 않고 남겨둠):
- * - "로그인"은 /login(AdminLoginPage)으로 연결했지만 지금은 관리자(01) 화면만 있다.
- *   이 문구 자체는 "관리자·스태프 로그인"이라 스태프 몫도 같은 버튼에서 갈라져야 하는데,
- *   스태프 진입(S0)은 아직 안 만들어서 당장은 관리자로만 보낸다 — 스태프 앱 만들 때
- *   역할을 어떻게 나눌지(같은 화면에서 선택 vs 별도 경로) 다시 정한다.
+ * - "로그인"은 /admin(AdminLoginPage)으로 연결한다. 라우트가 `/`·`/admin`·`/staff` 3개로
+ *   고정되면서(AdminLoginPage.tsx 주석 참고) `/login` 독립 라우트는 없어졌는데 이 링크만
+ *   안 따라와서 404였다 — 여기서 같이 고친다. 이 문구 자체는 "관리자·스태프 로그인"이라
+ *   스태프 몫도 같은 버튼에서 갈라져야 하는데, 스태프 진입(S0)은 이미 /staff로 따로 있어서
+ *   역할을 어떻게 나눌지(같은 화면에서 선택 vs 별도 경로)는 다음에 다시 정한다.
  * - "행사 신청"은 /events/new 자리표시 그대로 둔다 — docs/features/event-entry.md 확정:
  *   "행사 신청·즉시 발급은 이번 범위에 넣지 않습니다"라 이번 해커톤에서 안 만든다.
  */
@@ -31,7 +32,7 @@ export function LandingPage() {
         <p className="text-t-body text-center font-medium text-ink-500">
           관리자·스태프 로그인, 새 행사를 열려면 행사 신청을 선택하세요
         </p>
-        <Link to="/login" className={buttonClasses({ size: 'lg', fullWidth: true })}>
+        <Link to="/admin" className={buttonClasses({ size: 'lg', fullWidth: true })}>
           로그인
         </Link>
         <Link

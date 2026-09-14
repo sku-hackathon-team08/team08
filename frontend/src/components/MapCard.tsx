@@ -1,29 +1,25 @@
+import type { RefObject } from 'react'
 import { buttonClasses } from './buttonStyles'
-import { VWorldMap, type VWorldMapPin } from './VWorldMap'
-import type { DemoMapResponse } from '../api/demoMap'
 
 /**
  * 관리자 지도 카드 — 02 지도 대시보드 좌측 58% 영역 / 03~05 상세 화면 좌측 46~58% 영역.
  *
  * 2026-09-12: VWorld API 키를 받아서 실지도 연동 시작(docs/features/command-dashboard.md의
  * "이번 범위 제외"는 접근 경로 안내·구역 판정 얘기였고, 지도 표시 자체는 제외 대상이
- * 아니었다 — docs/api/demo-map.md 참고). `real` prop을 주면 그라디언트 자리표시자 대신
- * VWorldMap(실제 Cesium 3D 지도)을 배경에 깔고, 기존 오버레이 UI(라벨·컨트롤·CTA·출처
- * 바)는 그대로 위에 얹는다 — real이 없으면 예전처럼 플레이스홀더만 보여준다(지도 데이터
- * 로딩 실패 시 폴백으로도 재사용).
+ * 아니었다 — docs/api/demo-map.md 참고). `showRealMap`이 있으면 그라디언트 자리표시자
+ * 대신 실지도가 들어갈 빈 슬롯을 그리고, 기존 오버레이 UI(라벨·컨트롤·CTA·출처 바)는
+ * 그대로 위에 얹는다 — 없으면 예전처럼 플레이스홀더만 보여준다(지도 데이터 로딩 실패 시
+ * 폴백으로도 재사용).
+ *
+ * 실지도(VWorldMap)는 이 컴포넌트가 직접 그리지 않는다 — 브이월드 SDK는 페이지에
+ * map.start()를 두 번째 부르면 내부 싱글턴이 깨지는 제약이 있어(VWorldMap.tsx 주석 참고)
+ * 인스턴스를 하나만 만들어 두고 화면(대시보드 58%/상세 46%)에 따라 위치만 옮겨야 한다.
+ * 그래서 여기서는 실지도가 들어갈 자리를 `mapSlotRef`로 알려주기만 하고, 실제 VWorldMap은
+ * 상위(AdminHomePage)가 그 슬롯 좌표를 읽어 화면 밖에서 겹쳐 그린다.
  *
  * `compact`(04/05 신고 상세용)일 때는 dc.html 원본대로 정보카드 + 핀 하나만 그리고
  * 컨트롤 스택·고도 뱃지·직접 신고 CTA·출처 바를 뺀다(상세 화면 지도엔 그 요소들이 없음).
- * compact 지도는 아직 플레이스홀더로 남겨뒀다 — Cesium 뷰어를 화면마다 새로 띄우는 비용이
- * 커서, 지금은 대시보드 메인 지도 하나만 실지도로 연결한다.
  */
-
-export type RealMapProps = {
-  mapData: DemoMapResponse
-  pins: VWorldMapPin[]
-  selectedId?: string | null
-  onSelectPin?: (id: string) => void
-}
 
 export type MapPinData = {
   id: string
@@ -57,15 +53,17 @@ type MapCardProps = {
   lastSyncLabel?: string
   onDirectReport?: () => void
   className?: string
-  /** 있으면 그라디언트 대신 실제 VWorld 3D 지도를 배경에 그린다 */
-  real?: RealMapProps
+  /** 있으면 그라디언트 자리표시자 대신 실지도가 들어갈 빈 슬롯을 그린다 */
+  showRealMap?: boolean
+  /** showRealMap일 때 그 슬롯의 DOM 좌표를 상위로 알려주는 ref — 위 파일 설명 참고 */
+  mapSlotRef?: RefObject<HTMLDivElement | null>
 }
 
 const CONTROL_ICONS = ['▲', '◎', '+', '−', '⤢']
 
 export function MapCard({
   state,
-  locationLabel = '서울 월드컵 경기장',
+  locationLabel = '상암월드컵경기장',
   pins = [],
   connector,
   compact = false,
@@ -73,25 +71,25 @@ export function MapCard({
   lastSyncLabel,
   onDirectReport,
   className = '',
-  real,
+  showRealMap = false,
+  mapSlotRef,
 }: MapCardProps) {
   return (
     <div
       className={[
         'relative overflow-hidden rounded-md shadow-map',
-        real ? '' : 'bg-[linear-gradient(160deg,rgb(214,224,214)_0%,rgb(197,213,199)_35%,rgb(180,202,190)_65%,rgb(162,190,183)_100%)]',
+        showRealMap ? '' : 'bg-[linear-gradient(160deg,rgb(214,224,214)_0%,rgb(197,213,199)_35%,rgb(180,202,190)_65%,rgb(162,190,183)_100%)]',
+        // showRealMap일 때 카드 자체를 pointer-events-none으로 뚫어야 한다 — 슬롯 div만
+        // 뚫어도(바로 아래) 그 부모인 이 카드 루트 자체가 여전히 pointer-events:auto라
+        // 클릭·드래그를 그대로 가로채서, 화면상 겹쳐진 진짜 지도(AdminHomePage가 띄우는
+        // VWorldMap)까지 이벤트가 전달되지 않는다(2026-09-12 실제 드래그로 확인 — 카드
+        // 루트가 elementFromPoint의 타깃으로 잡혔다). 그래서 이 안의 실제 클릭 가능한 요소
+        // (관리자 직접 신고 버튼)에만 다시 pointer-events-auto를 되살린다.
+        showRealMap ? 'pointer-events-none' : '',
         className,
       ].join(' ')}
     >
-      {real && !compact && (
-        <VWorldMap
-          mapData={real.mapData}
-          pins={real.pins}
-          selectedId={real.selectedId}
-          onSelectPin={real.onSelectPin}
-          className="absolute inset-0 z-0"
-        />
-      )}
+      {showRealMap && <div ref={mapSlotRef} className="absolute inset-0 z-0" />}
 
       {state === 'error' && <div className="absolute inset-0 z-10 bg-white/55" />}
 
@@ -106,7 +104,7 @@ export function MapCard({
       </div>
 
       {compact ? (
-        singlePin && (
+        !showRealMap && singlePin && (
           <i
             className={['absolute z-20 rounded-full border-[6px] border-white shadow-[0_0_0_8px_rgba(0,0,0,0.08)]', singlePin.colorClass].join(' ')}
             style={{ top: `${singlePin.top}%`, left: `${singlePin.left}%`, width: 27, height: 27 }}
@@ -150,7 +148,7 @@ export function MapCard({
             </span>
           )}
 
-          {!real &&
+          {!showRealMap &&
             state === 'ready' &&
             pins.map((pin) => (
               <i
@@ -165,7 +163,7 @@ export function MapCard({
               />
             ))}
 
-          {!real && state === 'ready' && connector && (
+          {!showRealMap && state === 'ready' && connector && (
             <>
               <span
                 className="absolute z-10 border-t-2 border-dashed border-primary"
@@ -212,7 +210,7 @@ export function MapCard({
             <button
               type="button"
               onClick={onDirectReport}
-              className={[buttonClasses({ variant: 'primary', size: 'sm' }), 'absolute bottom-[46px] left-[15px] z-20'].join(' ')}
+              className={[buttonClasses({ variant: 'primary', size: 'sm' }), 'absolute bottom-[46px] left-[15px] z-20 pointer-events-auto'].join(' ')}
             >
               + 관리자 직접 신고
             </button>
