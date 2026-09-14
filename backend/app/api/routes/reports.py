@@ -149,12 +149,19 @@ async def list_reports(
     as_of = service.now()
     if role == "ADMIN":
         urgency = {"URGENT": 0, "CAUTION": 1, "NORMAL": 2}
-        rows.sort(
-            key=lambda row: (
-                not service.is_unacknowledged(row, as_of),
-                urgency[row.urgency_value] if sort == "urgency" else 0,
+        # sort=urgency: 위험도가 최우선이라 긴급이 항상 맨 위. 같은 위험도 안에서만 미확인이
+        # 먼저 온다(2026-09-12 사용자 확정 변경 — 전에는 미확인이 위험도보다 앞서서, 배정된
+        # 긴급 신고가 방치된 일반 신고보다 아래로 밀리는 문제가 있었다).
+        # sort=recent(기본): 기존대로 미확인이 정렬과 무관하게 항상 맨 위.
+        if sort == "urgency":
+            rows.sort(
+                key=lambda row: (
+                    urgency[row.urgency_value],
+                    not service.is_unacknowledged(row, as_of),
+                )
             )
-        )
+        else:
+            rows.sort(key=lambda row: not service.is_unacknowledged(row, as_of))
     selected = page(request, rows, cursor, page_size, str(identity.actor.id), as_of)
     values = [await service.detail(db, row, as_of) for row in selected["items"]]
     selected["items"] = [
